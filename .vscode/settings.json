@@ -3,27 +3,15 @@
   "diffEditor.ignoreTrimWhitespace": false,
   "editor.codeActionsOnSave": [
     "source.addMissingImports",
-    "source.fixAll",
     "source.organizeImports"
   ],
-  "editor.foldingImportsByDefault": true,
-  "editor.formatOnSave": true,
-  "editor.tabSize": 2,
   "files.exclude": {
     "**/.stylelintcache": true,
-    "**/.eslintcache": true,
-    "**/.gitignore": true,
-    "**/.nyc_output": true,
-    "**/.vscode": true,
-    "**/dist": true,
     "**/node_modules": true,
-    "**/yarn.lock": true,
-    "**/coverage": true
   },
   "files.watcherExclude": {
     "**/dist": true
   },
-  "javascript.format.enable": false,
   "stylelint.validate": [
     "css"
   ],
@@ -36,6 +24,8 @@
     "editor.defaultFormatter": "vscode.css-language-features"
   },
   "cSpell.words": [
-    "iNat"
-  ]
+    "iNat",
+    "stylelint",
+    "tailwindcss"
+]
 }

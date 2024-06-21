@@ -1,0 +1,143 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Diaz Dam",
+                "description": "Diaz Dam is a collection of seasonal pans.",
+                "location": "water body"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        [
+                            26.605809784142735,
+                            -33.686520046978124
+                        ],
+                        [
+                            26.60239087951652,
+                            -33.70072469410953
+                        ],
+                        [
+                            26.604663633257786,
+                            -33.703960755797596
+                        ],
+                        [
+                            26.61606035489777,
+                            -33.69716858630498
+                        ],
+                        [
+                            26.61514747859671,
+                            -33.69332984349646
+                        ],
+                        [
+                            26.61096150634097,
+                            -33.688283606073064
+                        ],
+                        [
+                            26.605809784142735,
+                            -33.686520046978124
+                        ]
+                    ]
+                ],
+                "type": "Polygon"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Diaz Dam - Access Road",
+                "description": "From the R72, turn in towards Boknes / Cannon Rocks. The dam is on the left.",
+                "road": "access"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.606186439009235,
+                        -33.6827436672731
+                    ],
+                    [
+                        26.602745886184465,
+                        -33.69774842395945
+                    ],
+                    [
+                        26.602934790371677,
+                        -33.69787250050297
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Diaz Cross - Dam Path",
+                "description": "Farm road to get closer to the large dam.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.60330960198081,
+                        -33.6984613727811
+                    ],
+                    [
+                        26.605684293510137,
+                        -33.70186653672089
+                    ],
+                    [
+                        26.609379432987282,
+                        -33.69982486223609
+                    ],
+                    [
+                        26.609528731552928,
+                        -33.69947552143572
+                    ],
+                    [
+                        26.614026348514983,
+                        -33.69686706364428
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Diaz Dam - Diaz Cross Parking Area",
+                "description": "Path to Diaz Cross parking area.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.606087897197,
+                        -33.70233552425719
+                    ],
+                    [
+                        26.608459324210628,
+                        -33.70560432149056
+                    ],
+                    [
+                        26.61409350455287,
+                        -33.70877480569997
+                    ],
+                    [
+                        26.614391889884786,
+                        -33.709111310403756
+                    ],
+                    [
+                        26.61522007774002,
+                        -33.709400665228124
+                    ],
+                    [
+                        26.615562395387002,
+                        -33.70969920489818
+                    ]
+                ],
+                "type": "LineString"
+            }
+        }
+    ]
+}
