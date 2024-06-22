@@ -24,11 +24,13 @@
     "editor.defaultFormatter": "vscode.css-language-features"
   },
   "cSpell.words": [
-    "boknes",
+    "Boknes",
+    "DCBC",
     "iNat",
     "Kariega",
     "latlng",
-    "ngciyo",
+    "locatecontrol",
+    "Ngciyo",
     "stylelint",
     "tailwindcss"
 ]

@@ -1,12 +1,12 @@
 type LineStyle = {
     stroke?: string;
-    "stroke-width"?: number;
-    "stroke-opacity"?: number;
+    'stroke-width'?: number;
+    'stroke-opacity'?: number;
 }
 
 type PolyStyle = LineStyle & {
     fill?: string;
-    "fill-opacity"?: number;
+    'fill-opacity'?: number;
 };
 
 type Info = {
