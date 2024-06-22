@@ -7,7 +7,11 @@ export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry
         layer.bindPopup(`
             <b><u>${feature.properties.name}</u></b>
             <p>${feature.properties.description ?? ''}</p>
-            ${feature.properties.pdf ? `<p><a href='${feature.properties.pdf}' target='_blank'>PDF</a></p>` : ''}
+            <p>
+            ${feature.properties.pin ? `<a href='${feature.properties.pin}' target='_blank'>Map Pin</a>` : ''}
+            ${(feature.properties.pin && feature.properties.document) ? ' | ' : ''}
+            ${feature.properties.document ? `<a href='${feature.properties.document}' target='_blank'>Information Document</a>` : ''}
+            </P>
         `);
     }
 }

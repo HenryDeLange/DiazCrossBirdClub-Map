@@ -4,9 +4,10 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Poorman's Game Drive - Ngciyo Pans",
+                "name": "Ghio Wetland",
                 "description": "Ngciyo Pans are seasonal pans situated in the Kariega Game Reserve.",
-                "pdf": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view"
+                "document": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view",
+                "pin": "https://maps.app.goo.gl/14mPHyLFVa1dEfZv6"
             },
             "geometry": {
                 "coordinates": [
@@ -83,8 +84,10 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Poorman's Game Drive - Bushman's Bridge",
-                "description": "Single lane bridge over the Bushman's River."
+                "name": "Bushman's Bridge",
+                "description": "Single lane bridge over the Bushman's River.",
+                "document": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view",
+                "pin": "https://maps.app.goo.gl/xCRRNKFtNn1SL7sG7"
             },
             "geometry": {
                 "coordinates": [

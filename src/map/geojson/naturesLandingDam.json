@@ -82,7 +82,8 @@
             "type": "Feature",
             "properties": {
                 "name": "Nature's Landing Dam",
-                "description": "Good spot for water birds and raptors."
+                "description": "Good spot for water birds and raptors.",
+                "pin": "https://maps.app.goo.gl/gbjtracbT1y2ToF98"
             },
             "geometry": {
                 "coordinates": [

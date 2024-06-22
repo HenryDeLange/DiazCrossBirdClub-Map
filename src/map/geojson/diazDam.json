@@ -18,7 +18,9 @@
             "type": "Feature",
             "properties": {
                 "name": "Diaz Dam",
-                "description": "Diaz Dam is a collection of seasonal pans."
+                "description": "Diaz Dam is a collection of seasonal pans.",
+                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
+                "pin": "https://maps.app.goo.gl/5fCSihiAZXGrzLNs5"
             },
             "geometry": {
                 "coordinates": [

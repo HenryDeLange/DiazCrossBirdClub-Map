@@ -13,7 +13,8 @@ type Info = {
     name: string;
     description?: string;
     road?: 'access' | 'birding';
-    pdf?: string;
+    document?: string;
+    pin?: string;
 }
 
 export type FeatureProps = Info & LineStyle & PolyStyle;

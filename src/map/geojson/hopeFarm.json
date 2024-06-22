@@ -267,7 +267,8 @@
             "properties": {
                 "name": "Hope Farm",
                 "description": "Hope Farm is sometimes visited on the monthly bird club outing.",
-                "pdf": "https://drive.google.com/file/d/1mF6gDfSmEAswSnT0RgW-C1BgDQDqN2Wy/view"
+                "document": "https://drive.google.com/file/d/1mF6gDfSmEAswSnT0RgW-C1BgDQDqN2Wy/view",
+                "pin": "https://maps.app.goo.gl/531ncNbZ2ruHZi7i8"
             },
             "geometry": {
                 "coordinates": [
