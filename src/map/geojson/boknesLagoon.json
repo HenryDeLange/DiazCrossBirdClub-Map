@@ -1,0 +1,267 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.585410819959066,
+                    -33.72173824845825
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Shallows Trail",
+                "description": "Trail along the edge of the lagoon.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.586226272376535,
+                        -33.72668996894614
+                    ],
+                    [
+                        26.586089121053732,
+                        -33.72561915450256
+                    ],
+                    [
+                        26.586264270556853,
+                        -33.725344785602275
+                    ],
+                    [
+                        26.586517796584985,
+                        -33.72442556383053
+                    ],
+                    [
+                        26.58679509067744,
+                        -33.724056554471275
+                    ],
+                    [
+                        26.587135765433885,
+                        -33.723865458998354
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon",
+                "description": "Lagoon of the Bakanas river that sometimes open into the sea at Boknes.",
+                "pdf": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        [
+                            26.585470565582995,
+                            -33.727048951440445
+                        ],
+                        [
+                            26.58720635387874,
+                            -33.72582366722196
+                        ],
+                        [
+                            26.589029660912246,
+                            -33.723227462666145
+                        ],
+                        [
+                            26.58848996203102,
+                            -33.72243888031335
+                        ],
+                        [
+                            26.585543497864364,
+                            -33.723797663853674
+                        ],
+                        [
+                            26.581911470252635,
+                            -33.722305427198236
+                        ],
+                        [
+                            26.579898539286972,
+                            -33.722414616125675
+                        ],
+                        [
+                            26.577768916671573,
+                            -33.723360914347786
+                        ],
+                        [
+                            26.578407059750276,
+                            -33.72428985569292
+                        ],
+                        [
+                            26.580120807600082,
+                            -33.723742996933574
+                        ],
+                        [
+                            26.581435810737787,
+                            -33.7249566688496
+                        ],
+                        [
+                            26.584753018133398,
+                            -33.726837117523296
+                        ],
+                        [
+                            26.585470565582995,
+                            -33.727048951440445
+                        ]
+                    ]
+                ],
+                "type": "Polygon"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Cliff Trail",
+                "description": "Walk along the houses to get closer view of the rocks at the back of the lagoon.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.585215326017618,
+                        -33.7270455346692
+                    ],
+                    [
+                        26.581755023574942,
+                        -33.7247453654069
+                    ],
+                    [
+                        26.58131334753341,
+                        -33.72406694726743
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Bird Hide",
+                "description": "The footpath from Gregorio Street to the bird hide.",
+                "road": "access"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.578648970488018,
+                        -33.72385266252436
+                    ],
+                    [
+                        26.578823783248623,
+                        -33.72436154633564
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Access Road",
+                "description": "Follow Main Street through Boknes to the beach parking area.",
+                "road": "access"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.58530116400624,
+                        -33.727167203553265
+                    ],
+                    [
+                        26.58478810261937,
+                        -33.7274516754223
+                    ],
+                    [
+                        26.58434939795518,
+                        -33.72713628264166
+                    ],
+                    [
+                        26.58261688631464,
+                        -33.72862047385532
+                    ],
+                    [
+                        26.581732041313927,
+                        -33.729047174078545
+                    ],
+                    [
+                        26.580765403918065,
+                        -33.72929453555543
+                    ],
+                    [
+                        26.579843380555445,
+                        -33.729344007766024
+                    ],
+                    [
+                        26.57890648584919,
+                        -33.729207959120224
+                    ],
+                    [
+                        26.57716653269773,
+                        -33.72839784287381
+                    ],
+                    [
+                        26.572783060764934,
+                        -33.726082662832816
+                    ],
+                    [
+                        26.579674820643106,
+                        -33.72005071033796
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Bakanas Bridge",
+                "description": "Easy to stop on the bridge and look for birds sitting in the reeds or under the bridge."
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        [
+                            26.573801864824418,
+                            -33.724005740101035
+                        ],
+                        [
+                            26.573311018154413,
+                            -33.72440317243786
+                        ],
+                        [
+                            26.573886381469805,
+                            -33.72516558850524
+                        ],
+                        [
+                            26.574260205759373,
+                            -33.725942829987154
+                        ],
+                        [
+                            26.574949341480334,
+                            -33.72570221222429
+                        ],
+                        [
+                            26.574403233928166,
+                            -33.724664033466205
+                        ],
+                        [
+                            26.573801864824418,
+                            -33.724005740101035
+                        ]
+                    ]
+                ],
+                "type": "Polygon"
+            }
+        }
+    ]
+}

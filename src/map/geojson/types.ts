@@ -1,19 +1,19 @@
-export type LineStyle = {
+type LineStyle = {
     stroke?: string;
     "stroke-width"?: number;
     "stroke-opacity"?: number;
 }
 
-export type PolyStyle = LineStyle & {
+type PolyStyle = LineStyle & {
     fill?: string;
     "fill-opacity"?: number;
 };
 
-export type Info = {
+type Info = {
     name: string;
-    description: string;
-    location?: 'private property' | 'public property' | 'trail' | 'water body';
+    description?: string;
     road?: 'access' | 'birding';
+    pdf?: string;
 }
 
-export type FeatureStyle = Info & LineStyle & PolyStyle;
+export type FeatureProps = Info & LineStyle & PolyStyle;

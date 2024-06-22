@@ -1,0 +1,268 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Access Road",
+                "description": "Parts of the wetland can at times be visible from Umthati Street in Boesmansriviermond.",
+                "road": "access",
+                "stroke-opacity": 0.5
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.65449977124402,
+                        -33.689591778306664
+                    ],
+                    [
+                        26.654716295812534,
+                        -33.68937368921188
+                    ],
+                    [
+                        26.656702973194,
+                        -33.68819266226006
+                    ],
+                    [
+                        26.656291380299223,
+                        -33.68619661899498
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei",
+                "description": "Seasonal pans and vlei area situated between Klipfontein and Boesmandriviermond.",
+                "pdf": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        [
+                            26.64344177626853,
+                            -33.691564388398305
+                        ],
+                        [
+                            26.640890524999804,
+                            -33.69201872641197
+                        ],
+                        [
+                            26.640299708915876,
+                            -33.69378391852117
+                        ],
+                        [
+                            26.64214377404494,
+                            -33.69717268778139
+                        ],
+                        [
+                            26.64648537708058,
+                            -33.69522136881423
+                        ],
+                        [
+                            26.652366680545754,
+                            -33.69152714406095
+                        ],
+                        [
+                            26.654470343872674,
+                            -33.691303698158244
+                        ],
+                        [
+                            26.65481946246709,
+                            -33.689895975612195
+                        ],
+                        [
+                            26.654022755930924,
+                            -33.689315004029275
+                        ],
+                        [
+                            26.652312969993318,
+                            -33.69013432179204
+                        ],
+                        [
+                            26.64809669514574,
+                            -33.691892107154885
+                        ],
+                        [
+                            26.645885610713947,
+                            -33.69133349368174
+                        ],
+                        [
+                            26.644435428303552,
+                            -33.69175804230578
+                        ],
+                        [
+                            26.64344177626853,
+                            -33.691564388398305
+                        ]
+                    ]
+                ],
+                "type": "Polygon"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Sand Track",
+                "description": "A long sand track extends straight all the way to the Diaz Cross parking area.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.645999435142755,
+                        -33.69460736947007
+                    ],
+                    [
+                        26.64587438195383,
+                        -33.69469655089162
+                    ],
+                    [
+                        26.64567786979967,
+                        -33.69514245661158
+                    ],
+                    [
+                        26.645439673249513,
+                        -33.695320818251346
+                    ],
+                    [
+                        26.64110450056768,
+                        -33.69798133333464
+                    ],
+                    [
+                        26.638860441329797,
+                        -33.69922843095265
+                    ],
+                    [
+                        26.636056164117605,
+                        -33.70057652764025
+                    ],
+                    [
+                        26.63183487997904,
+                        -33.70263049332949
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Horse Trail",
+                "description": "Heavily eroded dirt rode leading from the sea to the pans.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.645959096799032,
+                        -33.69485443123957
+                    ],
+                    [
+                        26.645766206486826,
+                        -33.695431174338964
+                    ],
+                    [
+                        26.64605554234359,
+                        -33.69595274783247
+                    ],
+                    [
+                        26.646399128672215,
+                        -33.69610320113659
+                    ],
+                    [
+                        26.646983828214076,
+                        -33.696022959407514
+                    ],
+                    [
+                        26.64764086172113,
+                        -33.69584241524184
+                    ],
+                    [
+                        26.648123088147713,
+                        -33.6959176420238
+                    ],
+                    [
+                        26.648864511278845,
+                        -33.69625365417729
+                    ],
+                    [
+                        26.64943999378525,
+                        -33.69639814170705
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Access Road",
+                "description": "Start from the Bushman's River Mouth.",
+                "road": "access"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.649861781101322,
+                        -33.69659980271154
+                    ],
+                    [
+                        26.652373046003987,
+                        -33.697451011035795
+                    ],
+                    [
+                        26.65556638285514,
+                        -33.69622578426632
+                    ],
+                    [
+                        26.659782827629698,
+                        -33.69518110343206
+                    ],
+                    [
+                        26.661332991149607,
+                        -33.69418799999884
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Access Road",
+                "description": "From the R72 from Kenton's side, lookout for the unmarked turnoff after the Alexandria Street turnoff. There is a wire fence on the dirt road than can be easily opened to gain access.",
+                "road": "access"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.641377285306987,
+                        -33.688745287494314
+                    ],
+                    [
+                        26.643594423927397,
+                        -33.69148348846177
+                    ]
+                ],
+                "type": "LineString"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.64447865907823,
+                    -33.69094007061304
+                ],
+                "type": "Point"
+            },
+            "id": 6
+        }
+    ]
+}

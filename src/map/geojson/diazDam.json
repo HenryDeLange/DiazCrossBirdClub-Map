@@ -4,9 +4,21 @@
         {
             "type": "Feature",
             "properties": {
+                "name": "Diaz Dam"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.607827104415634,
+                    -33.6851991385178
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
                 "name": "Diaz Dam",
-                "description": "Diaz Dam is a collection of seasonal pans.",
-                "location": "water body"
+                "description": "Diaz Dam is a collection of seasonal pans."
             },
             "geometry": {
                 "coordinates": [
