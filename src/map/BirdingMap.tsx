@@ -16,7 +16,7 @@ export default function BirdingMap() {
             <SpeciesListControl />
             <AttributionControl
                 position='bottomleft'
-                prefix={`v${version} | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
+                prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank'>v${version}</a> | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
             />
             <ZoomControl position='bottomright' />
             <LocateControl />
