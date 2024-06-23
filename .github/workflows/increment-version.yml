@@ -2,11 +2,11 @@ name: Increment Version
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   bump-version:
-    name: Bump Version (master)
+    name: Bump Version
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository
