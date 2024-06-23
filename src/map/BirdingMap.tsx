@@ -1,5 +1,6 @@
 
 import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { version } from '../../package.json';
 import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
 import { LocateControl } from './LocateControl';
 import { Logo } from './Logo';
@@ -15,7 +16,7 @@ export default function BirdingMap() {
             <SpeciesListControl />
             <AttributionControl
                 position='bottomleft'
-                prefix='Google Maps | Leaflet | MyWild | Diaz Cross Bird Club'
+                prefix={`v${version} | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
             />
             <ZoomControl position='bottomright' />
             <LocateControl />

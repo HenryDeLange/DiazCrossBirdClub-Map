@@ -18,6 +18,7 @@ export function SpeciesListControl() {
             map.dragging.disable();
             map.scrollWheelZoom.disable();
             map.doubleClickZoom.disable();
+            // TODO: Handle pagination (though it's unlikely to exceed 500 species any time soon)
             fetch(`https://api.inaturalist.org/v1/observations/species_counts?captive=false&iconic_taxa=Aves&nelat=${map.getBounds().getNorthEast().lat}&nelng=${map.getBounds().getNorthEast().lng}&swlat=${map.getBounds().getSouthWest().lat}&swlng=${map.getBounds().getSouthWest().lng}&verifiable=true&per_page=500`)
                 .then((response) => response.json())
                 .then((data) => {
@@ -37,7 +38,7 @@ export function SpeciesListControl() {
 
     return (
         <>
-            <button className='inat-button' onClick={handleClick}>
+            <button className='inat-button' onClick={handleClick} title='iNaturalist Species List'>
                 <img alt='inat-logo' src='./inat-logo.png' width={'40rem'} className='inat-button-image' />
             </button>
             {showModal && (
@@ -60,10 +61,10 @@ export function SpeciesListControl() {
                                     </a>
                                 </div>
                                 <div className='flex justify-end pt-2'>
-                                    <button className='modal-close px-4 bg-green-600 p-3 rounded-lg text-black hover:bg-green-500 text-lg'
+                                    <button className='modal-close px-4 text-white bg-green-600 p-3 rounded-lg hover:bg-green-700 text-lg'
                                         onClick={handleClick}
                                     >
-                                        Back
+                                        BACK
                                     </button>
                                 </div>
                             </div>
@@ -90,7 +91,7 @@ export function SpeciesListControl() {
                                                             src={speciesCount.taxon.default_photo.medium_url}
                                                             className='object-cover h-60 w-60'
                                                         />
-                                                        <div className='text-sm font-semibold'>
+                                                        <div className='text-lg font-semibold'>
                                                             {speciesCount.taxon.preferred_common_name}
                                                         </div>
                                                         <div className='text-sm'>

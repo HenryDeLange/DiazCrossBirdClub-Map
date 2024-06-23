@@ -4,11 +4,11 @@ import { FeatureProps } from './geojson/types';
 
 export function pointToLayerShowText(feature: geojson.Feature<geojson.Point, FeatureProps>, latlng: LatLng): Layer {
     const divIcon = new DivIcon({
-        html: `<b>${feature.properties.name}</b>`,
+        html: feature.properties.name,
         className: 'text-marker',
-        iconSize: [350, 50]
+        iconSize: [350, 8]
     });
     const marker = new Marker(latlng, { icon: divIcon });
-    marker.addEventListener('click', (event) => event.sourceTarget._map.setView(latlng, 15));
+    marker.addEventListener('click', (event) => event.sourceTarget._map.setView([latlng.lat - 0.0025, latlng.lng], 16));
     return marker;
 }

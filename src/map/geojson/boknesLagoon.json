@@ -4,51 +4,45 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Boknes Lagoon"
-            },
-            "geometry": {
-                "coordinates": [
-                    26.585410819959066,
-                    -33.72173824845825
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Boknes Lagoon - Shallows Trail",
-                "description": "Trail along the edge of the lagoon.",
-                "road": "birding"
+                "name": "Boknes Lagoon - Bakanas Bridge",
+                "description": "Easy to stop on the bridge and look for birds sitting in the reeds or under the bridge.",
+                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
+                "pin": "https://maps.app.goo.gl/f8TLLWtsVws2gXfq8"
             },
             "geometry": {
                 "coordinates": [
                     [
-                        26.586226272376535,
-                        -33.72668996894614
-                    ],
-                    [
-                        26.586089121053732,
-                        -33.72561915450256
-                    ],
-                    [
-                        26.586264270556853,
-                        -33.725344785602275
-                    ],
-                    [
-                        26.586517796584985,
-                        -33.72442556383053
-                    ],
-                    [
-                        26.58679509067744,
-                        -33.724056554471275
-                    ],
-                    [
-                        26.587135765433885,
-                        -33.723865458998354
+                        [
+                            26.573801864824418,
+                            -33.724005740101035
+                        ],
+                        [
+                            26.573311018154413,
+                            -33.72440317243786
+                        ],
+                        [
+                            26.573886381469805,
+                            -33.72516558850524
+                        ],
+                        [
+                            26.574260205759373,
+                            -33.725942829987154
+                        ],
+                        [
+                            26.574949341480334,
+                            -33.72570221222429
+                        ],
+                        [
+                            26.574403233928166,
+                            -33.724664033466205
+                        ],
+                        [
+                            26.573801864824418,
+                            -33.724005740101035
+                        ]
                     ]
                 ],
-                "type": "LineString"
+                "type": "Polygon"
             }
         },
         {
@@ -117,6 +111,56 @@
                     ]
                 ],
                 "type": "Polygon"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.585410819959066,
+                    -33.72173824845825
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Lagoon - Shallows Trail",
+                "description": "Trail along the edge of the lagoon.",
+                "road": "birding"
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.586226272376535,
+                        -33.72668996894614
+                    ],
+                    [
+                        26.586089121053732,
+                        -33.72561915450256
+                    ],
+                    [
+                        26.586264270556853,
+                        -33.725344785602275
+                    ],
+                    [
+                        26.586517796584985,
+                        -33.72442556383053
+                    ],
+                    [
+                        26.58679509067744,
+                        -33.724056554471275
+                    ],
+                    [
+                        26.587135765433885,
+                        -33.723865458998354
+                    ]
+                ],
+                "type": "LineString"
             }
         },
         {
@@ -220,50 +264,6 @@
                     ]
                 ],
                 "type": "LineString"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Boknes Lagoon - Bakanas Bridge",
-                "description": "Easy to stop on the bridge and look for birds sitting in the reeds or under the bridge.",
-                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
-                "pin": "https://maps.app.goo.gl/f8TLLWtsVws2gXfq8"
-            },
-            "geometry": {
-                "coordinates": [
-                    [
-                        [
-                            26.573801864824418,
-                            -33.724005740101035
-                        ],
-                        [
-                            26.573311018154413,
-                            -33.72440317243786
-                        ],
-                        [
-                            26.573886381469805,
-                            -33.72516558850524
-                        ],
-                        [
-                            26.574260205759373,
-                            -33.725942829987154
-                        ],
-                        [
-                            26.574949341480334,
-                            -33.72570221222429
-                        ],
-                        [
-                            26.574403233928166,
-                            -33.724664033466205
-                        ],
-                        [
-                            26.573801864824418,
-                            -33.724005740101035
-                        ]
-                    ]
-                ],
-                "type": "Polygon"
             }
         }
     ]

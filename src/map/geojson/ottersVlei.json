@@ -4,36 +4,6 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Otters' Vlei - Access Road",
-                "description": "Parts of the wetland can at times be visible from Umthati Street in Boesmansriviermond.",
-                "road": "access",
-                "stroke-opacity": 0.5
-            },
-            "geometry": {
-                "coordinates": [
-                    [
-                        26.65449977124402,
-                        -33.689591778306664
-                    ],
-                    [
-                        26.654716295812534,
-                        -33.68937368921188
-                    ],
-                    [
-                        26.656702973194,
-                        -33.68819266226006
-                    ],
-                    [
-                        26.656291380299223,
-                        -33.68619661899498
-                    ]
-                ],
-                "type": "LineString"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
                 "name": "Otters' Vlei",
                 "description": "Seasonal pans and vlei area situated between Klipfontein and Boesmandriviermond.",
                 "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
@@ -101,6 +71,36 @@
                     ]
                 ],
                 "type": "Polygon"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Otters' Vlei - Access Road",
+                "description": "Parts of the wetland can at times be visible from Umthati Street in Boesmansriviermond.",
+                "road": "access",
+                "stroke-opacity": 0.5
+            },
+            "geometry": {
+                "coordinates": [
+                    [
+                        26.65449977124402,
+                        -33.689591778306664
+                    ],
+                    [
+                        26.654716295812534,
+                        -33.68937368921188
+                    ],
+                    [
+                        26.656702973194,
+                        -33.68819266226006
+                    ],
+                    [
+                        26.656291380299223,
+                        -33.68619661899498
+                    ]
+                ],
+                "type": "LineString"
             }
         },
         {

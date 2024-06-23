@@ -9,11 +9,16 @@ export function Logo() {
     }, [expanded]);
     return (
         <button className='logo flex items-center' onClick={handleClick}>
-            <img alt='dcbc-logo' src='./logo.png' width={'70rem'} className='logo-image' />
+            <img alt='dcbc-logo' src='./logo.png' width={'75rem'} className='logo-image' />
             {expanded &&
-                <p className='m-2'>
-                    Diaz Cross Bird Club
-                </p>
+                <div className='m-2'>
+                    <div className='text-lg'>
+                        Diaz Cross
+                    </div>
+                    <div className='text-lg'>
+                        Bird Club
+                    </div>
+                </div>
             }
         </button>
     );
