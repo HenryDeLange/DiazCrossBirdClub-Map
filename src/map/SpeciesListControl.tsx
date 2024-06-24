@@ -1,8 +1,12 @@
-import { MouseEventHandler, useCallback, useEffect, useState } from 'react';
+import { MouseEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { INatSpeciesCount } from './iNatTypes';
 
-export function SpeciesListControl() {
+type Props = {
+    mapHeight: number;
+}
+
+export function SpeciesListControl({ mapHeight }: Readonly<Props>) {
     const map = useMap();
 
     const [showModal, setShowModal] = useState<boolean>(false);
@@ -36,6 +40,23 @@ export function SpeciesListControl() {
         }
     }, [showModal, map]);
 
+    const modalHeadingRef = useRef<HTMLDivElement>(null);
+    const [height, setHeight] = useState(mapHeight);
+
+    useEffect(() => {
+        const updateHeight = () => {
+            if (showModal && modalHeadingRef.current) {
+                const headingHeight = modalHeadingRef.current.getBoundingClientRect().height;
+                const headingTop = modalHeadingRef.current.getBoundingClientRect().top;
+                const padding = 16; // From the parent element's "p-4"
+                setHeight(mapHeight - headingHeight - headingTop - padding);
+            }
+        };
+        window.addEventListener('resize', updateHeight);
+        updateHeight();
+        return () => window.removeEventListener('resize', updateHeight);
+    }, [showModal, modalHeadingRef.current, mapHeight]);
+
     return (
         <>
             <button className='inat-button' onClick={handleClick} title='iNaturalist Species List'>
@@ -43,9 +64,9 @@ export function SpeciesListControl() {
             </button>
             {showModal && (
                 <div className='fixed inset-0 bg-gray-900 bg-opacity-75' style={{ zIndex: 999999999 }}>
-                    <div className='modal-container w-full h-full px-4 pt-4 '>
+                    <div className='modal-container w-full h-full px-4 pt-4'>
                         <div className='bg-white rounded-t-lg p-4 text-black w-full h-full max-h-full'>
-                            <div className='flex justify-between items-center pb-2'>
+                            <div ref={modalHeadingRef} className='flex justify-between items-center pb-2'>
                                 <div>
                                     <p className='text-2xl font-bold'>
                                         iNaturalist Species List
@@ -68,41 +89,34 @@ export function SpeciesListControl() {
                                     </button>
                                 </div>
                             </div>
-                            <div className={`modal-content mt-2 max-h-full ${data ? 'overflow-y-auto' : ''}`}>
-                                <div>
-                                    {!data &&
-                                        <div className='flex flex-row justify-center gap-2'>
-                                            <div className='relative h-8 w-8'>
-                                                <div className='absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-tr from-lime-300 to-green-500 animate-spin'></div>
-                                                <div className='absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-white'></div>
-                                            </div>
-                                            <div className='flex items-center text-lg'>
-                                                Loading...
-                                            </div>
+                            <div className={`modal-content mt-2 ${data ? 'overflow-y-auto' : ''}`} style={{ maxHeight: height }}>
+                                {!data &&
+                                    <div className='flex flex-row justify-center gap-2'>
+                                        <div className='relative h-20 w-20'>
+                                            <div className='absolute top-0 left-0 w-full h-full rounded-full bg-gradient-to-tr from-lime-300 to-green-500 animate-spin'></div>
+                                            <div className='absolute top-1/4 left-1/4 w-1/2 h-1/2 rounded-full bg-white'></div>
                                         </div>
-                                    }
-                                    {data &&
-                                        <div className='max-h-full overflow-y-auto pb-20'>
-                                            <article className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-6 gap-x-6'>
-                                                {data.results.map((speciesCount, index) => (
-                                                    <div key={`${index}_${speciesCount.taxon.name}`}>
-                                                        <img
-                                                            alt={speciesCount.taxon.name}
-                                                            src={speciesCount.taxon.default_photo.medium_url}
-                                                            className='object-cover h-60 w-60'
-                                                        />
-                                                        <div className='text-lg font-semibold'>
-                                                            {speciesCount.taxon.preferred_common_name}
-                                                        </div>
-                                                        <div className='text-sm'>
-                                                            <i>{speciesCount.taxon.name}</i>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </article>
-                                        </div>
-                                    }
-                                </div>
+                                    </div>
+                                }
+                                {data &&
+                                    <article className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-6 gap-x-6'>
+                                        {data.results.map((speciesCount, index) => (
+                                            <div key={`${index}_${speciesCount.taxon.name}`}>
+                                                <img
+                                                    alt={speciesCount.taxon.name}
+                                                    src={speciesCount.taxon.default_photo.medium_url}
+                                                    className='object-cover h-60 w-60'
+                                                />
+                                                <div className='text-lg font-semibold'>
+                                                    {speciesCount.taxon.preferred_common_name}
+                                                </div>
+                                                <div className='text-sm'>
+                                                    <i>{speciesCount.taxon.name}</i>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </article>
+                                }
                             </div>
                         </div>
                     </div>

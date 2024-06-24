@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => ({
             include: ['src/**/*'],
             exclude: ['src/main.tsx'],
             thresholds: {
-                100: true,
+                100: true
             },
             provider: 'istanbul',
             enabled: true,
@@ -41,6 +41,8 @@ export default defineConfig(({ mode }) => ({
                         'fonts/*.woff2'
                     ],
                     manifest: {
+                        name: 'Diaz Cross Bird Club Map',
+                        short_name: 'DCBC Map',
                         theme_color: '#52a339',
                         icons: [
                             {

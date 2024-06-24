@@ -1,4 +1,5 @@
 
+import { useEffect, useState } from 'react';
 import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { version } from '../../package.json';
 import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
@@ -10,16 +11,32 @@ import { spots } from './geojson/spots';
 import './map.css';
 
 export default function BirdingMap() {
+    const [mapHeight, setMapHeight] = useState(window.innerHeight);
+    useEffect(() => {
+        const updateDimensions = () => {
+            setMapHeight(window.innerHeight);
+        };
+        window.addEventListener('resize', updateDimensions);
+        return () => window.removeEventListener('resize', updateDimensions);
+    }, []);
     return (
-        <MapContainer center={startPosition} zoom={11} scrollWheelZoom attributionControl={false} zoomControl={false}>
-            <Logo />
-            <SpeciesListControl />
+        <MapContainer
+            center={startPosition}
+            zoom={11}
+            scrollWheelZoom
+            attributionControl={false}
+            zoomControl={false}
+            style={{ height: mapHeight }}
+        >
+            <Logo />F
+            <SpeciesListControl mapHeight={mapHeight} />
             <AttributionControl
                 position='bottomleft'
                 prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank'>v${version}</a> | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
             />
-            <ZoomControl position='bottomright' />
             <LocateControl />
+            <ZoomControl position='bottomright' />
+
             <LayersControl position='topright'>
                 <LayersControl.BaseLayer name='Google Maps - Street' checked={true}>
                     <TileLayer
