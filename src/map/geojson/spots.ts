@@ -1,4 +1,5 @@
 import boknesLagoon from './boknesLagoon.json';
+import capePadrone from './capePadrone.json';
 import diazDam from './diazDam.json';
 import ghioPans from './ghioPans.json';
 import naturesLandingDam from './naturesLandingDam.json';
@@ -10,3 +11,4 @@ spots.push(diazDam);
 spots.push(naturesLandingDam);
 spots.push(ghioPans);
 spots.push(ottersVlei);
+spots.push(capePadrone);
