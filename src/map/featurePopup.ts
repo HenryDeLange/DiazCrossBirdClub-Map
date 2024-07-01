@@ -3,7 +3,7 @@ import { Layer } from 'leaflet';
 import { FeatureProps } from './geojson/types';
 
 export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer) {
-    if (feature.geometry.type !== 'Point') {
+    if (feature.geometry.type !== 'Point' || (feature.geometry.type === 'Point' && feature.properties.category === 'spot')) {
         layer.bindPopup(`
             <div class='text-2xl font-semibold'>${feature.properties.name}</div>
             <p class='text-lg'>${feature.properties.description ?? ''}</p>

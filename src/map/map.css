@@ -22,6 +22,14 @@
     text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000, 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
 }
 
+.spot-marker {
+    color: #c6dfeb;
+    font-size: 1.3em;
+    text-align: center;
+    font-weight: 300;
+    text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000, 0 -2px #000, 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000;
+}
+
 /* LOGO */
 .logo {
     position: absolute;

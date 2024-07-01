@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Bustards",
+                "description": "Good spot for seeing Denham's Bustard (Stanley's Bustard), although they are frequently seen all along the Golder Mile. This is a know breeding spot (with 20+ birds gathering, and nests with chicks being observed).",
+                "category": "spot"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.57015252216857,
+                    -33.72891274087881
+                ],
+                "type": "Point"
+            },
+            "id": 0
+        }
+    ]
+}

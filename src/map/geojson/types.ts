@@ -12,9 +12,10 @@ type PolyStyle = LineStyle & {
 type Info = {
     name: string;
     description?: string;
-    road?: 'access' | 'birding';
+    road?: 'access' | 'birding' | 'loop';
     document?: string;
     pin?: string;
+    category?: 'spot';
 }
 
 export type FeatureProps = Info & LineStyle & PolyStyle;
