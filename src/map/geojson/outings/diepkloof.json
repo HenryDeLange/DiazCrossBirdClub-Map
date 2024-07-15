@@ -4,7 +4,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "??A??",
+                "name": "Diepkloof",
                 "description": "Private farm that is sometimes made available to the club for outings."
             },
             "geometry": {
@@ -66,7 +66,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "??A?? - Access Road",
+                "name": "Diepkloof - Access Road",
                 "description": "Follow the R343 from Kenton. Turn left into the farm.",
                 "road": "access"
             },
@@ -99,7 +99,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "??A?? - Outcrop Trail",
+                "name": "Diepkloof - Outcrop Trail",
                 "description": "From the entrance go towards the house, then follow the fence towards the rocky outcrop.",
                 "road": "birding"
             },
@@ -172,7 +172,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "??A?? - Valley Trail",
+                "name": "Diepkloof - Valley Trail",
                 "description": "From the house walk towards the dam and then along the valley.",
                 "road": "birding"
             },
@@ -317,7 +317,7 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "??A??"
+                "name": "Diepkloof"
             },
             "geometry": {
                 "coordinates": [

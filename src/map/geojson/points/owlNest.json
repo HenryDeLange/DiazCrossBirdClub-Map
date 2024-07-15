@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Spotted Eagle Own Nest",
+                "description": "Well established nest. Parents with offspring seen regularly over the recent years.",
+                "category": "spot"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.53417841304372,
+                    -33.74915204207478
+                ],
+                "type": "Point"
+            },
+            "id": 0
+        }
+    ]
+}

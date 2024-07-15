@@ -6,9 +6,9 @@ import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
 import { LocateControl } from './LocateControl';
 import { Logo } from './Logo';
 import { SpeciesListControl } from './SpeciesListControl';
-import { loops } from './geojson/loops';
 import { outings } from './geojson/outings';
-import { points } from './geojson/pointsOfInterest';
+import { paths } from './geojson/paths';
+import { points } from './geojson/points';
 import { spots } from './geojson/spots';
 import './map.css';
 
@@ -63,7 +63,7 @@ export default function BirdingMap() {
                 </LayersControl.BaseLayer>
                 <LayersControl.Overlay name='Birding Loops' checked>
                     <LayerGroup>
-                        {loops.map((layer, index) => <GenericGeoJSONLayer key={index} layer={layer} />)}
+                        {paths.map((layer, index) => <GenericGeoJSONLayer key={index} layer={layer} />)}
                     </LayerGroup>
                 </LayersControl.Overlay>
                 <LayersControl.Overlay name='Birding Points of Interest' checked>

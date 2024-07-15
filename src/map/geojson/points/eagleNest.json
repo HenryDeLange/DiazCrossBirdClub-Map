@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Crested Eagle Nest",
+                "description": "Close to the highway. Large nest in the Eucalyptus tree.",
+                "category": "spot"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.477598708375837,
+                    -33.3696562391722
+                ],
+                "type": "Point"
+            },
+            "id": 0
+        }
+    ]
+}

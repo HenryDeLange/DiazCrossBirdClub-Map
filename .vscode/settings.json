@@ -1,42 +1,43 @@
 {
-  "css.validate": false,
-  "diffEditor.ignoreTrimWhitespace": false,
-  "editor.codeActionsOnSave": [
-    "source.addMissingImports",
-    "source.organizeImports"
-  ],
-  "files.exclude": {
-    "**/.stylelintcache": true,
-    "**/node_modules": true,
-  },
-  "files.watcherExclude": {
-    "**/dist": true
-  },
-  "stylelint.validate": [
-    "css"
-  ],
-  "typescript.disableAutomaticTypeAcquisition": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features"
-  },
-  "[css]": {
-    "editor.defaultFormatter": "vscode.css-language-features"
-  },
-  "cSpell.words": [
-    "Addo",
-    "Assegaai",
-    "Bakanas",
-    "Boknes",
-    "DCBC",
-    "Ghio",
-    "iNat",
-    "Kariega",
-    "Kasouga",
-    "latlng",
-    "locatecontrol",
-    "Ngciyo",
-    "stylelint",
-    "tailwindcss"
-]
+    "css.validate": false,
+    "diffEditor.ignoreTrimWhitespace": false,
+    "editor.codeActionsOnSave": [
+        "source.addMissingImports",
+        "source.organizeImports"
+    ],
+    "files.exclude": {
+        "**/.stylelintcache": true,
+        "**/node_modules": true,
+    },
+    "files.watcherExclude": {
+        "**/dist": true
+    },
+    "stylelint.validate": [
+        "css"
+    ],
+    "typescript.disableAutomaticTypeAcquisition": true,
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "[typescriptreact]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[css]": {
+        "editor.defaultFormatter": "vscode.css-language-features"
+    },
+    "cSpell.words": [
+        "Addo",
+        "Assegaai",
+        "Bakanas",
+        "Boknes",
+        "DCBC",
+        "Diepkloof",
+        "Ghio",
+        "iNat",
+        "Kariega",
+        "Kasouga",
+        "latlng",
+        "locatecontrol",
+        "Ngciyo",
+        "stylelint",
+        "tailwindcss"
+    ]
 }
