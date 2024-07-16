@@ -4,6 +4,7 @@ import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer,
 import { version } from '../../package.json';
 import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
 import { LocateControl } from './LocateControl';
+import { LocationsControl } from './LocationsControl';
 import { Logo } from './Logo';
 import { SpeciesListControl } from './SpeciesListControl';
 import { outings } from './geojson/outings';
@@ -32,6 +33,7 @@ export default function BirdingMap() {
         >
             <Logo />F
             <SpeciesListControl mapHeight={mapHeight} />
+            <LocationsControl mapHeight={mapHeight} />
             <AttributionControl
                 position='bottomleft'
                 prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank'>v${version}</a> | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}

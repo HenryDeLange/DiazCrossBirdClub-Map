@@ -85,7 +85,7 @@ export function SpeciesListControl({ mapHeight }: Readonly<Props>) {
                                     <button className='modal-close px-4 text-white bg-green-600 p-3 rounded-lg hover:bg-green-700 text-lg'
                                         onClick={handleClick}
                                     >
-                                        BACK
+                                        CLOSE
                                     </button>
                                 </div>
                             </div>

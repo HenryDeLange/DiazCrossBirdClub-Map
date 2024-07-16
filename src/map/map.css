@@ -51,7 +51,7 @@
 /* INAT */
 .inat-button {
     position: absolute;
-    top: 8.4em;
+    top: 13em;
     left: 0.85em;
     z-index: 999999;
     background-color: #e8f3e7;
@@ -62,6 +62,25 @@
 }
 
 .inat-button-image {
+    border-radius: 0.4em;
+    padding: 0.1em;
+}
+
+/* LOCATIONS */
+.locations-button {
+    position: absolute;
+    top: 8.4em;
+    left: 0.85em;
+    z-index: 999999;
+    background-color: #f3e7e7;
+    border-color: #3b2929;
+    color: #770b0b;
+    border-radius: 0.4em;
+    border-width: 0.2em;
+    cursor: pointer;
+}
+
+.locations-button-image {
     border-radius: 0.4em;
     padding: 0.1em;
 }
