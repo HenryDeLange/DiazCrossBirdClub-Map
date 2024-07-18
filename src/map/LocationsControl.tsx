@@ -1,5 +1,5 @@
 import type { FeatureCollection, Geometry } from 'geojson';
-import { MouseEventHandler, useCallback, useEffect, useRef, useState } from 'react';
+import { MouseEventHandler, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { FaInfo } from 'react-icons/fa';
 import { useMap } from 'react-leaflet';
 import { outings } from './geojson/outings';
@@ -42,7 +42,7 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
             if (showModal && modalHeadingRef.current) {
                 const headingHeight = modalHeadingRef.current.getBoundingClientRect().height;
                 const headingTop = modalHeadingRef.current.getBoundingClientRect().top;
-                const padding = 16; // From the parent element's "p-4"
+                const padding = 16; // From the parent element's 'p-4'
                 setHeight(mapHeight - headingHeight - headingTop - padding);
             }
         };
@@ -52,11 +52,11 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
     }, [showModal, modalHeadingRef.current, mapHeight]);
 
     const tabs = [
-        { label: 'Outings', content: <FeatureDetails title='Outings' geojson={outings} /> },
-        { label: 'Spots', content: <FeatureDetails title='Spots' geojson={spots} /> },
-        { label: 'Paths', content: <FeatureDetails title='Paths' geojson={paths} /> },
-        { label: 'Points', content: <FeatureDetails title='Points' geojson={points} /> },
-      ];
+        { label: 'Outings', content: <FeatureDetails geojson={outings} /> },
+        { label: 'Spots', content: <FeatureDetails geojson={spots} /> },
+        { label: 'Paths', content: <FeatureDetails geojson={paths} /> },
+        { label: 'Points', content: <FeatureDetails geojson={points} /> }
+    ];
 
     return (
         <>
@@ -74,16 +74,14 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
                                     </p>
                                 </div>
                                 <div className='flex justify-end pt-2'>
-                                    <button className='modal-close px-4 text-white bg-green-600 p-3 rounded-lg hover:bg-green-700 text-lg'
+                                    <button className='modal-close px-4 text-white bg-red-600 p-3 rounded-lg hover:bg-red-700 text-lg'
                                         onClick={handleClick}
                                     >
                                         CLOSE
                                     </button>
                                 </div>
                             </div>
-                            <div className='modal-content mt-2 overflow-y-auto' style={{ maxHeight: height }}>
-                                <Tabs tabs={tabs} />
-                            </div>
+                            <Tabs height={height} tabs={tabs} />
                         </div>
                     </div>
                 </div>
@@ -93,56 +91,53 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
 }
 
 type TabProps = {
-    label: string;
-    content: React.ReactNode;
+    tabs: {
+        label: string;
+        content: ReactNode;
+    }[];
+    height: number;
 }
 
-const Tabs: React.FC<{ tabs: TabProps[] }> = ({ tabs }) => {
+function Tabs({ tabs, height }: TabProps) {
     const [activeTab, setActiveTab] = useState(tabs[0].label);
     return (
         <div>
-            <div className="flex border-b">
+            <div className='flex border-b'>
                 {tabs.map((tab) => (
                     <button
                         key={tab.label}
-                        className={`px-4 py-2 -mb-px border-b-2 ${activeTab === tab.label ? 'border-blue-500' : 'border-transparent'
-                            }`}
+                        className={`text-xl font-bold px-4 -mb-px border-b-4 ${activeTab === tab.label ? 'border-red-500' : 'border-transparent'}`}
                         onClick={() => setActiveTab(tab.label)}
                     >
                         {tab.label}
                     </button>
                 ))}
             </div>
-            <div className="p-4">
-                {tabs.map(
-                    (tab) =>
-                        activeTab === tab.label && (
-                            <div key={tab.label}>{tab.content}</div>
-                        )
-                )}
+            <div className='modal-content mt-2 overflow-y-auto' style={{ maxHeight: height }}>
+                <div className='p-4'>
+                    {tabs.map((tab) => activeTab === tab.label && (
+                        <div key={tab.label}>{tab.content}</div>
+                    ))}
+                </div>
             </div>
         </div>
     );
 };
 
 type FeatureDetailsProps = {
-    title: string;
     geojson: FeatureCollection<Geometry, FeatureProps>[];
 }
 
-function FeatureDetails({ title, geojson }: FeatureDetailsProps) {
+function FeatureDetails({ geojson }: FeatureDetailsProps) {
     return (
         <>
-            <div className='text-2xl font-bold'>
-                {title}
-            </div>
             {geojson.map((geojsonObject, outingIndex) => (
-                <div key={outingIndex} className='text-2xl font-bold mb-8'>
+                <div key={outingIndex} className='mb-8'>
                     {geojsonObject.features.map((feature, featureIndex) => {
                         if (feature.properties.description)
                             return (
-                                <div key={`${featureIndex}_${feature.properties.name}_${feature.id}`}>
-                                    <div className='text-xl'>
+                                <div key={`${featureIndex}_${feature.properties.name}_${feature.id}`} className='mb-2'>
+                                    <div className={feature.geometry.type === 'Polygon' ? 'text-xl font-bold' : 'text-lg'}>
                                         {feature.properties.name}
                                     </div>
                                     <div className='text-base'>

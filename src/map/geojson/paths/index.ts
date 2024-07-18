@@ -5,5 +5,5 @@ import goldenMile from './goldenMile.json';
 
 export const paths: FeatureCollection<Geometry, FeatureProps>[] = [];
 
-paths.push(goldenMile as any);
 paths.push(alexandria as any);
+paths.push(goldenMile as any);

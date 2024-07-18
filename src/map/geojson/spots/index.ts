@@ -13,11 +13,11 @@ import ottersVlei from './ottersVlei.json';
 export const spots: FeatureCollection<Geometry, FeatureProps>[] = [];
 
 spots.push(boknesLagoon as any);
+spots.push(capePadrone as any);
 spots.push(diazDam as any);
-spots.push(naturesLandingDam as any);
-spots.push(ghioPans as any);
 spots.push(fishRiverLighthouse as any);
 spots.push(fishRiverMouth as any);
-spots.push(ottersVlei as any);
-spots.push(capePadrone as any);
+spots.push(ghioPans as any);
 spots.push(kasouga as any);
+spots.push(naturesLandingDam as any);
+spots.push(ottersVlei as any);

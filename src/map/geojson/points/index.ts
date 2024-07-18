@@ -7,5 +7,5 @@ import owlNest from './owlNest.json';
 export const points: FeatureCollection<Geometry, FeatureProps>[] = [];
 
 points.push(bustards as any);
-points.push(owlNest as any);
 points.push(eagleNest as any);
+points.push(owlNest as any);
