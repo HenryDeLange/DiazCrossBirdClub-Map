@@ -4,8 +4,23 @@
         {
             "type": "Feature",
             "properties": {
+                "name": "Assegaai Trails"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.5611545500698,
+                    -33.48840421172067
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
                 "name": "Assegaai Trails",
-                "description": "Club outing location."
+                "description": "Assegaai Trails was the venue for the Diaz Cross Bird Club's 50th anniversary.",
+                "linkMap": "https://maps.app.goo.gl/R4BEQYGumeSdHs9P9",
+                "linkWeb": "https://assegaaitrails.co.za"
             },
             "geometry": {
                 "coordinates": [
@@ -176,7 +191,7 @@
             "type": "Feature",
             "properties": {
                 "name": "Assegaai Trails - Cliff Trail",
-                "description": "From the conference center follow the dirt road all the way down to the bottom of the cliff. There is a nice overnight hut there to picnic at.",
+                "description": "From the conference center follow the dirt road all the way down to the bottom of the cliff. There is a overnight hut there to picnic at.",
                 "road": "birding"
             },
             "geometry": {
@@ -553,21 +568,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Assegaai Trails"
-            },
-            "geometry": {
-                "coordinates": [
-                    26.5611545500698,
-                    -33.48840421172067
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Assegaai Trails - Chappel",
-                "description": "Short path to open chapel.",
+                "name": "Assegaai Trails - Gazebo",
+                "description": "There is a short path near the conference center that leads to an gazebo.",
                 "road": "birding"
             },
             "geometry": {

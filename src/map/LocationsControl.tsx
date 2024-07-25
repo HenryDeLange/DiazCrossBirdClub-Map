@@ -143,6 +143,21 @@ function FeatureDetails({ geojson }: FeatureDetailsProps) {
                                     <div className='text-base'>
                                         {feature.properties.description}
                                     </div>
+                                    {feature.properties.linkMap &&
+                                        <a className='text-lg' href={feature.properties.linkMap} target='_blank'>Map Pin</a>
+                                    }
+                                    {feature.properties.linkMap && feature.properties.linkDocument &&
+                                        <span className='text-xl'> | </span>
+                                    }
+                                    {feature.properties.linkDocument &&
+                                        <a className='text-lg' href={feature.properties.linkDocument} target='_blank'>Document</a>
+                                    }
+                                    {((feature.properties.linkMap && feature.properties.linkWeb) || (feature.properties.linkDocument && feature.properties.linkWeb)) &&
+                                        <span className='text-xl'> | </span>
+                                    }
+                                    {feature.properties.linkWeb &&
+                                        <a className='text-lg' href={feature.properties.linkWeb} target='_blank'>Website</a>
+                                    }
                                 </div>
                             );
                     })}

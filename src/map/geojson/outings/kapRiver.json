@@ -4,10 +4,24 @@
         {
             "type": "Feature",
             "properties": {
+                "name": "Kap River"
+            },
+            "geometry": {
+                "coordinates": [
+                    27.08685039085583,
+                    -33.46650897870845
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
                 "name": "Kap River",
-                "description": "Kap River Nature Reserve is open for free and a good birding spot.",
-                "pin": "https://maps.app.goo.gl/ipJxdjdMtmyCwcae6",
-                "document": "https://drive.google.com/file/d/1Z0nneW6nO7DMJiVhPdlBpoP4zgu0bF06/view"
+                "description": "Kap River Nature Reserve is open to the public and a good birding spot.",
+                "linkMap": "https://maps.app.goo.gl/ipJxdjdMtmyCwcae6",
+                "linkDocument": "https://drive.google.com/file/d/1Z0nneW6nO7DMJiVhPdlBpoP4zgu0bF06/view",
+                "linkWeb": "https://kapriverconservancy.wordpress.com"
             },
             "geometry": {
                 "coordinates": [
@@ -48,8 +62,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Kap River - Access Road",
-                "description": "From Port Alfred's side, follwo the R72 and then turn left towards the nature reserve just before the Great Fish River bridge.",
+                "name": "Kap River: Access Road",
+                "description": "From Port Alfred, follow the R72 and then turn left towards the nature reserve just before the Great Fish River bridge.",
                 "road": "access"
             },
             "geometry": {
@@ -117,22 +131,9 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Kap River"
-            },
-            "geometry": {
-                "coordinates": [
-                    27.08685039085583,
-                    -33.46650897870845
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Kap River - Loop",
-                "description": "Longer loop that can be driven.",
-                "road": "loop"
+                "name": "Kap River: Loop",
+                "description": "There is a longer loop that can be driven, going through the reserve and nearby farms.",
+                "road": "drive"
             },
             "geometry": {
                 "coordinates": [

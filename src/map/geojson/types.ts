@@ -9,13 +9,29 @@ type PolyStyle = LineStyle & {
     'fill-opacity'?: number;
 };
 
-type Info = {
+type BaseInfo = {
     name: string;
     description?: string;
-    road?: 'access' | 'birding' | 'loop';
-    document?: string;
-    pin?: string;
+}
+
+type LineInfo = {
+    road?: 'access' | 'birding' | 'drive';
+}
+
+type PolyInfo = {
+    linkDocument?: string;
+    linkMap?: string;
+    linkWeb?: string;
+}
+
+type PointInfo = {
     category?: 'spot';
 }
 
-export type FeatureProps = Info & LineStyle & PolyStyle;
+export type FeatureProps =
+    BaseInfo &
+    LineInfo &
+    PolyInfo &
+    PointInfo &
+    LineStyle &
+    PolyStyle;

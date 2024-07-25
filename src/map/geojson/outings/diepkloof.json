@@ -4,8 +4,22 @@
         {
             "type": "Feature",
             "properties": {
+                "name": "Diepkloof"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.517288634322767,
+                    -33.51883579404745
+                ],
+                "type": "Point"
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
                 "name": "Diepkloof",
-                "description": "Private farm that is sometimes made available to the club for outings."
+                "description": "A private farm that is sometimes made available to the club for outings.",
+                "linkMap": "https://maps.app.goo.gl/FH3pekk1jojoLZRW7"
             },
             "geometry": {
                 "coordinates": [
@@ -172,8 +186,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Diepkloof - Valley Trail",
-                "description": "From the house walk towards the dam and then along the valley.",
+                "name": "Diepkloof - Farm Trail",
+                "description": "From the house walk towards the dam and then across the farm.",
                 "road": "birding"
             },
             "geometry": {
@@ -312,19 +326,6 @@
                     ]
                 ],
                 "type": "LineString"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Diepkloof"
-            },
-            "geometry": {
-                "coordinates": [
-                    26.517288634322767,
-                    -33.51883579404745
-                ],
-                "type": "Point"
             }
         }
     ]

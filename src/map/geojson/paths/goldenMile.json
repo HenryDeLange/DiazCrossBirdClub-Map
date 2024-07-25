@@ -5,8 +5,8 @@
             "type": "Feature",
             "properties": {
                 "name": "Golden Mile",
-                "description": "Loop road through the cattle farms.",
-                "road": "loop"
+                "description": "Loop road through the cattle farms from Cannon Rocks/Boknes to Alexandria.",
+                "road": "drive"
             },
             "geometry": {
                 "coordinates": [

@@ -4,8 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Alexandria Forest - Office",
-                "description": "",
+                "name": "Alexandria Forest - Office Trail",
+                "description": "The area around the SANParks office can be good for birding. There is a day trail starting from the office, but you need to pay.",
                 "road": "birding"
             },
             "geometry": {
@@ -37,21 +37,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Alexandria Forest"
-            },
-            "geometry": {
-                "coordinates": [
-                    26.361009538956893,
-                    -33.70806728591378
-                ],
-                "type": "Point"
-            }
-        },
-        {
-            "type": "Feature",
-            "properties": {
-                "name": "Alexandria Forest - Road",
-                "description": "",
+                "name": "Alexandria Forest - Dirt Road",
+                "description": "Driving slowly (or walking) along the dirt road can deliver some interesting sightings.",
                 "road": "birding"
             },
             "geometry": {

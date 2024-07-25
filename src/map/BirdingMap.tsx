@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from 'react';
-import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, useMapEvents, ZoomControl } from 'react-leaflet';
 import { version } from '../../package.json';
 import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
 import { LocateControl } from './LocateControl';
@@ -14,6 +14,7 @@ import { spots } from './geojson/spots';
 import './map.css';
 
 export default function BirdingMap() {
+    // Fix height
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
     useEffect(() => {
         const updateDimensions = () => {
@@ -22,16 +23,33 @@ export default function BirdingMap() {
         window.addEventListener('resize', updateDimensions);
         return () => window.removeEventListener('resize', updateDimensions);
     }, []);
+    // Remember map position
+    const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
+    const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
+    const MapEvents = () => {
+        useMapEvents({
+            moveend: (e) => {
+                localStorage.setItem('mapCenter', JSON.stringify(e.target.getCenter()));
+                console.log('set center', e.target.getCenter())
+            },
+            zoomend: (e) => {
+                console.log('set zoom', e.target.getZoom())
+                localStorage.setItem('mapZoom', JSON.stringify(e.target.getZoom()));
+            },
+        });
+        return null;
+    };
+    // RENDER
     return (
         <MapContainer
-            center={startPosition}
-            zoom={11}
+            center={center}
+            zoom={zoom}
             scrollWheelZoom
             attributionControl={false}
             zoomControl={false}
             style={{ height: mapHeight }}
         >
-            <Logo />F
+            <Logo />
             <SpeciesListControl mapHeight={mapHeight} />
             <LocationsControl mapHeight={mapHeight} />
             <AttributionControl
@@ -84,6 +102,7 @@ export default function BirdingMap() {
                     </LayerGroup>
                 </LayersControl.Overlay>
             </LayersControl>
+            <MapEvents />
         </MapContainer>
     );
 }
