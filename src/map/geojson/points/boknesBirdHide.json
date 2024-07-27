@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Boknes Bird Hide",
+                "description": "Not great, but it exists.",
+                "category": "spot"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.579032004220466,
+                    -33.7237490004401
+                ],
+                "type": "Point"
+            },
+            "id": 0
+        }
+    ]
+}

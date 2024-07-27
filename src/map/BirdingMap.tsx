@@ -30,10 +30,8 @@ export default function BirdingMap() {
         useMapEvents({
             moveend: (e) => {
                 localStorage.setItem('mapCenter', JSON.stringify(e.target.getCenter()));
-                console.log('set center', e.target.getCenter())
             },
             zoomend: (e) => {
-                console.log('set zoom', e.target.getZoom())
                 localStorage.setItem('mapZoom', JSON.stringify(e.target.getZoom()));
             },
         });

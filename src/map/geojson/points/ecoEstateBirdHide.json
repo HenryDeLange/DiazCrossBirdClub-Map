@@ -1,0 +1,21 @@
+{
+    "type": "FeatureCollection",
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "name": "Eco Estate Bird Hide",
+                "description": "The Kenton Eco Estate Bird Hide.",
+                "category": "spot"
+            },
+            "geometry": {
+                "coordinates": [
+                    26.698706909338682,
+                    -33.66573842290036
+                ],
+                "type": "Point"
+            },
+            "id": 0
+        }
+    ]
+}
