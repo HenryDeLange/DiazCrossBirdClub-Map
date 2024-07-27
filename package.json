@@ -2,7 +2,7 @@
 	"name": "dcbc-map",
 	"license": "MIT",
 	"private": true,
-	"version": "0.1.8",
+	"version": "0.1.9",
 	"scripts": {
 		"dev": "vite --open --host",
 		"build": "vite build",
