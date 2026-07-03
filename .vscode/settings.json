@@ -1,5 +1,4 @@
 {
-    "css.validate": false,
     "diffEditor.ignoreTrimWhitespace": false,
     "editor.codeActionsOnSave": [
         "source.addMissingImports",
@@ -11,17 +10,6 @@
     },
     "files.watcherExclude": {
         "**/dist": true
-    },
-    "stylelint.validate": [
-        "css"
-    ],
-    "typescript.disableAutomaticTypeAcquisition": true,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "vscode.typescript-language-features"
-    },
-    "[css]": {
-        "editor.defaultFormatter": "vscode.css-language-features"
     },
     "cSpell.words": [
         "Addo",

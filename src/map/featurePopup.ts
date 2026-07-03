@@ -1,6 +1,6 @@
 import * as geojson from 'geojson';
 import { Layer } from 'leaflet';
-import { FeatureProps } from './geojson/types';
+import type { FeatureProps } from './geojson/types';
 
 export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer) {
     if (feature.geometry.type !== 'Point' || (feature.geometry.type === 'Point' && feature.properties.category === 'spot')) {

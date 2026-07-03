@@ -1,64 +1,88 @@
-/// <reference types="vitest" />
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
+import compressionPlugin from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import svgr from 'vite-plugin-svgr';
+import packageJson from './package.json' with { type: 'json' };
+const { version } = packageJson;
+const compression = compressionPlugin as unknown as (options?: Record<string, unknown>) => any;
 
-export default defineConfig(({ mode }) => ({
-    base: '',
-    test: {
-        css: false,
-        include: ['src/**/__tests__/*'],
-        globals: true,
-        environment: 'jsdom',
-        setupFiles: 'src/setupTests.ts',
-        clearMocks: true,
-        coverage: {
-            include: ['src/**/*'],
-            exclude: ['src/main.tsx'],
-            thresholds: {
-                100: true
-            },
-            provider: 'istanbul',
-            enabled: true,
-            reporter: ['text', 'lcov'],
-            reportsDirectory: 'coverage'
+export default defineConfig({
+  define: {
+    VITE_APP_VERSION: JSON.stringify(version)
+  },
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] }),
+    svgr(),
+    visualizer(),
+    compression({
+      algorithm: 'brotliCompress',
+      ext: '.br'
+    }),
+    VitePWA({
+      devOptions: {
+        enabled: true
+      },
+      registerType: 'autoUpdate',
+      strategies: 'generateSW',
+      manifest: {
+        name: 'Diaz Cross Bird Club Map',
+        short_name: 'DCBC Map',
+        description: 'Diaz Cross Bird Club map of birding spots.',
+        theme_color: 'rgb(0, 0, 0)',
+        icons: [
+          {
+            src: 'pwa-64x64.png',
+            sizes: '64x64',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png'
+          },
+          {
+            src: 'maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
+          }
+        ],
+        background_color: 'rgb(0, 0, 0)',
+        display: 'standalone',
+        launch_handler: {
+          client_mode: [
+            'focus-existing',
+            'auto'
+          ]
         }
-    },
-    plugins: [
-        tsconfigPaths(),
-        react(),
-        ...(mode === 'test'
-            ? []
-            : [
-                VitePWA({
-                    registerType: 'autoUpdate',
-                    includeAssets: [
-                        'favicon.png',
-                        'robots.txt',
-                        'apple-touch-icon.png',
-                        'icons/*.svg',
-                        'fonts/*.woff2'
-                    ],
-                    manifest: {
-                        name: 'Diaz Cross Bird Club Map',
-                        short_name: 'DCBC Map',
-                        theme_color: '#52a339',
-                        icons: [
-                            {
-                                src: '/android-chrome-192x192.png',
-                                sizes: '192x192',
-                                type: 'image/png',
-                                purpose: 'any maskable'
-                            },
-                            {
-                                src: '/android-chrome-512x512.png',
-                                sizes: '512x512',
-                                type: 'image/png'
-                            }
-                        ]
-                    }
-                })
-            ])
-    ]
-}));
+      }
+    })
+  ],
+  // build: {
+  //       rolldownOptions: {
+  //           output: {
+  //               codeSplitting: {
+  //                   groups: [
+  //                       {
+  //                           name: 'react',
+  //                           test: /node_modules\/(react|react-dom)/,
+  //                       },
+  //                       {
+  //                           name: 'routing',
+  //                           test: /node_modules\/(react-error-boundary|@tanstack\/react-router|@tanstack\/router)/,
+  //                       }
+  //                   ]
+  //               }
+  //           }
+  //       }
+  //   }
+})

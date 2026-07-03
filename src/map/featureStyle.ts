@@ -1,5 +1,5 @@
-import { StyleFunction } from 'leaflet';
-import { FeatureProps } from './geojson/types';
+import type { StyleFunction } from 'leaflet';
+import type { FeatureProps } from './geojson/types';
 
 export const styleFunction: StyleFunction<FeatureProps> = (feature) => {
     return {

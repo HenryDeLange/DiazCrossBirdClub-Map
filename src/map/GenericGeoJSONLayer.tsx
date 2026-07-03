@@ -1,8 +1,8 @@
 import type { GeoJsonObject } from 'geojson';
-import { pointToLayerShowText } from 'map/featureAsTextMarker';
-import { onEachFeatureShowPopup } from 'map/featurePopup';
-import { styleFunction } from 'map/featureStyle';
 import { GeoJSON } from 'react-leaflet';
+import { pointToLayerShowText } from './featureAsTextMarker';
+import { onEachFeatureShowPopup } from './featurePopup';
+import { styleFunction } from './featureStyle';
 
 type Props = {
     layer: GeoJsonObject;

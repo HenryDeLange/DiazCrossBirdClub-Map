@@ -1,19 +1,15 @@
 import type { ReactElement } from 'react';
 
-interface Properties {
+type Props = {
     error?: Error;
 }
 
-export default function LoadingOrError({ error }: Readonly<Properties>): ReactElement {
+export function LoadingOrError({ error }: Props): ReactElement {
     return (
-        <div className='flex min-h-screen items-center justify-center'>
-            <h1 className='text-xl' data-testid='LoadingOrError'>
+        <div>
+            <h1>
                 {error ? error.message : 'Loading...'}
             </h1>
         </div>
     );
 }
-
-LoadingOrError.defaultProps = {
-    error: undefined,
-};

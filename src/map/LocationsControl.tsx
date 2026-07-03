@@ -1,12 +1,12 @@
-import type { FeatureCollection, Geometry } from 'geojson';
-import { MouseEventHandler, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import { FaInfo } from 'react-icons/fa';
+import type { Feature, FeatureCollection, Geometry } from 'geojson';
+import { Info } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type MouseEventHandler, type ReactNode } from 'react';
 import { useMap } from 'react-leaflet';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
 import { spots } from './geojson/spots';
-import { FeatureProps } from './geojson/types';
+import type { FeatureProps } from './geojson/types';
 
 type Props = {
     mapHeight: number;
@@ -49,7 +49,7 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
         window.addEventListener('resize', updateHeight);
         updateHeight();
         return () => window.removeEventListener('resize', updateHeight);
-    }, [showModal, modalHeadingRef.current, mapHeight]);
+    }, [showModal, mapHeight]);
 
     const tabs = [
         { label: 'Outings', content: <FeatureDetails geojson={outings} /> },
@@ -60,21 +60,21 @@ export function LocationsControl({ mapHeight }: Readonly<Props>) {
 
     return (
         <>
-            <button className='locations-button' onClick={handleClick} title='Birding Locations'>
-                <FaInfo className='locations-button-image m-1' size={'2rem'} />
+            <button onClick={handleClick} title='Birding Locations'>
+                <Info size={'2rem'} />
             </button>
             {showModal && (
-                <div className='fixed inset-0 bg-gray-900 bg-opacity-75' style={{ zIndex: 999999999 }}>
-                    <div className='modal-container w-full h-full px-4 pt-4'>
-                        <div className='bg-white rounded-t-lg p-4 text-black w-full h-full max-h-full'>
-                            <div ref={modalHeadingRef} className='flex justify-between items-center pb-2'>
+                <div style={{ zIndex: 999999999 }}>
+                    <div>
+                        <div>
+                            <div ref={modalHeadingRef}>
                                 <div>
-                                    <p className='text-2xl font-bold'>
+                                    <p>
                                         Birding Locations
                                     </p>
                                 </div>
-                                <div className='flex justify-end pt-2'>
-                                    <button className='modal-close px-4 text-white bg-red-600 p-3 rounded-lg hover:bg-red-700 text-lg'
+                                <div>
+                                    <button
                                         onClick={handleClick}
                                     >
                                         CLOSE
@@ -102,19 +102,18 @@ function Tabs({ tabs, height }: TabProps) {
     const [activeTab, setActiveTab] = useState(tabs[0].label);
     return (
         <div>
-            <div className='flex border-b'>
+            <div>
                 {tabs.map((tab) => (
                     <button
                         key={tab.label}
-                        className={`text-xl font-bold px-4 -mb-px border-b-4 ${activeTab === tab.label ? 'border-red-500' : 'border-transparent'}`}
                         onClick={() => setActiveTab(tab.label)}
                     >
                         {tab.label}
                     </button>
                 ))}
             </div>
-            <div className='modal-content mt-2 overflow-y-auto' style={{ maxHeight: height }}>
-                <div className='p-4'>
+            <div style={{ maxHeight: height }}>
+                <div>
                     {tabs.map((tab) => activeTab === tab.label && (
                         <div key={tab.label}>{tab.content}</div>
                     ))}
@@ -132,31 +131,31 @@ function FeatureDetails({ geojson }: FeatureDetailsProps) {
     return (
         <>
             {geojson.map((geojsonObject, outingIndex) => (
-                <div key={outingIndex} className='mb-8'>
-                    {geojsonObject.features.map((feature, featureIndex) => {
+                <div key={outingIndex}>
+                    {geojsonObject.features.map((feature: Feature<Geometry, FeatureProps>, featureIndex: number) => {
                         if (feature.properties.description)
                             return (
-                                <div key={`${featureIndex}_${feature.properties.name}_${feature.id}`} className='mb-2'>
-                                    <div className={feature.geometry.type === 'Polygon' ? 'text-xl font-bold' : 'text-lg'}>
+                                <div key={`${featureIndex}_${feature.properties.name ?? 'feature'}_${feature.id ?? 'unknown'}`}>
+                                    <div>
                                         {feature.properties.name}
                                     </div>
-                                    <div className='text-base'>
+                                    <div>
                                         {feature.properties.description}
                                     </div>
                                     {feature.properties.linkMap &&
-                                        <a className='text-lg' href={feature.properties.linkMap} target='_blank'>Map Pin</a>
+                                        <a href={feature.properties.linkMap} target='_blank'>Map Pin</a>
                                     }
                                     {feature.properties.linkMap && feature.properties.linkDocument &&
-                                        <span className='text-xl'> | </span>
+                                        <span> | </span>
                                     }
                                     {feature.properties.linkDocument &&
-                                        <a className='text-lg' href={feature.properties.linkDocument} target='_blank'>Document</a>
+                                        <a href={feature.properties.linkDocument} target='_blank'>Document</a>
                                     }
                                     {((feature.properties.linkMap && feature.properties.linkWeb) || (feature.properties.linkDocument && feature.properties.linkWeb)) &&
-                                        <span className='text-xl'> | </span>
+                                        <span> | </span>
                                     }
                                     {feature.properties.linkWeb &&
-                                        <a className='text-lg' href={feature.properties.linkWeb} target='_blank'>Website</a>
+                                        <a href={feature.properties.linkWeb} target='_blank'>Website</a>
                                     }
                                 </div>
                             );
