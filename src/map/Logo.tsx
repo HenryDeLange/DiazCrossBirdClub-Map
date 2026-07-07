@@ -1,25 +1,25 @@
-import { useCallback, useState, type MouseEventHandler } from 'react';
+import type { MouseEvent } from 'react';
 
 export function Logo() {
-    const [expanded, setExpanded] = useState<boolean>(false);
-    const handleClick = useCallback<MouseEventHandler<HTMLButtonElement>>((event) => {
-        // TODO: Double-clicks still carry through to the map for some reason
+    const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
         event.stopPropagation();
-        setExpanded(!expanded);
-    }, [expanded]);
+    };
+
     return (
-        <button onClick={handleClick}>
-            <img alt='dcbc-logo' src='./logo.png' width={'75rem'} />
-            {expanded &&
-                <a href='https://sites.google.com/site/diazcrossbirdclub/home' target='_blank'>
-                    <div>
-                        Diaz Cross
-                    </div>
-                    <div>
-                        Bird Club
-                    </div>
-                </a>
-            }
-        </button>
+        <div className='logo-card'>
+            <a
+                className='logo-button'
+                href='https://www.diazcrossbirdclub.co.za'
+                target='_blank'
+                rel='noreferrer'
+                onClick={handleClick}
+            >
+                <img className='logo-image' alt='DCBC logo' src='/LOGO.png' />
+                <div className='logo-text'>
+                    <div className='logo-brand'>Diaz Cross</div>
+                    <div className='logo-subtitle'>Bird Club</div>
+                </div>
+            </a>
+        </div>
     );
 }
