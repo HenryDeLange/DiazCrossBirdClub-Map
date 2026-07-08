@@ -22,6 +22,8 @@ type PolyInfo = {
     linkDocument?: string;
     linkMap?: string;
     linkWeb?: string;
+    document?: string;
+    pin?: string;
 }
 
 type PointInfo = {

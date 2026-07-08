@@ -82,8 +82,8 @@ export function SpeciesListControl({ mapHeight, isOpen, onToggle, onClose }: Rea
                     >
                         <div className='drawer-header'>
                             <div>
-                                <div className='drawer-label'>Species list</div>
-                                <div className='drawer-title'>iNaturalist observations</div>
+                                <div className='drawer-label'>Species List</div>
+                                <div className='drawer-title'>iNaturalist Observations</div>
                             </div>
                             <button type='button' className='drawer-close drawer-close-large' onClick={onClose} aria-label='Close drawer'>
                                 <X className='drawer-close-icon' />

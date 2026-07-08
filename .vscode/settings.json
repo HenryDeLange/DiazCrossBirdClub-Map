@@ -26,6 +26,7 @@
         "locatecontrol",
         "Ngciyo",
         "stylelint",
-        "tailwindcss"
+        "tailwindcss",
+        "usehooks"
     ]
 }

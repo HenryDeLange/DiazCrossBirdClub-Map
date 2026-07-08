@@ -14,10 +14,10 @@ export function Logo() {
                 rel='noreferrer'
                 onClick={handleClick}
             >
-                <img className='logo-image' alt='DCBC logo' src='/LOGO.png' />
+                <img className='logo-image' alt='DCBC logo' src='/LOGO.jpg' />
                 <div className='logo-text'>
-                    <div className='logo-brand'>Diaz Cross</div>
-                    <div className='logo-subtitle'>Bird Club</div>
+                    <div>Diaz Cross</div>
+                    <div>Bird Club</div>
                 </div>
             </a>
         </div>

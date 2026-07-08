@@ -78,13 +78,6 @@ export default function BirdingMap() {
                         url={isDarkMode
                             ? 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}' // TODO: Need to use Google Maps API key for dark layer
                             : 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}'}
-                    maxZoom={maxZoom}
-                    subdomains={subdomains}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name='Google Maps - Satellite'>
-                    <TileLayer
-                        url='https://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}'
                         maxZoom={maxZoom}
                         subdomains={subdomains}
                     />
@@ -92,6 +85,13 @@ export default function BirdingMap() {
                 <LayersControl.BaseLayer name='Google Maps - Hybrid'>
                     <TileLayer
                         url='https://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}'
+                        maxZoom={maxZoom}
+                        subdomains={subdomains}
+                    />
+                </LayersControl.BaseLayer>
+                <LayersControl.BaseLayer name='Google Maps - Satellite'>
+                    <TileLayer
+                        url='https://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}'
                         maxZoom={maxZoom}
                         subdomains={subdomains}
                     />
