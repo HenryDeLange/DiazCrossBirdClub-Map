@@ -4,7 +4,7 @@ Birding spots map for the members of the [Diaz Cross Bird Club](https://www.diaz
 
 ## Live Website
 
-[https://dcbcmap.mywild.co.za/](https://dcbcmap.mywild.co.za/)
+[https://map.diazcrossbirdclub.co.za/](https://map.diazcrossbirdclub.co.za/)
 
 ## Development
 
