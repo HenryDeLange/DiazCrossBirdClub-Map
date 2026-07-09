@@ -1,7 +1,7 @@
 import * as geojson from 'geojson';
 import { DivIcon, LatLng, Layer, Marker } from 'leaflet';
 import { onEachFeatureShowPopup } from './featurePopup';
-import { FeatureProps } from './geojson/types';
+import type { FeatureProps } from './geojson/types';
 
 export function pointToLayerShowText(feature: geojson.Feature<geojson.Point, FeatureProps>, latlng: LatLng): Layer {
     if (feature.properties.category === 'spot') {

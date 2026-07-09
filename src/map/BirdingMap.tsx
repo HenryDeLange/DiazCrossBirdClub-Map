@@ -1,43 +1,49 @@
 
 import { useEffect, useState } from 'react';
-import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, useMapEvents, ZoomControl } from 'react-leaflet';
-import { version } from '../../package.json';
+import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
 import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
-import { LocateControl } from './LocateControl';
-import { LocationsControl } from './LocationsControl';
-import { Logo } from './Logo';
-import { SpeciesListControl } from './SpeciesListControl';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
 import { spots } from './geojson/spots';
+import { LocateControl } from './LocateControl';
+import { LocationsControl } from './LocationsControl';
+import { Logo } from './Logo';
 import './map.css';
+import { MapEvents } from './MapEvents';
+import { SpeciesListControl } from './SpeciesListControl';
+
+type OpenDrawer = 'inat' | 'locations' | null;
 
 export default function BirdingMap() {
-    // Fix height
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(null);
+
     useEffect(() => {
-        const updateDimensions = () => {
-            setMapHeight(window.innerHeight);
+        const updateDimensions = () => setMapHeight(window.innerHeight);
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+        const handleColorSchemeChange = (event: MediaQueryListEvent) => {
+            setIsDarkMode(event.matches);
         };
+
         window.addEventListener('resize', updateDimensions);
-        return () => window.removeEventListener('resize', updateDimensions);
+        mediaQuery.addEventListener('change', handleColorSchemeChange);
+
+        return () => {
+            window.removeEventListener('resize', updateDimensions);
+            mediaQuery.removeEventListener('change', handleColorSchemeChange);
+        };
     }, []);
-    // Remember map position
+
     const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
-    const MapEvents = () => {
-        useMapEvents({
-            moveend: (e) => {
-                localStorage.setItem('mapCenter', JSON.stringify(e.target.getCenter()));
-            },
-            zoomend: (e) => {
-                localStorage.setItem('mapZoom', JSON.stringify(e.target.getZoom()));
-            },
-        });
-        return null;
+
+    const toggleDrawer = (drawer: OpenDrawer) => {
+        setOpenDrawer((current) => (current === drawer ? null : drawer));
     };
-    // RENDER
+
     return (
         <MapContainer
             center={center}
@@ -48,19 +54,30 @@ export default function BirdingMap() {
             style={{ height: mapHeight }}
         >
             <Logo />
-            <SpeciesListControl mapHeight={mapHeight} />
-            <LocationsControl mapHeight={mapHeight} />
+            <SpeciesListControl
+                mapHeight={mapHeight}
+                isOpen={openDrawer === 'inat'}
+                onToggle={() => toggleDrawer('inat')}
+                onClose={() => setOpenDrawer(null)}
+            />
+            <LocationsControl
+                mapHeight={mapHeight}
+                isOpen={openDrawer === 'locations'}
+                onToggle={() => toggleDrawer('locations')}
+                onClose={() => setOpenDrawer(null)}
+            />
             <AttributionControl
                 position='bottomleft'
-                prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank'>v${version}</a> | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
+                prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank'>v${VITE_APP_VERSION}</a> | Google Maps | Leaflet | MyWild | Diaz Cross Bird Club`}
             />
-            <LocateControl />
             <ZoomControl position='bottomright' />
-
+            <LocateControl />
             <LayersControl position='topright'>
                 <LayersControl.BaseLayer name='Google Maps - Street' checked={true}>
                     <TileLayer
-                        url='https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}'
+                        url={isDarkMode
+                            ? 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}' // TODO: Need to use Google Maps API key for dark layer
+                            : 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}'}
                         maxZoom={maxZoom}
                         subdomains={subdomains}
                     />

@@ -1,21 +1,31 @@
 import * as geojson from 'geojson';
 import { Layer } from 'leaflet';
-import { FeatureProps } from './geojson/types';
+import type { FeatureProps } from './geojson/types';
 
 export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer) {
     if (feature.geometry.type !== 'Point' || (feature.geometry.type === 'Point' && feature.properties.category === 'spot')) {
+        const links: string[] = [];
+
+        if (feature.properties.linkMap) {
+            links.push(`<a class='popup-link' href='${feature.properties.linkMap}' target='_blank' rel='noreferrer'>Map pin</a>`);
+        }
+
+        if (feature.properties.linkDocument) {
+            links.push(`<a class='popup-link' href='${feature.properties.linkDocument}' target='_blank' rel='noreferrer'>Document</a>`);
+        }
+
+        if (feature.properties.linkWeb) {
+            links.push(`<a class='popup-link' href='${feature.properties.linkWeb}' target='_blank' rel='noreferrer'>Website</a>`);
+        }
+
+        const linkMarkup = links.length > 0 ? `<div class='popup-links'>${links.join('<span class="popup-separator">•</span>')}</div>` : '';
+
         layer.bindPopup(`
-            <div class='text-2xl font-semibold'>${feature.properties.name}</div>
-            <p class='text-lg'>${feature.properties.description ?? ''}</p>
-            <p>
-            ${feature.properties.linkMap ? `<a class='text-lg' href='${feature.properties.linkMap}' target='_blank'>Map Pin</a>` : ''}
-            ${(feature.properties.linkMap && feature.properties.linkDocument)
-                ? '<span class=\'text-xl\'> | </span>' : ''}
-            ${feature.properties.linkDocument ? `<a class='text-lg' href='${feature.properties.linkDocument}' target='_blank'>Document</a>` : ''}
-            ${((feature.properties.linkMap && feature.properties.linkWeb) || (feature.properties.linkDocument && feature.properties.linkWeb))
-                ? '<span class=\'text-xl\'> | </span>' : ''}
-            ${feature.properties.linkWeb ? `<a class='text-lg' href='${feature.properties.linkWeb}' target='_blank'>Website</a>` : ''}
-            </P>
+            <div class='popup-content'>
+                <div class='popup-title'>${feature.properties.name}</div>
+                <div class='popup-description'>${feature.properties.description ?? ''}</div>
+                ${linkMarkup}
+            </div>
         `);
     }
 }

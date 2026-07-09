@@ -1,5 +1,5 @@
 import type { FeatureCollection, Geometry } from 'geojson';
-import { FeatureProps } from '../types';
+import type { FeatureProps } from '../types';
 import boknesBirdHide from './boknesBirdHide.json';
 import bustards from './bustards.json';
 import eagleNest from './eagleNest.json';

@@ -1,5 +1,5 @@
 import type { FeatureCollection, Geometry } from 'geojson';
-import { FeatureProps } from '../types';
+import type { FeatureProps } from '../types';
 import assegaaiTrails from './assegaaiTrails.json';
 import diepkloof from './diepkloof.json';
 import hopeFarm from './hopeFarm.json';

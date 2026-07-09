@@ -1,5 +1,5 @@
 import type { FeatureCollection, Geometry } from 'geojson';
-import { FeatureProps } from '../types';
+import type { FeatureProps } from '../types';
 import boknesLagoon from './boknesLagoon.json';
 import capePadrone from './capePadrone.json';
 import diazDam from './diazDam.json';
