@@ -14,7 +14,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@types/geojson": "^7946.0.16",
     "geojson": "^0.5.0",
     "leaflet": "^1.9.4",
     "leaflet.locatecontrol": "^0.90.0",
@@ -29,6 +28,7 @@
     "@eslint/js": "^10.0.1",
     "@rolldown/plugin-babel": "^0.2.3",
     "@types/babel__core": "^7.20.5",
+    "@types/geojson": "^7946.0.16",
     "@types/leaflet": "^1.9.12",
     "@types/leaflet.locatecontrol": "^0.74.5",
     "@types/node": "^24.13.2",

@@ -90,7 +90,7 @@ export function SpeciesListControl({ mapHeight, isOpen, onToggle, onClose }: Rea
                             </button>
                         </div>
                         <div className='drawer-content'>
-                            <div className='drawer-panel-subtitle'>View the top species found in the visible map area.</div>
+                            <div className='drawer-panel-subtitle'>Species found in the visible map area.</div>
                             <div className='drawer-link-row'>
                                 <a
                                     className='drawer-link'

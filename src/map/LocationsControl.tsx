@@ -84,8 +84,7 @@ export function LocationsControl({ mapHeight, isOpen, onToggle, onClose }: Reado
                     >
                         <div className='drawer-header'>
                             <div>
-                                <div className='drawer-label'>Map Locations</div>
-                                <div className='drawer-title'>Birding Location Details</div>
+                                <div className='drawer-title'>Birding Locations</div>
                             </div>
                             <button type='button' className='drawer-close drawer-close-large' onClick={onClose} aria-label='Close drawer'>
                                 <X className='drawer-close-icon' />
@@ -141,17 +140,6 @@ function Tabs({ tabs, height }: TabProps) {
 
     return (
         <>
-            <div className='drawer-search-row'>
-                <Search className='drawer-search-icon' />
-                <input
-                    aria-label='Search locations'
-                    className='drawer-search-input'
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder='Search locations'
-                    type='search'
-                    value={searchQuery}
-                />
-            </div>
             {isMobile ? (
                 <div className='drawer-tab-select-row'>
                     <select
@@ -181,6 +169,17 @@ function Tabs({ tabs, height }: TabProps) {
                     ))}
                 </div>
             )}
+            <div className='drawer-search-row'>
+                <Search className='drawer-search-icon' />
+                <input
+                    aria-label='Search locations'
+                    className='drawer-search-input'
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder='Search locations'
+                    type='search'
+                    value={searchQuery}
+                />
+            </div>
             <div className='drawer-content' ref={contentRef} style={{ height }}>
                 {tabs.map((tab) => activeTab === tab.label && (
                     <div key={tab.label}>{tab.content(debouncedSearchQuery)}</div>
@@ -239,10 +238,9 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
                                     {hasHeading && heading && (
                                         <div className='location-group-header'>
                                             <div className='location-group-header-row'>
-                                                <div className='location-group-title'>{heading.properties.name}</div>
                                                 <button
                                                     type='button'
-                                                    className='location-card-nav'
+                                                    className='location-card-nav location-card-nav-title'
                                                     onClick={() => {
                                                         focusFeature(heading);
                                                         onClose();
@@ -252,6 +250,7 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
                                                 >
                                                     <MapPinSearch className='location-card-nav-icon' />
                                                 </button>
+                                                <div className='location-group-title'>{heading.properties.name}</div>
                                             </div>
                                             {heading.properties.description && (
                                                 <div className='location-group-description'>{heading.properties.description}</div>
@@ -288,29 +287,31 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
                                                                 <div className='location-group-item-description'>{feature.properties.description}</div>
                                                             )}
                                                             <div className='location-card-links'>
-                                                                {linkMap && (
-                                                                    <a href={linkMap} target='_blank' rel='noreferrer'>Map pin</a>
-                                                                )}
-                                                                {linkDocument && (
-                                                                    <a href={linkDocument} target='_blank' rel='noreferrer'>Document</a>
-                                                                )}
                                                                 {linkWeb && (
                                                                     <a href={linkWeb} target='_blank' rel='noreferrer'>Website</a>
                                                                 )}
+                                                                {linkMap && (
+                                                                    <a href={linkMap} target='_blank' rel='noreferrer'>Google Maps</a>
+                                                                )}
+                                                                {linkDocument && (
+                                                                    <a href={linkDocument} target='_blank' rel='noreferrer'>DCBC Doc</a>
+                                                                )}
                                                             </div>
                                                         </div>
-                                                        <button
-                                                            type='button'
-                                                            className='location-card-nav'
-                                                            onClick={() => {
-                                                                focusFeature(feature);
-                                                                onClose();
-                                                            }}
-                                                            aria-label={`Navigate to ${feature.properties.name}`}
-                                                            title={`Navigate to ${feature.properties.name}`}
-                                                        >
-                                                            <MapPinSearch className='location-card-nav-icon' />
-                                                        </button>
+                                                        <div>
+                                                            <button
+                                                                type='button'
+                                                                className='location-card-nav'
+                                                                onClick={() => {
+                                                                    focusFeature(feature);
+                                                                    onClose();
+                                                                }}
+                                                                aria-label={`Navigate to ${feature.properties.name}`}
+                                                                title={`Navigate to ${feature.properties.name}`}
+                                                            >
+                                                                <MapPinSearch className='location-card-nav-icon' />
+                                                            </button>
+                                                        </div>
                                                     </li>
                                                 );
                                             })}
