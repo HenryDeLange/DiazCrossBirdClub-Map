@@ -8,7 +8,7 @@ Birding spots map for the members of the [Diaz Cross Bird Club](https://www.diaz
 
 ## Development
 
- ### Useful Links
+### Useful Links
 
 - [Create GeoJSON](https://geojson.io/)
 - [React Leaflet](https://react-leaflet.js.org/)
