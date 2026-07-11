@@ -51,7 +51,7 @@ export default defineConfig({
                     {
                         // iNaturalist species count observations for the visible map area
                         urlPattern: /^https:\/\/api\.inaturalist\.org\/v1\/observations\/species_counts/,
-                        handler: 'StaleWhileRevalidate',
+                        handler: 'NetworkFirst',
                         options: {
                             cacheName: 'inat-species-counts',
                             networkTimeoutSeconds: 4,
