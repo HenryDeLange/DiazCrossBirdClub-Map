@@ -6,15 +6,18 @@ import { styleFunction } from './featureStyle';
 
 type Props = {
     layer: GeoJsonObject;
+    onTextMarkerClick?: (searchText: string) => void;
 }
 
-export function GenericGeoJSONLayer({ layer }: Readonly<Props>) {
+export function GenericGeoJSONLayer({ layer, onTextMarkerClick }: Readonly<Props>) {
     return (
         <GeoJSON
             data={layer}
             style={styleFunction}
             onEachFeature={onEachFeatureShowPopup}
-            pointToLayer={pointToLayerShowText}
+            pointToLayer={(feature, latlng) => pointToLayerShowText(feature, latlng, {
+                onTextMarkerClick: ({ searchText }) => onTextMarkerClick?.(searchText)
+            })}
         />
     );
 }

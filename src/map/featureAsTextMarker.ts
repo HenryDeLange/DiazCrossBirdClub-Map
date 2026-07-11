@@ -3,7 +3,19 @@ import { DivIcon, LatLng, Layer, Marker } from 'leaflet';
 import { onEachFeatureShowPopup } from './featurePopup';
 import type { FeatureProps } from './geojson/types';
 
-export function pointToLayerShowText(feature: geojson.Feature<geojson.Point, FeatureProps>, latlng: LatLng): Layer {
+type TextMarkerClickPayload = {
+    searchText: string;
+}
+
+type PointToLayerOptions = {
+    onTextMarkerClick?: (payload: TextMarkerClickPayload) => void;
+}
+
+export function pointToLayerShowText(
+    feature: geojson.Feature<geojson.Point, FeatureProps>,
+    latlng: LatLng,
+    options: PointToLayerOptions = {}
+): Layer {
     if (feature.properties.category === 'spot') {
         const divIcon = new DivIcon({
             html: feature.properties.name,
@@ -21,7 +33,11 @@ export function pointToLayerShowText(feature: geojson.Feature<geojson.Point, Fea
             iconSize: [350, 8]
         });
         const marker = new Marker(latlng, { icon: divIcon, zIndexOffset: 99999 });
-        marker.addEventListener('click', (event) => event.sourceTarget._map.setView([latlng.lat - 0.0025, latlng.lng], 16));
+        marker.addEventListener('click', () => {
+            if (feature.properties.name) {
+                options.onTextMarkerClick?.({ searchText: feature.properties.name });
+            }
+        });
         return marker;
     }
 }

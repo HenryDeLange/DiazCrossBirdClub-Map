@@ -1,9 +1,10 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { LatLngBounds, type LatLngExpression } from 'leaflet';
-import { Info, MapPinSearch, Search, X } from 'lucide-react';
+import { Info, MapPinSearch, X } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
+import { DrawerSearchField } from './DrawerSearchField';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
@@ -15,27 +16,21 @@ type Props = {
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
+    initialSearchQuery?: string;
+    initialTab?: string;
+    searchVersion?: number;
 }
 
-export function LocationsControl({ mapHeight, isOpen, onToggle, onClose }: Readonly<Props>) {
+export function LocationsControl({
+    mapHeight,
+    isOpen,
+    onToggle,
+    onClose,
+    initialSearchQuery,
+    initialTab,
+    searchVersion
+}: Readonly<Props>) {
     const map = useMap();
-    const [isMounted, setIsMounted] = useState(isOpen);
-    const [isClosing, setIsClosing] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            setIsMounted(true);
-            setIsClosing(false);
-        }
-        else if (isMounted) {
-            setIsClosing(true);
-            const timeout = window.setTimeout(() => {
-                setIsMounted(false);
-                setIsClosing(false);
-            }, 240);
-            return () => window.clearTimeout(timeout);
-        }
-    }, [isOpen, isMounted]);
 
     useEffect(() => {
         if (isOpen) {
@@ -51,7 +46,6 @@ export function LocationsControl({ mapHeight, isOpen, onToggle, onClose }: Reado
     }, [isOpen, map]);
 
     const drawerHeight = Math.min(mapHeight * 0.82, 780);
-    const showDrawer = isMounted || isOpen;
 
     const tabs = [
         { label: 'Outings', content: (searchQuery: string) => <FeatureDetails geojson={outings} searchQuery={searchQuery} onClose={onClose} /> },
@@ -75,10 +69,10 @@ export function LocationsControl({ mapHeight, isOpen, onToggle, onClose }: Reado
                     <Info className='button-icon' />
                 </button>
             </div>
-            {showDrawer && (
+            {isOpen && (
                 <div className={`drawer-backdrop ${isOpen ? 'drawer-backdrop-open' : 'drawer-backdrop-closing'}`} onClick={onClose}>
                     <div
-                        className={`drawer-panel ${isOpen ? 'drawer-open' : 'drawer-closed'} ${isClosing ? 'drawer-closing' : ''}`}
+                        className={`drawer-panel ${isOpen ? 'drawer-open' : 'drawer-closed'}`}
                         onClick={(event) => event.stopPropagation()}
                         style={{ height: drawerHeight, maxHeight: 'calc(100dvh - 1rem)' }}
                     >
@@ -90,7 +84,13 @@ export function LocationsControl({ mapHeight, isOpen, onToggle, onClose }: Reado
                                 <X className='drawer-close-icon' />
                             </button>
                         </div>
-                        <Tabs height={drawerHeight - 104} tabs={tabs} />
+                        <Tabs
+                            key={`locations-tabs-${searchVersion ?? 0}`}
+                            height={drawerHeight - 104}
+                            tabs={tabs}
+                            initialSearchQuery={initialSearchQuery}
+                            initialTab={initialTab}
+                        />
                     </div>
                 </div>
             )}
@@ -104,11 +104,15 @@ type TabProps = {
         content: (searchQuery: string) => ReactNode;
     }[];
     height: number;
+    initialSearchQuery?: string;
+    initialTab?: string;
 }
 
-function Tabs({ tabs, height }: TabProps) {
-    const [activeTab, setActiveTab] = useState(tabs[0].label);
-    const [searchQuery, setSearchQuery] = useState('');
+function Tabs({ tabs, height, initialSearchQuery, initialTab }: TabProps) {
+    const [activeTab, setActiveTab] = useState(
+        initialTab && locationTabNames.includes(initialTab) ? initialTab : tabs[0].label
+    );
+    const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
     const [debouncedSearchQuery] = useDebounceValue(searchQuery, 180);
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(max-width: 820px)').matches : false);
     const contentRef = useRef<HTMLDivElement | null>(null);
@@ -169,17 +173,12 @@ function Tabs({ tabs, height }: TabProps) {
                     ))}
                 </div>
             )}
-            <div className='drawer-search-row'>
-                <Search className='drawer-search-icon' />
-                <input
-                    aria-label='Search locations'
-                    className='drawer-search-input'
-                    onChange={(event) => setSearchQuery(event.target.value)}
-                    placeholder='Search locations'
-                    type='search'
-                    value={searchQuery}
-                />
-            </div>
+            <DrawerSearchField
+                ariaLabel='Search locations'
+                onChange={setSearchQuery}
+                placeholder='Search locations'
+                value={searchQuery}
+            />
             <div className='drawer-content' ref={contentRef} style={{ height }}>
                 {tabs.map((tab) => activeTab === tab.label && (
                     <div key={tab.label}>{tab.content(debouncedSearchQuery)}</div>
@@ -188,6 +187,8 @@ function Tabs({ tabs, height }: TabProps) {
         </>
     );
 };
+
+const locationTabNames = ['Outings', 'Spots', 'Paths', 'Points'];
 
 type FeatureDetailsProps = {
     geojson: FeatureCollection<Geometry, FeatureProps>[];

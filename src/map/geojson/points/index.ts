@@ -6,10 +6,12 @@ import eagleNest from './eagleNest.json';
 import ecoEstateBirdHide from './ecoEstateBirdHide.json';
 import owlNest from './owlNest.json';
 
-export const points: FeatureCollection<Geometry, FeatureProps>[] = [];
+type GeoCollection = FeatureCollection<Geometry, FeatureProps>;
 
-points.push(boknesBirdHide as any);
-points.push(bustards as any);
-points.push(eagleNest as any);
-points.push(ecoEstateBirdHide as any);
-points.push(owlNest as any);
+export const points: GeoCollection[] = [
+	boknesBirdHide as GeoCollection,
+	bustards as GeoCollection,
+	eagleNest as GeoCollection,
+	ecoEstateBirdHide as GeoCollection,
+	owlNest as GeoCollection
+];

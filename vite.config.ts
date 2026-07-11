@@ -1,13 +1,14 @@
 import babel from '@rolldown/plugin-babel';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig } from 'vite';
+import { defineConfig, type PluginOption } from 'vite';
 import compressionPlugin from 'vite-plugin-compression';
 import { VitePWA } from 'vite-plugin-pwa';
 import svgr from 'vite-plugin-svgr';
 import packageJson from './package.json' with { type: 'json' };
+
 const { version } = packageJson;
-const compression = compressionPlugin as unknown as (options?: Record<string, unknown>) => any;
+const compression = compressionPlugin as unknown as (options?: Record<string, unknown>) => PluginOption;
 
 export default defineConfig({
     define: {
