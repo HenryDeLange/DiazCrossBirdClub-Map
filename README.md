@@ -1,5 +1,8 @@
 # DiazCrossBirdClub-Map
 
+![App Version](https://img.shields.io/github/package-json/v/HenryDeLange/DiazCrossBirdClub-Map)
+![GitHub License](https://img.shields.io/github/license/HenryDeLange/DiazCrossBirdClub-Map)
+
 Birding spots map for the members of the [Diaz Cross Bird Club](https://www.diazcrossbirdclub.co.za).
 
 ## Live Website
