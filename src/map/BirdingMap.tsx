@@ -130,6 +130,24 @@ export default function BirdingMap() {
         }
     }, [openDrawer]);
 
+    useEffect(() => {
+        if (typeof window === 'undefined') {
+            return;
+        }
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && openDrawerRef.current !== null) {
+                setOpenDrawer(null);
+            }
+        };
+
+        window.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, []);
+
     return (
         <MapContainer
             center={center}
