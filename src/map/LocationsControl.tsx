@@ -219,10 +219,17 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
         }
     };
 
+    const allGroups = geojson.map((geojsonObject) => filterFeatureGroups(buildFeatureGroups(geojsonObject.features), normalizedQuery));
+    const hasAnyResults = allGroups.some((groups) => groups.length > 0);
+
+    if (!hasAnyResults) {
+        return <div className='drawer-empty'>No locations match your search.</div>;
+    }
+
     return (
         <>
             {geojson.map((geojsonObject, outingIndex) => {
-                const groups = filterFeatureGroups(buildFeatureGroups(geojsonObject.features), normalizedQuery);
+                const groups = allGroups[outingIndex];
 
                 if (groups.length === 0) {
                     return null;

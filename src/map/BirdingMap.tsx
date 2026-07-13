@@ -70,7 +70,24 @@ export default function BirdingMap() {
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
 
     const toggleDrawer = (drawer: OpenDrawer) => {
-        setOpenDrawer((current) => (current === drawer ? null : drawer));
+        setOpenDrawer((current) => {
+            if (current === drawer) {
+                if (drawer === 'locations') {
+                    setLocationSearchQuery('');
+                }
+                return null;
+            }
+            return drawer;
+        });
+    };
+
+    const closeDrawer = () => {
+        setOpenDrawer((current) => {
+            if (current === 'locations') {
+                setLocationSearchQuery('');
+            }
+            return null;
+        });
     };
 
     const handleTextMarkerClick = (searchText: string, tab: TabName) => {
@@ -100,6 +117,9 @@ export default function BirdingMap() {
         const onPopState = () => {
             if (openDrawerRef.current !== null) {
                 hasDrawerHistoryEntryRef.current = false;
+                if (openDrawerRef.current === 'locations') {
+                    setLocationSearchQuery('');
+                }
                 setOpenDrawer(null);
             }
         };
@@ -162,13 +182,13 @@ export default function BirdingMap() {
                 mapHeight={mapHeight}
                 isOpen={openDrawer === 'inat'}
                 onToggle={() => toggleDrawer('inat')}
-                onClose={() => setOpenDrawer(null)}
+                onClose={closeDrawer}
             />
             <LocationsControl
                 mapHeight={mapHeight}
                 isOpen={openDrawer === 'locations'}
                 onToggle={() => toggleDrawer('locations')}
-                onClose={() => setOpenDrawer(null)}
+                onClose={closeDrawer}
                 initialSearchQuery={locationSearchQuery}
                 initialTab={selectedLocationsTab}
                 searchVersion={locationSearchVersion}

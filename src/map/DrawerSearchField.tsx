@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 
 type Props = {
     ariaLabel: string;
@@ -19,6 +19,17 @@ export function DrawerSearchField({ ariaLabel, placeholder, value, onChange }: R
                 type='search'
                 value={value}
             />
+            {value && (
+                <button
+                    aria-label='Clear search'
+                    className='drawer-search-clear'
+                    onClick={() => onChange('')}
+                    title='Clear search'
+                    type='button'
+                >
+                    <X className='drawer-search-clear-icon' />
+                </button>
+            )}
         </div>
     );
 }

@@ -6,16 +6,16 @@ export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry
     if (feature.geometry.type !== 'Point' || (feature.geometry.type === 'Point' && feature.properties.category === 'spot')) {
         const links: string[] = [];
 
+        if (feature.properties.linkWeb) {
+            links.push(`<a class='popup-link' href='${feature.properties.linkWeb}' target='_blank' rel='noreferrer'>Website</a>`);
+        }
+
         if (feature.properties.linkMap) {
-            links.push(`<a class='popup-link' href='${feature.properties.linkMap}' target='_blank' rel='noreferrer'>Map pin</a>`);
+            links.push(`<a class='popup-link' href='${feature.properties.linkMap}' target='_blank' rel='noreferrer'>Google Maps</a>`);
         }
 
         if (feature.properties.linkDocument) {
-            links.push(`<a class='popup-link' href='${feature.properties.linkDocument}' target='_blank' rel='noreferrer'>Document</a>`);
-        }
-
-        if (feature.properties.linkWeb) {
-            links.push(`<a class='popup-link' href='${feature.properties.linkWeb}' target='_blank' rel='noreferrer'>Website</a>`);
+            links.push(`<a class='popup-link' href='${feature.properties.linkDocument}' target='_blank' rel='noreferrer'>DCBC Doc</a>`);
         }
 
         const linkMarkup = links.length > 0 ? `<div class='popup-links'>${links.join('<span class="popup-separator">•</span>')}</div>` : '';
