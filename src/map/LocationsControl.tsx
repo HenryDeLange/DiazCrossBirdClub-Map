@@ -228,7 +228,7 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
 
     return (
         <>
-            {geojson.map((geojsonObject, outingIndex) => {
+            {geojson.map((_geojsonObject, outingIndex) => {
                 const groups = allGroups[outingIndex];
 
                 if (groups.length === 0) {
