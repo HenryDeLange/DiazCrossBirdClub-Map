@@ -1,7 +1,7 @@
 import * as geojson from 'geojson';
 import { DivIcon, LatLng, Layer, Marker } from 'leaflet';
+import type { FeatureProps } from '../geojson/types';
 import { onEachFeatureShowPopup } from './featurePopup';
-import type { FeatureProps } from './geojson/types';
 
 type TextMarkerClickPayload = {
     searchText: string;

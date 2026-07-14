@@ -1,26 +1,23 @@
 
 import { useEffect, useRef, useState } from 'react';
-import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
-import { GenericGeoJSONLayer } from './GenericGeoJSONLayer';
+import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { LocateControl } from './controls/LocateControl';
+import { LocationsControl } from './controls/locations/LocationsControl';
+import { Logo } from './controls/logo/Logo';
+import { SpeciesListControl } from './controls/species/SpeciesListControl';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
 import { spots } from './geojson/spots';
-import { LocateControl } from './LocateControl';
-import { LocationsControl } from './LocationsControl';
+import { GenericGeoJSONLayer } from './layers/GenericGeoJSONLayer';
+import { getInitialLayerState, type LayerState } from './layers/layerState';
+import { LayerStateSync } from './layers/LayerStateSync';
 import type { LocationSource, LocationTabName } from './locationUtils';
 import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, setLocationPath } from './locationUtils';
-import { Logo } from './Logo';
 import './map.css';
 import { MapEvents } from './MapEvents';
-import { SpeciesListControl } from './SpeciesListControl';
 
 type OpenDrawer = 'inat' | 'locations' | null;
-
-type LayerState = {
-    baseLayer: string;
-    overlays: Record<string, boolean>;
-}
 
 const locationSources: LocationSource[] = [
     { tab: 'Outings', collections: outings },
@@ -40,26 +37,7 @@ export default function BirdingMap() {
     const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
     const warnedInitialLocationKeyRef = useRef('');
 
-    const [layerState, setLayerState] = useState<LayerState>(() => {
-        const raw = localStorage.getItem('mapLayerState');
-        if (!raw) {
-            return defaultLayerState;
-        }
-
-        try {
-            const parsed = JSON.parse(raw) as Partial<LayerState>;
-            return {
-                baseLayer: baseLayerNames.includes(String(parsed.baseLayer)) ? String(parsed.baseLayer) : defaultLayerState.baseLayer,
-                overlays: {
-                    ...defaultLayerState.overlays,
-                    ...(parsed.overlays ?? {})
-                }
-            };
-        }
-        catch {
-            return defaultLayerState;
-        }
-    });
+    const [layerState, setLayerState] = useState<LayerState>(getInitialLayerState);
 
     useEffect(() => {
         const updateDimensions = () => setMapHeight(window.innerHeight);
@@ -282,66 +260,6 @@ export default function BirdingMap() {
     );
 }
 
-type LayerStateSyncProps = {
-    onLayerStateChange: (updater: (current: LayerState) => LayerState) => void;
-}
-
-function LayerStateSync({ onLayerStateChange }: Readonly<LayerStateSyncProps>) {
-    const map = useMap();
-
-    useEffect(() => {
-        const handleBaseLayerChange = (event: { name?: string }) => {
-            if (!event.name) {
-                return;
-            }
-            onLayerStateChange((current) => ({
-                ...current,
-                baseLayer: event.name ?? current.baseLayer
-            }));
-        };
-
-        const handleOverlayAdd = (event: { name?: string }) => {
-            if (!event.name) {
-                return;
-            }
-            const name = event.name;
-            onLayerStateChange((current) => ({
-                ...current,
-                overlays: {
-                    ...current.overlays,
-                    [name]: true
-                }
-            }));
-        };
-
-        const handleOverlayRemove = (event: { name?: string }) => {
-            if (!event.name) {
-                return;
-            }
-            const name = event.name;
-            onLayerStateChange((current) => ({
-                ...current,
-                overlays: {
-                    ...current.overlays,
-                    [name]: false
-                }
-            }));
-        };
-
-        map.on('baselayerchange', handleBaseLayerChange);
-        map.on('overlayadd', handleOverlayAdd);
-        map.on('overlayremove', handleOverlayRemove);
-
-        return () => {
-            map.off('baselayerchange', handleBaseLayerChange);
-            map.off('overlayadd', handleOverlayAdd);
-            map.off('overlayremove', handleOverlayRemove);
-        };
-    }, [map, onLayerStateChange]);
-
-    return null;
-}
-
 const startPosition = {
     lat: -33.6,
     lng: 26.73
@@ -351,15 +269,4 @@ const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
 
 const maxZoom = 20;
 
-const baseLayerNames = ['Google Maps - Street', 'Google Maps - Hybrid', 'Google Maps - Satellite'];
-
-const defaultLayerState: LayerState = {
-    baseLayer: 'Google Maps - Street',
-    overlays: {
-        'Birding Loops': true,
-        'Birding Points of Interest': true,
-        'Birding Spots': true,
-        'Birding Outings': true
-    }
-};
 

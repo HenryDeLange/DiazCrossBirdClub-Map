@@ -1,4 +1,5 @@
 import { Search, X } from 'lucide-react';
+import styles from './DrawerSearchField.module.css';
 
 type Props = {
     ariaLabel: string;
@@ -9,11 +10,11 @@ type Props = {
 
 export function DrawerSearchField({ ariaLabel, placeholder, value, onChange }: Readonly<Props>) {
     return (
-        <div className='drawer-search-row'>
-            <Search className='drawer-search-icon' />
+        <div className={styles.searchRow}>
+            <Search className={styles.searchIcon} />
             <input
                 aria-label={ariaLabel}
-                className='drawer-search-input'
+                className={styles.searchInput}
                 onChange={(event) => onChange(event.target.value)}
                 placeholder={placeholder}
                 type='search'
@@ -22,12 +23,12 @@ export function DrawerSearchField({ ariaLabel, placeholder, value, onChange }: R
             {value && (
                 <button
                     aria-label='Clear search'
-                    className='drawer-search-clear'
+                    className={styles.searchClear}
                     onClick={() => onChange('')}
                     title='Clear search'
                     type='button'
                 >
-                    <X className='drawer-search-clear-icon' />
+                    <X className={styles.searchClearIcon} />
                 </button>
             )}
         </div>

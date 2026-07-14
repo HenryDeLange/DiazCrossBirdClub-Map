@@ -1,25 +1,26 @@
 import { useState } from 'react';
+import styles from './Logo.module.css';
 
 export function Logo() {
     const [isExpanded, setIsExpanded] = useState(false);
 
     return (
-        <div className='logo-card'>
-            <div className={`logo-button ${isExpanded ? 'logo-button-expanded' : ''}`}>
+        <div className={styles.logoCard}>
+            <div className={`${styles.logoButton} ${isExpanded ? styles.logoButtonExpanded : ''}`}>
                 <button
                     aria-expanded={isExpanded}
                     aria-label={isExpanded ? 'Collapse Diaz Cross Bird Club label' : 'Expand Diaz Cross Bird Club label'}
-                    className='logo-toggle'
+                    className={styles.logoToggle}
                     onClick={(event) => {
                         event.stopPropagation();
                         setIsExpanded((current) => !current);
                     }}
                     type='button'
                 >
-                    <img className='logo-image' alt='DCBC logo' src='/LOGO.jpg' />
+                    <img className={styles.logoImage} alt='DCBC logo' src='/LOGO.jpg' />
                 </button>
                 <a
-                    className='logo-text'
+                    className={styles.logoText}
                     href='https://www.diazcrossbirdclub.co.za'
                     target='_blank'
                     rel='noreferrer'

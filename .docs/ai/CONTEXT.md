@@ -6,7 +6,8 @@ DiazCrossBirdClub-Map is a Vite + React + TypeScript web app that shows birding 
 
 - Main app entry: `src/App.tsx` renders `src/map/BirdingMap.tsx`.
 - The map uses React Leaflet, Google tile layers, and localStorage for saved map state.
-- Core UI controls live in `src/map/` and include location search, species search, locate control, and drawer panels.
+- Core UI controls are organized under `src/map/controls/` (for example `locations/`, `species/`, `logo/`, and `LocateControl.tsx`) and use shared primitives from `src/map/components/` (for example drawer and control button components).
+- Reusable feature rendering logic is grouped under `src/map/features/`, and map layer components live under `src/map/layers/`.
 - GeoJSON data is grouped under `src/map/geojson/` by type: `outings`, `paths`, `points`, and `spots`.
 
 ## Useful commands
