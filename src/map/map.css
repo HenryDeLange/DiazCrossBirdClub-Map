@@ -632,8 +632,36 @@ a:active {
 
 .location-group-header-row {
     display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.location-group-header-main {
+    display: flex;
     align-items: center;
     gap: 0.75rem;
+    min-width: 0;
+}
+
+.location-category-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 2.4rem;
+    height: 2.4rem;
+    border: 1px solid var(--control-border);
+    border-radius: 20%;
+    background: var(--drawer-card);
+    color: var(--drawer-muted);
+}
+
+.location-group-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
 }
 
 .location-group-title {
@@ -697,6 +725,19 @@ a:active {
 .location-card-nav-icon {
     width: 1rem;
     height: 1rem;
+}
+
+.location-card-nav-image {
+    width: 1rem;
+    height: 1rem;
+    object-fit: contain;
+    filter: saturate(0.01) brightness(0.5);
+}
+
+@media (prefers-color-scheme: dark) {
+    .location-card-nav-image {
+        filter: saturate(0.01) brightness(1.35);
+    }
 }
 
 .location-card-description {

@@ -1,23 +1,28 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
-import { LatLngBounds, type LatLngExpression } from 'leaflet';
-import { Info, MapPinSearch, X } from 'lucide-react';
+import { Binoculars, Footprints, Info, MapPin, MapPinSearch, Route, Share2, Telescope, X, type LucideIcon } from 'lucide-react';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
+import inatLogo from '../assets/inat-logo.png';
 import { DrawerSearchField } from './DrawerSearchField';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
 import { spots } from './geojson/spots';
 import type { FeatureProps } from './geojson/types';
+import { findLocationGroupByName, focusLocationGroup, getLocationUrl } from './locationUtils';
 
 type Props = {
     mapHeight: number;
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
+    onOpenInat: () => void;
+    onLocationSelected: (locationName: string) => void;
+    onSearchCleared: () => void;
     initialSearchQuery?: string;
     initialTab?: string;
+    initialFocusQuery?: string;
     searchVersion?: number;
 }
 
@@ -26,8 +31,12 @@ export function LocationsControl({
     isOpen,
     onToggle,
     onClose,
+    onOpenInat,
+    onLocationSelected,
+    onSearchCleared,
     initialSearchQuery,
     initialTab,
+    initialFocusQuery,
     searchVersion
 }: Readonly<Props>) {
     const map = useMap();
@@ -48,10 +57,10 @@ export function LocationsControl({
     const drawerHeight = Math.min(mapHeight * 0.82, 780);
 
     const tabs = [
-        { label: 'Outings', content: (searchQuery: string) => <FeatureDetails geojson={outings} searchQuery={searchQuery} onClose={onClose} /> },
-        { label: 'Spots', content: (searchQuery: string) => <FeatureDetails geojson={spots} searchQuery={searchQuery} onClose={onClose} /> },
-        { label: 'Paths', content: (searchQuery: string) => <FeatureDetails geojson={paths} searchQuery={searchQuery} onClose={onClose} /> },
-        { label: 'Points', content: (searchQuery: string) => <FeatureDetails geojson={points} searchQuery={searchQuery} onClose={onClose} /> }
+        { label: 'Outings', content: (searchQuery: string) => <FeatureDetails geojson={outings} searchQuery={searchQuery} onClose={onClose} onOpenInat={onOpenInat} onLocationSelected={onLocationSelected} initialFocusQuery={initialFocusQuery} tabLabel='Outings' /> },
+        { label: 'Spots', content: (searchQuery: string) => <FeatureDetails geojson={spots} searchQuery={searchQuery} onClose={onClose} onOpenInat={onOpenInat} onLocationSelected={onLocationSelected} initialFocusQuery={initialFocusQuery} tabLabel='Spots' /> },
+        { label: 'Paths', content: (searchQuery: string) => <FeatureDetails geojson={paths} searchQuery={searchQuery} onClose={onClose} onOpenInat={onOpenInat} onLocationSelected={onLocationSelected} initialFocusQuery={initialFocusQuery} tabLabel='Paths' /> },
+        { label: 'Points', content: (searchQuery: string) => <FeatureDetails geojson={points} searchQuery={searchQuery} onClose={onClose} onOpenInat={onOpenInat} onLocationSelected={onLocationSelected} initialFocusQuery={initialFocusQuery} tabLabel='Points' /> }
     ];
 
     return (
@@ -90,6 +99,7 @@ export function LocationsControl({
                             tabs={tabs}
                             initialSearchQuery={initialSearchQuery}
                             initialTab={initialTab}
+                            onSearchCleared={onSearchCleared}
                         />
                     </div>
                 </div>
@@ -106,9 +116,10 @@ type TabProps = {
     height: number;
     initialSearchQuery?: string;
     initialTab?: string;
+    onSearchCleared: () => void;
 }
 
-function Tabs({ tabs, height, initialSearchQuery, initialTab }: TabProps) {
+function Tabs({ tabs, height, initialSearchQuery, initialTab, onSearchCleared }: TabProps) {
     const [activeTab, setActiveTab] = useState(
         initialTab && locationTabNames.includes(initialTab) ? initialTab : tabs[0].label
     );
@@ -141,6 +152,16 @@ function Tabs({ tabs, height, initialSearchQuery, initialTab }: TabProps) {
             contentRef.current.scrollTop = 0;
         }
     }, [activeTab, debouncedSearchQuery]);
+
+    const previousSearchQueryRef = useRef(searchQuery);
+
+    useEffect(() => {
+        if (previousSearchQueryRef.current.trim() && !searchQuery.trim()) {
+            onSearchCleared();
+        }
+
+        previousSearchQueryRef.current = searchQuery;
+    }, [onSearchCleared, searchQuery]);
 
     return (
         <>
@@ -194,6 +215,10 @@ type FeatureDetailsProps = {
     geojson: FeatureCollection<Geometry, FeatureProps>[];
     searchQuery: string;
     onClose: () => void;
+    onOpenInat: () => void;
+    onLocationSelected: (locationName: string) => void;
+    initialFocusQuery?: string;
+    tabLabel: string;
 }
 
 type FeatureGroup = {
@@ -201,23 +226,26 @@ type FeatureGroup = {
     items: Array<{ feature: Feature<Geometry, FeatureProps>; featureIndex: number }>;
 }
 
-function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) {
+function FeatureDetails({ geojson, searchQuery, onClose, onOpenInat, onLocationSelected, initialFocusQuery, tabLabel }: FeatureDetailsProps) {
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
+    const hasHandledInitialFocus = useRef(false);
 
-    const focusFeature = (feature: Feature<Geometry, FeatureProps>) => {
-        if (feature.geometry.type === 'Point') {
-            const [lng, lat] = feature.geometry.coordinates;
-            map.flyTo([lat, lng], Math.max(map.getZoom(), 15), { duration: 0.8 });
+    useEffect(() => {
+        if (!initialFocusQuery || hasHandledInitialFocus.current) {
             return;
         }
 
-        const bounds = getFeatureBounds(feature.geometry);
+        const locationGroup = findLocationGroupByName(geojson, initialFocusQuery);
+        hasHandledInitialFocus.current = true;
 
-        if (bounds) {
-            map.fitBounds(bounds, { padding: [28, 28], maxZoom: 16 });
+        if (!locationGroup) {
+            console.warn(`No location matched path: ${initialFocusQuery}`);
+            return;
         }
-    };
+
+        focusLocationGroup(map, locationGroup.heading, locationGroup.items);
+    }, [geojson, initialFocusQuery, map]);
 
     const allGroups = geojson.map((geojsonObject) => filterFeatureGroups(buildFeatureGroups(geojsonObject.features), normalizedQuery));
     const hasAnyResults = allGroups.some((groups) => groups.length > 0);
@@ -246,19 +274,52 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
                                     {hasHeading && heading && (
                                         <div className='location-group-header'>
                                             <div className='location-group-header-row'>
-                                                <button
-                                                    type='button'
-                                                    className='location-card-nav location-card-nav-title'
-                                                    onClick={() => {
-                                                        focusFeature(heading);
-                                                        onClose();
-                                                    }}
-                                                    aria-label={`Navigate to ${heading.properties.name}`}
-                                                    title={`Navigate to ${heading.properties.name}`}
-                                                >
-                                                    <MapPinSearch className='location-card-nav-icon' />
-                                                </button>
-                                                <div className='location-group-title'>{heading.properties.name}</div>
+                                                <div className='location-group-header-main'>
+                                                    <span className='location-category-badge' title={`${tabLabel} category`}>
+                                                        <PrimaryCategoryIcon tabLabel={tabLabel} />
+                                                    </span>
+                                                    <div className='location-group-title'>{heading.properties.name}</div>
+                                                </div>
+                                                <div className='location-group-header-actions'>
+                                                    <button
+                                                        type='button'
+                                                        className='location-card-nav location-card-nav-inat'
+                                                        onClick={() => {
+                                                            onLocationSelected(heading.properties.name);
+                                                            map.once('moveend', () => onOpenInat());
+                                                            focusLocationGroup(map, heading, group.items);
+                                                        }}
+                                                        aria-label={`Open iNaturalist observations near ${heading.properties.name}`}
+                                                        title='Open iNaturalist observations'
+                                                    >
+                                                        <img className='location-card-nav-image' alt='iNaturalist' src={inatLogo} />
+                                                    </button>
+                                                    <button
+                                                        type='button'
+                                                        className='location-card-nav'
+                                                        onClick={() => {
+                                                            onLocationSelected(heading.properties.name);
+                                                            void shareLocation(heading.properties.name);
+                                                        }}
+                                                        aria-label={`Share ${heading.properties.name}`}
+                                                        title='Share location'
+                                                    >
+                                                        <Share2 className='location-card-nav-icon' />
+                                                    </button>
+                                                    <button
+                                                        type='button'
+                                                        className='location-card-nav location-card-nav-title'
+                                                        onClick={() => {
+                                                            onLocationSelected(heading.properties.name);
+                                                            focusLocationGroup(map, heading, group.items);
+                                                            onClose();
+                                                        }}
+                                                        aria-label={`Navigate to ${heading.properties.name}`}
+                                                        title={`Navigate to ${heading.properties.name}`}
+                                                    >
+                                                        <MapPinSearch className='location-card-nav-icon' />
+                                                    </button>
+                                                </div>
                                             </div>
                                             {heading.properties.description && (
                                                 <div className='location-group-description'>{heading.properties.description}</div>
@@ -311,7 +372,7 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
                                                                 type='button'
                                                                 className='location-card-nav'
                                                                 onClick={() => {
-                                                                    focusFeature(feature);
+                                                                        focusLocationGroup(map, feature, []);
                                                                     onClose();
                                                                 }}
                                                                 aria-label={`Navigate to ${feature.properties.name}`}
@@ -334,7 +395,6 @@ function FeatureDetails({ geojson, searchQuery, onClose }: FeatureDetailsProps) 
         </>
     );
 }
-
 function buildFeatureGroups(features: Feature<Geometry, FeatureProps>[]): FeatureGroup[] {
     const namedFeatures = features.filter((feature) => feature.properties?.name);
     const headingIndex = namedFeatures.findIndex((feature) => feature.geometry.type === 'Point');
@@ -364,6 +424,19 @@ function buildFeatureGroups(features: Feature<Geometry, FeatureProps>[]): Featur
     });
 
     return groups;
+}
+
+function PrimaryCategoryIcon({ tabLabel }: { tabLabel: string }) {
+    const iconByTab: Record<string, LucideIcon> = {
+        Outings: Footprints,
+        Spots: Binoculars,
+        Paths: Route,
+        Points: Telescope
+    };
+
+    const Icon = iconByTab[tabLabel] ?? MapPin;
+
+    return <Icon className='location-card-nav-icon' aria-hidden='true' />;
 }
 
 function filterFeatureGroups(groups: FeatureGroup[], query: string): FeatureGroup[] {
@@ -409,49 +482,6 @@ function matchesQuery(feature: Feature<Geometry, FeatureProps> | null, query: st
     return searchableText.includes(query);
 }
 
-function getFeatureBounds(geometry: Geometry): LatLngBounds | null {
-    const points: LatLngExpression[] = [];
-    if (geometry.type === 'Point') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-    else if (geometry.type === 'MultiPoint') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-    else if (geometry.type === 'LineString') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-    else if (geometry.type === 'MultiLineString') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-    else if (geometry.type === 'Polygon') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-    else if (geometry.type === 'MultiPolygon') {
-        collectCoordinates(geometry.coordinates, points);
-    }
-
-    if (points.length === 0) {
-        return null;
-    }
-
-    const bounds = new LatLngBounds([]);
-    points.forEach((point) => bounds.extend(point));
-    return bounds;
-}
-
-function collectCoordinates(value: unknown, points: LatLngExpression[]): void {
-    if (!Array.isArray(value)) {
-        return;
-    }
-
-    if (value.length >= 2 && typeof value[0] === 'number' && typeof value[1] === 'number') {
-        points.push([value[1], value[0]] as LatLngExpression);
-        return;
-    }
-
-    value.forEach((child) => collectCoordinates(child, points));
-}
-
 function getFeatureLink(feature: Feature<Geometry, FeatureProps>, kind: 'map' | 'document' | 'web') {
     if (kind === 'map') {
         return feature.properties.linkMap ?? feature.properties.pin;
@@ -462,4 +492,30 @@ function getFeatureLink(feature: Feature<Geometry, FeatureProps>, kind: 'map' | 
     }
 
     return feature.properties.linkWeb;
+}
+
+function shareLocation(locationName: string) {
+    const shareUrl = getLocationUrl(locationName);
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        void navigator.clipboard.writeText(shareUrl).catch(() => undefined);
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+        const canShare = typeof navigator.canShare !== 'function' || navigator.canShare({ url: shareUrl });
+
+        if (canShare) {
+            return navigator.share({
+                title: locationName,
+                text: `Birding location: ${locationName}`,
+                url: shareUrl
+            }).catch(() => undefined);
+        }
+    }
+
+    if (typeof window !== 'undefined') {
+        window.prompt('Copy location link', shareUrl);
+    }
+
+    return Promise.resolve();
 }

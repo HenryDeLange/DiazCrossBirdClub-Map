@@ -8,25 +8,37 @@ import { points } from './geojson/points';
 import { spots } from './geojson/spots';
 import { LocateControl } from './LocateControl';
 import { LocationsControl } from './LocationsControl';
+import type { LocationSource, LocationTabName } from './locationUtils';
+import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, setLocationPath } from './locationUtils';
 import { Logo } from './Logo';
 import './map.css';
 import { MapEvents } from './MapEvents';
 import { SpeciesListControl } from './SpeciesListControl';
 
 type OpenDrawer = 'inat' | 'locations' | null;
-type TabName = 'Outings' | 'Spots' | 'Paths' | 'Points';
 
 type LayerState = {
     baseLayer: string;
     overlays: Record<string, boolean>;
 }
 
+const locationSources: LocationSource[] = [
+    { tab: 'Outings', collections: outings },
+    { tab: 'Spots', collections: spots },
+    { tab: 'Paths', collections: paths },
+    { tab: 'Points', collections: points }
+];
+
 export default function BirdingMap() {
+    const initialLocationKeys = getInitialLocationKeys();
+    const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
-    const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(null);
-    const [locationSearchQuery, setLocationSearchQuery] = useState('');
+    const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
+    const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
+    const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
+    const warnedInitialLocationKeyRef = useRef('');
 
     const [layerState, setLayerState] = useState<LayerState>(() => {
         const raw = localStorage.getItem('mapLayerState');
@@ -69,14 +81,21 @@ export default function BirdingMap() {
     const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
 
+    const closeLocationsDrawer = () => {
+        setLocationSearchQuery('');
+        setInitialFocusQuery('');
+        clearLocationPath();
+    };
+
     const toggleDrawer = (drawer: OpenDrawer) => {
         setOpenDrawer((current) => {
             if (current === drawer) {
                 if (drawer === 'locations') {
-                    setLocationSearchQuery('');
+                    closeLocationsDrawer();
                 }
                 return null;
             }
+
             return drawer;
         });
     };
@@ -84,22 +103,34 @@ export default function BirdingMap() {
     const closeDrawer = () => {
         setOpenDrawer((current) => {
             if (current === 'locations') {
-                setLocationSearchQuery('');
+                closeLocationsDrawer();
             }
             return null;
         });
     };
 
-    const handleTextMarkerClick = (searchText: string, tab: TabName) => {
+    const handleLocationSelected = (locationName: string) => {
+        setLocationSearchQuery(locationName);
+        setLocationSearchVersion((current) => current + 1);
+        setInitialFocusQuery('');
+        setLocationPath(locationName);
+    };
+
+    const handleLocationSearchCleared = () => {
+        closeLocationsDrawer();
+    };
+
+    const handleTextMarkerClick = (searchText: string, tab: LocationTabName) => {
         setLocationSearchQuery(searchText);
         setLocationSearchVersion((current) => current + 1);
+        setInitialFocusQuery('');
+        setLocationPath(searchText);
         setOpenDrawer('locations');
         setSelectedLocationsTab(tab);
     };
 
-    const [selectedLocationsTab, setSelectedLocationsTab] = useState<TabName>('Outings');
+    const [selectedLocationsTab, setSelectedLocationsTab] = useState<LocationTabName>(initialLocationSelection?.tab ?? 'Outings');
     const openDrawerRef = useRef<OpenDrawer>(openDrawer);
-    const hasDrawerHistoryEntryRef = useRef(false);
 
     useEffect(() => {
         openDrawerRef.current = openDrawer;
@@ -114,49 +145,11 @@ export default function BirdingMap() {
             return;
         }
 
-        const onPopState = () => {
-            if (openDrawerRef.current !== null) {
-                hasDrawerHistoryEntryRef.current = false;
-                if (openDrawerRef.current === 'locations') {
-                    setLocationSearchQuery('');
-                }
-                setOpenDrawer(null);
-            }
-        };
-
-        window.addEventListener('popstate', onPopState);
-
-        return () => {
-            window.removeEventListener('popstate', onPopState);
-        };
-    }, []);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        if (openDrawer !== null) {
-            if (!hasDrawerHistoryEntryRef.current) {
-                window.history.pushState({ mapDrawer: true }, '');
-                hasDrawerHistoryEntryRef.current = true;
-            }
-            return;
-        }
-
-        if (hasDrawerHistoryEntryRef.current) {
-            hasDrawerHistoryEntryRef.current = false;
-            window.history.back();
-        }
-    }, [openDrawer]);
-
-    useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape' && openDrawerRef.current !== null) {
+                if (openDrawerRef.current === 'locations') {
+                    closeLocationsDrawer();
+                }
                 setOpenDrawer(null);
             }
         };
@@ -167,6 +160,17 @@ export default function BirdingMap() {
             window.removeEventListener('keydown', onKeyDown);
         };
     }, []);
+
+    useEffect(() => {
+        const initialLocationKey = initialLocationKeys[0] ?? '';
+
+        if (!initialLocationKey || initialLocationSelection || warnedInitialLocationKeyRef.current === initialLocationKey) {
+            return;
+        }
+
+        warnedInitialLocationKeyRef.current = initialLocationKey;
+        console.warn(`No location matched path: ${initialLocationKey}`);
+    }, [initialLocationKeys, initialLocationSelection]);
 
     return (
         <MapContainer
@@ -189,8 +193,12 @@ export default function BirdingMap() {
                 isOpen={openDrawer === 'locations'}
                 onToggle={() => toggleDrawer('locations')}
                 onClose={closeDrawer}
+                onOpenInat={() => setOpenDrawer('inat')}
+                onLocationSelected={handleLocationSelected}
+                onSearchCleared={handleLocationSearchCleared}
                 initialSearchQuery={locationSearchQuery}
                 initialTab={selectedLocationsTab}
+                initialFocusQuery={initialFocusQuery || undefined}
                 searchVersion={locationSearchVersion}
             />
             <AttributionControl
@@ -354,3 +362,4 @@ const defaultLayerState: LayerState = {
         'Birding Outings': true
     }
 };
+
