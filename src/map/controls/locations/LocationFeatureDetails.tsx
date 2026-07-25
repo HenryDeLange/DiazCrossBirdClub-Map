@@ -5,8 +5,9 @@ import { useMap } from 'react-leaflet';
 import inatLogo from '../../../assets/inat-logo.png';
 import type { FeatureProps } from '../../geojson/types';
 import { findLocationGroupByName, focusLocationGroup } from '../../locationUtils';
-import { PrimaryCategoryIcon } from './PrimaryCategoryIcon';
+import { LocationAstronomySummary } from './LocationAstronomySummary';
 import { buildFeatureGroups, filterFeatureGroups, getFeatureLink } from './locationFeatureUtils';
+import { PrimaryCategoryIcon } from './PrimaryCategoryIcon';
 import { shareLocation } from './shareLocation';
 import type { FeatureDetailsProps } from './types';
 
@@ -17,7 +18,8 @@ export function LocationFeatureDetails({
     onOpenInat,
     onLocationSelected,
     initialFocusQuery,
-    tabLabel
+    tabLabel,
+    onOpenAstronomy
 }: Readonly<FeatureDetailsProps>) {
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -100,6 +102,16 @@ export function LocationFeatureDetails({
                                                     >
                                                         <Share2 className='location-card-nav-icon' />
                                                     </button>
+                                                    {heading.geometry.type === 'Point' && (
+                                                        <LocationAstronomySummary
+                                                            location={{
+                                                                name: heading.properties.name,
+                                                                latitude: heading.geometry.coordinates[1],
+                                                                longitude: heading.geometry.coordinates[0]
+                                                            }}
+                                                            onOpen={onOpenAstronomy}
+                                                        />
+                                                    )}
                                                     <button
                                                         type='button'
                                                         className='location-card-nav location-card-nav-title'

@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { AstraControl } from './controls/AstraControl';
 import { LocateControl } from './controls/LocateControl';
 import { LocationsControl } from './controls/locations/LocationsControl';
 import { Logo } from './controls/logo/Logo';
@@ -213,6 +214,7 @@ export default function BirdingMap() {
                 initialFocusQuery={initialFocusQuery || undefined}
                 searchVersion={locationSearchVersion}
             />
+            <AstraControl />
             <AttributionControl
                 position='bottomleft'
                 prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank' rel='noreferrer'>v${VITE_APP_VERSION}</a> | <a href='https://www.mywild.co.za' target='_blank' rel='noreferrer'>MyWild</a> | <a href='https://www.diazcrossbirdclub.co.za' target='_blank' rel='noreferrer'>DCBC</a> | Google Maps | Leaflet`}

@@ -16,6 +16,12 @@ export type LocationsControlProps = {
     searchVersion?: number;
 }
 
+export type AstronomyLocation = {
+    name: string;
+    latitude: number;
+    longitude: number;
+}
+
 export type FeatureGroup = {
     heading: Feature<Geometry, FeatureProps> | null;
     items: Array<{ feature: Feature<Geometry, FeatureProps>; featureIndex: number }>;
@@ -29,4 +35,5 @@ export type FeatureDetailsProps = {
     onLocationSelected: (locationName: string) => void;
     initialFocusQuery?: string;
     tabLabel: LocationTabName;
+    onOpenAstronomy: (location: AstronomyLocation) => void;
 }

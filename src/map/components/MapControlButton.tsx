@@ -13,6 +13,7 @@ export function MapControlButton({ groupClassName, buttonClassName, title, onCli
         <div className={`control-group ${groupClassName}`}>
             <button
                 className={`control-button ${buttonClassName}`}
+                aria-label={title}
                 onClick={(event) => {
                     event.stopPropagation();
                     onClick();

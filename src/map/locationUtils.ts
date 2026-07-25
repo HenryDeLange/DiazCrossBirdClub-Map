@@ -14,6 +14,8 @@ export type LocationSelection = {
     name: string;
 };
 
+const reservedAppPaths = new Set(['astra']);
+
 type FeatureGroupItem = {
     feature: Feature<Geometry, FeatureProps>;
 };
@@ -34,6 +36,10 @@ export function getBasePathname(): string {
     }
 
     return basePath.endsWith('/') ? basePath : `${basePath}/`;
+}
+
+export function getAstraPathname(): string {
+    return joinPath(getBasePathname(), 'astra');
 }
 
 export function getLocationPathname(locationName: string): string {
@@ -79,7 +85,13 @@ export function getInitialLocationKeys(): string[] {
     const pathSlug = getLocationSlugFromPathname(url.pathname);
     const queryValue = url.searchParams.get('location')?.trim() ?? '';
 
-    return [pathSlug, queryValue].filter((value): value is string => Boolean(value));
+    return [pathSlug, queryValue]
+        .filter((value): value is string => Boolean(value))
+        .filter((value) => !reservedAppPaths.has(slugifyLocationName(value)));
+}
+
+export function isAstraPath(pathname: string): boolean {
+    return reservedAppPaths.has(getLocationSlugFromPathname(pathname));
 }
 
 export function getLocationSlugFromPathname(pathname: string): string {

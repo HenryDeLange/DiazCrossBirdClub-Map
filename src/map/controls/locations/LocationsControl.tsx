@@ -1,6 +1,6 @@
 import { Info } from 'lucide-react';
 import type { ReactElement } from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { MapControlButton } from '../../components/MapControlButton';
 import { MapDrawer } from '../../components/MapDrawer';
@@ -8,10 +8,10 @@ import { outings } from '../../geojson/outings';
 import { paths } from '../../geojson/paths';
 import { points } from '../../geojson/points';
 import { spots } from '../../geojson/spots';
-import type { LocationTabName } from '../../locationUtils';
+import { getAstraPathname, type LocationTabName } from '../../locationUtils';
 import { LocationFeatureDetails } from './LocationFeatureDetails';
 import { LocationTabs } from './LocationTabs';
-import type { LocationsControlProps } from './types';
+import type { AstronomyLocation, LocationsControlProps } from './types';
 
 type LocationTab = {
     label: LocationTabName;
@@ -32,6 +32,7 @@ export function LocationsControl({
     searchVersion
 }: Readonly<LocationsControlProps>) {
     const map = useMap();
+    const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -60,6 +61,7 @@ export function LocationsControl({
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Outings'
+                    onOpenAstronomy={setAstronomyLocation}
                 />
             )
         },
@@ -74,6 +76,7 @@ export function LocationsControl({
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Spots'
+                    onOpenAstronomy={setAstronomyLocation}
                 />
             )
         },
@@ -88,6 +91,7 @@ export function LocationsControl({
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Paths'
+                    onOpenAstronomy={setAstronomyLocation}
                 />
             )
         },
@@ -102,6 +106,7 @@ export function LocationsControl({
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Points'
+                    onOpenAstronomy={setAstronomyLocation}
                 />
             )
         }
@@ -133,6 +138,29 @@ export function LocationsControl({
                     onSearchCleared={onSearchCleared}
                 />
             </MapDrawer>
+            <MapDrawer
+                isOpen={astronomyLocation !== null}
+                onClose={() => setAstronomyLocation(null)}
+                label='Sun & moon'
+                title={astronomyLocation?.name ?? 'Astronomy'}
+                height={Math.min(mapHeight * 0.9, 900)}
+                maxHeight='calc(100dvh - 1rem)'
+            >
+                {astronomyLocation && (
+                    <iframe
+                        className='astronomy-iframe'
+                        src={getAstronomyUrl(astronomyLocation)}
+                        title={`Sun and moon guide for ${astronomyLocation.name}`}
+                    />
+                )}
+            </MapDrawer>
         </>
     );
+}
+
+function getAstronomyUrl(location: AstronomyLocation): string {
+    const url = new URL(`${window.location.origin}${getAstraPathname()}`);
+    url.searchParams.set('lat', location.latitude.toString());
+    url.searchParams.set('lng', location.longitude.toString());
+    return url.toString();
 }
