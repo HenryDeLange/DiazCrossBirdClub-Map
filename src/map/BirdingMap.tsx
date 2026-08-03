@@ -1,9 +1,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, ZoomControl } from 'react-leaflet';
+import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
 import { AstraControl } from './controls/AstraControl';
 import { LocateControl } from './controls/LocateControl';
 import { LocationsControl } from './controls/locations/LocationsControl';
+import type { AstronomyLocation } from './controls/locations/types';
 import { Logo } from './controls/logo/Logo';
 import { SpeciesListControl } from './controls/species/SpeciesListControl';
 import { outings } from './geojson/outings';
@@ -18,7 +19,7 @@ import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, se
 import './map.css';
 import { MapEvents } from './MapEvents';
 
-type OpenDrawer = 'inat' | 'locations' | null;
+type OpenDrawer = 'inat' | 'locations' | 'astra' | null;
 
 const locationSources: LocationSource[] = [
     { tab: 'Outings', collections: outings },
@@ -31,8 +32,10 @@ export default function BirdingMap() {
     const initialLocationKeys = getInitialLocationKeys();
     const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
+    const [drawerHeight, setDrawerHeight] = useState(() => getDefaultDrawerHeight(window.innerHeight));
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
+    const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
     const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
@@ -40,6 +43,7 @@ export default function BirdingMap() {
 
     const [layerState, setLayerState] = useState<LayerState>(getInitialLayerState);
     const [selectedLocationsTab, setSelectedLocationsTab] = useState<LocationTabName>(initialLocationSelection?.tab ?? 'Outings');
+    const [drawerBackTarget, setDrawerBackTarget] = useState<OpenDrawer>(null);
     const openDrawerRef = useRef<OpenDrawer>(openDrawer);
     const drawerHistoryEntryRef = useRef(false);
 
@@ -60,6 +64,10 @@ export default function BirdingMap() {
         };
     }, []);
 
+    useEffect(() => {
+        setDrawerHeight((currentHeight) => clampDrawerHeight(currentHeight, mapHeight));
+    }, [mapHeight]);
+
     const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
 
@@ -75,17 +83,17 @@ export default function BirdingMap() {
         }
 
         setOpenDrawer(null);
+        setDrawerBackTarget(null);
     }, [closeLocationsDrawer]);
 
-    const toggleDrawer = (drawer: OpenDrawer) => {
+    const openNestedDrawer = (drawer: Exclude<OpenDrawer, null>) => {
         const current = openDrawerRef.current;
 
-        if (current === drawer) {
-            if (drawer === 'locations') {
-                closeLocationsDrawer();
-            }
-            setOpenDrawer(null);
-            return;
+        if (current === 'locations') {
+            setDrawerBackTarget('locations');
+        }
+        else {
+            setDrawerBackTarget(null);
         }
 
         if (current === null && typeof window !== 'undefined') {
@@ -96,6 +104,31 @@ export default function BirdingMap() {
         setOpenDrawer(drawer);
     };
 
+    const toggleDrawer = (drawer: OpenDrawer) => {
+        const current = openDrawerRef.current;
+
+        if (current === drawer) {
+            if (drawer === 'locations') {
+                closeLocationsDrawer();
+            }
+            setOpenDrawer(null);
+            setDrawerBackTarget(null);
+            return;
+        }
+
+        if (current === 'locations') {
+            closeLocationsDrawer();
+        }
+
+        if (current === null && typeof window !== 'undefined') {
+            window.history.pushState({ ...window.history.state, drawer }, '', window.location.href);
+            drawerHistoryEntryRef.current = true;
+        }
+
+        setOpenDrawer(drawer);
+        setDrawerBackTarget(null);
+    };
+
     const closeDrawer = useCallback(() => {
         closeOpenDrawerState();
 
@@ -103,6 +136,16 @@ export default function BirdingMap() {
             window.history.replaceState({ ...window.history.state, drawer: null }, '', window.location.href);
         }
     }, [closeOpenDrawerState]);
+
+    const handleDrawerBack = () => {
+        if (drawerBackTarget === null) {
+            closeDrawer();
+            return;
+        }
+
+        setOpenDrawer(drawerBackTarget);
+        setDrawerBackTarget(null);
+    };
 
     const handleLocationSelected = (locationName: string) => {
         setLocationSearchQuery(locationName);
@@ -113,6 +156,16 @@ export default function BirdingMap() {
 
     const handleLocationSearchCleared = () => {
         closeLocationsDrawer();
+    };
+
+    const handleOpenAstronomy = (location: AstronomyLocation, tab: LocationTabName) => {
+        setSelectedLocationsTab(tab);
+        setLocationSearchQuery(location.name);
+        setLocationSearchVersion((current) => current + 1);
+        setInitialFocusQuery('');
+        setLocationPath(location.name);
+        setAstronomyLocation(location);
+        openNestedDrawer('astra');
     };
 
     const handleTextMarkerClick = (searchText: string, tab: LocationTabName) => {
@@ -194,19 +247,27 @@ export default function BirdingMap() {
             zoomControl={false}
             style={{ height: mapHeight }}
         >
+            <DrawerInteractionLock isOpen={openDrawer !== null} />
             <Logo />
             <SpeciesListControl
-                mapHeight={mapHeight}
+                drawerHeight={drawerHeight}
+                onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'inat'}
                 onToggle={() => toggleDrawer('inat')}
                 onClose={closeDrawer}
+                onBack={openDrawer === 'inat' && drawerBackTarget !== null ? handleDrawerBack : undefined}
             />
             <LocationsControl
-                mapHeight={mapHeight}
+                drawerHeight={drawerHeight}
+                onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'locations'}
                 onToggle={() => toggleDrawer('locations')}
                 onClose={closeDrawer}
-                onOpenInat={() => setOpenDrawer('inat')}
+                onOpenInat={(tab) => {
+                    setSelectedLocationsTab(tab);
+                    openNestedDrawer('inat');
+                }}
+                onOpenAstronomy={handleOpenAstronomy}
                 onLocationSelected={handleLocationSelected}
                 onSearchCleared={handleLocationSearchCleared}
                 initialSearchQuery={locationSearchQuery}
@@ -214,7 +275,15 @@ export default function BirdingMap() {
                 initialFocusQuery={initialFocusQuery || undefined}
                 searchVersion={locationSearchVersion}
             />
-            <AstraControl />
+            <AstraControl
+                drawerHeight={drawerHeight}
+                onDrawerHeightChange={setDrawerHeight}
+                isOpen={openDrawer === 'astra'}
+                onToggle={() => toggleDrawer('astra')}
+                onClose={closeDrawer}
+                onBack={openDrawer === 'astra' && drawerBackTarget !== null ? handleDrawerBack : undefined}
+                coordinates={astronomyLocation}
+            />
             <AttributionControl
                 position='bottomleft'
                 prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank' rel='noreferrer'>v${VITE_APP_VERSION}</a> | <a href='https://www.mywild.co.za' target='_blank' rel='noreferrer'>MyWild</a> | <a href='https://www.diazcrossbirdclub.co.za' target='_blank' rel='noreferrer'>DCBC</a> | Google Maps | Leaflet`}
@@ -304,5 +373,41 @@ const startPosition = {
 const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
 
 const maxZoom = 20;
+
+const drawerMinHeight = 180;
+
+function getDefaultDrawerHeight(viewportHeight: number): number {
+    return clampDrawerHeight(Math.min(viewportHeight * 0.82, 780), viewportHeight);
+}
+
+function clampDrawerHeight(height: number, viewportHeight: number): number {
+    return Math.min(Math.max(height, drawerMinHeight), Math.max(drawerMinHeight, viewportHeight - 8));
+}
+
+function DrawerInteractionLock({ isOpen }: Readonly<{ isOpen: boolean }>) {
+    const map = useMap();
+
+    useEffect(() => {
+        const interactionMethods = [
+            map.dragging,
+            map.scrollWheelZoom,
+            map.doubleClickZoom,
+            map.touchZoom,
+            map.boxZoom,
+            map.keyboard
+        ];
+
+        interactionMethods.forEach((handler) => {
+            if (isOpen) {
+                handler.disable();
+            }
+            else {
+                handler.enable();
+            }
+        });
+    }, [isOpen, map]);
+
+    return null;
+}
 
 

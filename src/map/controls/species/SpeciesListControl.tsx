@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import inatLogo from '../../../assets/inat-logo.png';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
@@ -8,25 +8,11 @@ import { INatSpeciesCard } from './INatSpeciesCard';
 import type { SpeciesListControlProps } from './types';
 import { useSpeciesObservations } from './useSpeciesObservations';
 
-export function SpeciesListControl({ mapHeight, isOpen, onToggle, onClose }: Readonly<SpeciesListControlProps>) {
+export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack }: Readonly<SpeciesListControlProps>) {
     const map = useMap();
     const [searchInput, setSearchInput] = useState('');
     const { data, loading, reset } = useSpeciesObservations(map, isOpen);
 
-    useEffect(() => {
-        if (isOpen) {
-            map.dragging.disable();
-            map.scrollWheelZoom.disable();
-            map.doubleClickZoom.disable();
-        }
-        else {
-            map.dragging.enable();
-            map.scrollWheelZoom.enable();
-            map.doubleClickZoom.enable();
-        }
-    }, [isOpen, map]);
-
-    const drawerHeight = Math.min(mapHeight * 0.82, 780);
     const normalizedSearch = searchInput.trim().toLowerCase();
 
     const filteredResults = useMemo(() => {
@@ -69,9 +55,11 @@ export function SpeciesListControl({ mapHeight, isOpen, onToggle, onClose }: Rea
             <MapDrawer
                 isOpen={isOpen}
                 onClose={onClose}
+                onBack={onBack}
                 label='Species List'
                 title='iNaturalist Observations'
                 height={drawerHeight}
+                onHeightChange={onDrawerHeightChange}
             >
                 <div className='drawer-content'>
                     <div className='drawer-panel-subtitle'>

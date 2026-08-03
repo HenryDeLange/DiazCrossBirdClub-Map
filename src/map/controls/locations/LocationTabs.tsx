@@ -9,7 +9,6 @@ type LocationTabsProps = {
         label: LocationTabName;
         content: (searchQuery: string) => ReactNode;
     }[];
-    height: number;
     initialSearchQuery?: string;
     initialTab?: LocationTabName;
     onSearchCleared: () => void;
@@ -17,7 +16,7 @@ type LocationTabsProps = {
 
 const locationTabNames: LocationTabName[] = ['Outings', 'Spots', 'Paths', 'Points'];
 
-export function LocationTabs({ tabs, height, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
+export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
     const [activeTab, setActiveTab] = useState<LocationTabName>(
         initialTab && locationTabNames.includes(initialTab) ? initialTab : tabs[0].label
     );
@@ -45,6 +44,12 @@ export function LocationTabs({ tabs, height, initialSearchQuery, initialTab, onS
         mediaQuery.addListener(updateLayout);
         return () => mediaQuery.removeListener(updateLayout);
     }, []);
+
+    useEffect(() => {
+        if (initialTab && locationTabNames.includes(initialTab)) {
+            setActiveTab(initialTab);
+        }
+    }, [initialTab]);
 
     useEffect(() => {
         if (contentRef.current) {
@@ -97,7 +102,7 @@ export function LocationTabs({ tabs, height, initialSearchQuery, initialTab, onS
                 placeholder='Search locations'
                 value={searchQuery}
             />
-            <div className='drawer-content' ref={contentRef} style={{ height }}>
+            <div className='drawer-content' ref={contentRef}>
                 {tabs.map((tab) => activeTab === tab.label && (
                     <div key={tab.label}>{tab.content(debouncedSearchQuery)}</div>
                 ))}

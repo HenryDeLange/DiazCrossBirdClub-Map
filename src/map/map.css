@@ -191,18 +191,48 @@ a:active {
 
 /* Locate control styling */
 .leaflet-control-locate {
+    --locate-control-icon-color: var(--control-text);
+    --locate-control-active-color: var(--action-color);
     border: 2px solid var(--locate-border) !important;
     border-radius: 50% !important;
 }
 
 .leaflet-control-locate a {
+    display: grid !important;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
     background: var(--control-bg) !important;
     color: var(--control-text) !important;
     border-radius: 50% !important;
 }
 
-.leaflet-control-locate:hover .leaflet-locate-icon {
-    background-color: var(--action-color) !important;
+.leaflet-control-locate a .leaflet-locate-icon {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    background: transparent !important;
+    color: var(--locate-control-icon-color) !important;
+}
+
+.leaflet-control-locate a .leaflet-locate-icon svg {
+    display: block;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    color: inherit;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+.leaflet-control-locate:hover a,
+.leaflet-control-locate:focus-within a {
+    color: var(--action-color) !important;
+}
+
+.leaflet-control-locate-fixed a {
+    color: var(--action-color) !important;
 }
 
 /* Locate control arrow - specific styling */
@@ -220,7 +250,8 @@ a:active {
     }
 
     .leaflet-locate-icon {
-        background-color: var(--control-text) !important;
+        background-color: transparent !important;
+        color: var(--control-text) !important;
     }
 }
 
@@ -243,6 +274,8 @@ a:active {
 
 .control-group.astra-group {
     bottom: 2.3rem;
+    left: 1rem;
+    right: auto;
 }
 
 @media (max-width: 820px) {
@@ -252,6 +285,7 @@ a:active {
         right: auto;
         max-width: calc(100vw - 1.5rem);
     }
+
 }
 
 .control-button {
@@ -297,6 +331,8 @@ a:active {
     align-items: flex-end;
     justify-content: center;
     padding: 0.5rem 0.5rem 0;
+    pointer-events: auto;
+    touch-action: none;
 }
 
 .drawer-panel {
@@ -310,17 +346,19 @@ a:active {
     border: 1px solid var(--drawer-border);
     transform: translateY(100%);
     opacity: 0;
-    transition: transform 240ms ease-out, opacity 240ms ease-out;
+    transition: transform 380ms cubic-bezier(0.32, 0.72, 0, 1), opacity 300ms ease-out;
+    will-change: transform, opacity;
+    pointer-events: auto;
 }
 
 .drawer-backdrop-open {
     opacity: 1;
-    transition: opacity 240ms ease-out;
+    transition: opacity 380ms ease-out;
 }
 
 .drawer-backdrop-closing {
     opacity: 0;
-    transition: opacity 240ms ease-out;
+    transition: opacity 380ms ease-out;
 }
 
 .drawer-open {
@@ -344,29 +382,114 @@ a:active {
     }
 }
 
+.drawer-topbar {
+    display: grid;
+    grid-template-columns: 2.25rem 1fr 2.25rem;
+    align-items: center;
+    min-height: 2.6rem;
+    padding: 0.35rem 1.1rem 0;
+    flex-shrink: 0;
+}
+
+.drawer-topbar-button,
+.drawer-drag-handle {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    color: var(--drawer-muted);
+    background: transparent;
+}
+
+.drawer-topbar-button {
+    cursor: pointer;
+}
+
+.drawer-topbar-button:hover,
+.drawer-topbar-button:focus-visible,
+.drawer-drag-handle:hover,
+.drawer-drag-handle:focus-visible {
+    border-color: transparent;
+    background: transparent;
+    color: var(--action-color);
+    outline: none;
+}
+
+.drawer-topbar-icon {
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.drawer-drag-handle {
+    justify-self: center;
+    width: 8rem;
+    cursor: ns-resize;
+    touch-action: none;
+}
+
+.drawer-drag-bar {
+    display: block;
+    width: 3.25rem;
+    margin-inline: auto;
+    height: 0.3rem;
+    border-radius: 999px;
+    background: currentColor;
+    opacity: 0.7;
+    transition: width 180ms ease, opacity 180ms ease;
+}
+
+.drawer-drag-handle:hover .drawer-drag-bar,
+.drawer-drag-handle:focus-visible .drawer-drag-bar {
+    width: 4.25rem;
+    opacity: 1;
+}
+
+.drawer-topbar-spacer {
+    width: 2.25rem;
+    height: 2.25rem;
+}
+
 .drawer-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.1rem 0.6rem;
+    padding: 0.45rem 1.1rem 0.6rem;
     gap: 1rem;
+    flex-shrink: 0;
+}
+
+.drawer-header-action {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: 1px solid var(--drawer-border);
+    border-radius: 0.35rem;
+    color: var(--drawer-muted);
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.drawer-header-action:hover,
+.drawer-header-action:focus-visible {
+    border-color: var(--action-color);
+    color: var(--action-color);
+    background: var(--drawer-bg);
+    outline: none;
 }
 
 .drawer-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    border: none;
-    color: var(--page-text);
-    cursor: pointer;
-    background-color: transparent;
+    color: var(--drawer-muted);
 }
 
 .drawer-close-icon {
-    width: 1.25rem;
-    height: 1.25rem;
-    color: var(--drawer-muted);
+    width: 1.15rem;
+    height: 1.15rem;
 }
 
 .drawer-label {
@@ -458,6 +581,7 @@ a:active {
 
 .drawer-content {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     padding: 0 1rem 1.1rem;
 }
@@ -537,6 +661,16 @@ a:active {
     border-radius: 20%;
     background: var(--drawer-card);
     color: var(--drawer-muted);
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.location-category-badge:hover,
+.location-category-badge:focus-visible {
+    border-color: var(--action-color);
+    background: var(--button-hover);
+    color: var(--action-color);
+    outline: none;
 }
 
 .location-group-header-actions {
@@ -623,6 +757,12 @@ a:active {
     height: 1rem;
     object-fit: contain;
     filter: saturate(0.01) brightness(0.5);
+    transition: filter 160ms ease;
+}
+
+.location-card-nav-inat:hover .location-card-nav-image,
+.location-card-nav-inat:focus-visible .location-card-nav-image {
+    filter: none;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -860,7 +1000,12 @@ a:active {
     }
 
     .drawer-header {
-        padding: 0.9rem 0.9rem 0.8rem;
+        padding: 0.4rem 0.9rem 0.8rem;
+    }
+
+    .drawer-topbar {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
     }
 
     .drawer-tab-row {

@@ -1,6 +1,6 @@
 import type { FeatureCollection, Geometry } from 'geojson';
 import { MapPinSearch, Share2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import inatLogo from '../../../assets/inat-logo.png';
 import type { FeatureProps } from '../../geojson/types';
@@ -9,7 +9,7 @@ import { LocationAstronomySummary } from './LocationAstronomySummary';
 import { buildFeatureGroups, filterFeatureGroups, getFeatureLink } from './locationFeatureUtils';
 import { PrimaryCategoryIcon } from './PrimaryCategoryIcon';
 import { shareLocation } from './shareLocation';
-import type { FeatureDetailsProps } from './types';
+import type { AstronomyLocation, FeatureDetailsProps } from './types';
 
 export function LocationFeatureDetails({
     geojson,
@@ -24,6 +24,8 @@ export function LocationFeatureDetails({
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const hasHandledInitialFocus = useRef(false);
+    const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+    const openAstronomy = (location: AstronomyLocation) => onOpenAstronomy(location, tabLabel);
 
     useEffect(() => {
         if (!initialFocusQuery || hasHandledInitialFocus.current) {
@@ -64,6 +66,9 @@ export function LocationFeatureDetails({
                         {groups.map((group, groupIndex) => {
                             const heading = group.heading;
                             const hasHeading = Boolean(heading?.properties.name);
+                            const groupKey = `${outingIndex}-${groupIndex}`;
+                            const itemsId = `location-group-items-${groupKey}`;
+                            const isExpanded = !collapsedGroups[groupKey];
 
                             return (
                                 <div key={`${outingIndex}-${groupIndex}`} className='location-group'>
@@ -71,25 +76,20 @@ export function LocationFeatureDetails({
                                         <div className='location-group-header'>
                                             <div className='location-group-header-row'>
                                                 <div className='location-group-header-main'>
-                                                    <span className='location-category-badge' title={`${tabLabel} category`}>
+                                                    <button
+                                                        type='button'
+                                                        className='location-category-badge'
+                                                        title={`${isExpanded ? 'Collapse' : 'Expand'} ${tabLabel} category`}
+                                                        aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${heading.properties.name}`}
+                                                        aria-expanded={isExpanded}
+                                                        aria-controls={itemsId}
+                                                        onClick={() => setCollapsedGroups((current) => ({ ...current, [groupKey]: isExpanded }))}
+                                                    >
                                                         <PrimaryCategoryIcon tabLabel={tabLabel} />
-                                                    </span>
+                                                    </button>
                                                     <div className='location-group-title'>{heading.properties.name}</div>
                                                 </div>
                                                 <div className='location-group-header-actions'>
-                                                    <button
-                                                        type='button'
-                                                        className='location-card-nav location-card-nav-inat'
-                                                        onClick={() => {
-                                                            onLocationSelected(heading.properties.name);
-                                                            map.once('moveend', () => onOpenInat());
-                                                            focusLocationGroup(map, heading, group.items);
-                                                        }}
-                                                        aria-label={`Open iNaturalist observations near ${heading.properties.name}`}
-                                                        title='Open iNaturalist observations'
-                                                    >
-                                                        <img className='location-card-nav-image' alt='iNaturalist' src={inatLogo} />
-                                                    </button>
                                                     <button
                                                         type='button'
                                                         className='location-card-nav'
@@ -102,6 +102,19 @@ export function LocationFeatureDetails({
                                                     >
                                                         <Share2 className='location-card-nav-icon' />
                                                     </button>
+                                                    <button
+                                                        type='button'
+                                                        className='location-card-nav location-card-nav-inat'
+                                                        onClick={() => {
+                                                            onLocationSelected(heading.properties.name);
+                                                            map.once('moveend', () => onOpenInat(tabLabel));
+                                                            focusLocationGroup(map, heading, group.items);
+                                                        }}
+                                                        aria-label={`Open iNaturalist observations near ${heading.properties.name}`}
+                                                        title='Open iNaturalist observations'
+                                                    >
+                                                        <img className='location-card-nav-image' alt='iNaturalist' src={inatLogo} />
+                                                    </button>
                                                     {heading.geometry.type === 'Point' && (
                                                         <LocationAstronomySummary
                                                             location={{
@@ -109,7 +122,7 @@ export function LocationFeatureDetails({
                                                                 latitude: heading.geometry.coordinates[1],
                                                                 longitude: heading.geometry.coordinates[0]
                                                             }}
-                                                            onOpen={onOpenAstronomy}
+                                                            onOpen={openAstronomy}
                                                         />
                                                     )}
                                                     <button
@@ -143,8 +156,8 @@ export function LocationFeatureDetails({
                                             </div>
                                         </div>
                                     )}
-                                    {group.items.length > 0 && (
-                                        <ul className='location-group-items'>
+                                    {isExpanded && group.items.length > 0 && (
+                                        <ul id={itemsId} className='location-group-items'>
                                             {group.items.map(({ feature, featureIndex }) => {
                                                 if (!feature.properties.name) {
                                                     return null;

@@ -3,11 +3,13 @@ import type { FeatureProps } from '../../geojson/types';
 import type { LocationTabName } from '../../locationUtils';
 
 export type LocationsControlProps = {
-    mapHeight: number;
+    drawerHeight: number;
+    onDrawerHeightChange: (height: number) => void;
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
-    onOpenInat: () => void;
+    onOpenInat: (tab: LocationTabName) => void;
+    onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     onSearchCleared: () => void;
     initialSearchQuery?: string;
@@ -31,9 +33,9 @@ export type FeatureDetailsProps = {
     geojson: FeatureCollection<Geometry, FeatureProps>[];
     searchQuery: string;
     onClose: () => void;
-    onOpenInat: () => void;
+    onOpenInat: (tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     initialFocusQuery?: string;
     tabLabel: LocationTabName;
-    onOpenAstronomy: (location: AstronomyLocation) => void;
+    onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
 }

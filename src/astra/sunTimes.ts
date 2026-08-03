@@ -17,28 +17,29 @@ export type AstronomyData = {
     moonIllumination: SunCalc.MoonIllumination;
     twilightSegments: TimelineSegment[];
     birdingSegments: TimelineSegment[];
+    moonSegment: TimelineSegment | null;
     date: Date;
     latitude: number;
     longitude: number;
 }
 
 const twilightPalette = {
-    night: '#152331',
-    astronomical: '#304a62',
-    nautical: '#44778d',
-    civil: '#73a9a4',
-    dawn: '#e9a85f',
-    morning: '#efc36e',
-    afternoon: '#e8d494',
-    evening: '#d9895e'
+    night: '#1f2d3d',
+    astronomical: '#38556b',
+    nautical: '#4f8799',
+    civil: '#72b4aa',
+    dawn: '#f0ae64',
+    morning: '#f3c96b',
+    afternoon: '#d6cf8e',
+    evening: '#d8835e'
 };
 
 const birdingPalette = {
-    early: '#d96b4d',
-    midMorning: '#e5a34f',
-    midday: '#f0d478',
-    afternoon: '#91b878',
-    evening: '#6d8faa'
+    early: '#e35d4e',
+    midMorning: '#e6963e',
+    midday: '#d7be55',
+    afternoon: '#6fa77d',
+    evening: '#6889ad'
 };
 
 export function getAstronomyData(date: Date, latitude: number, longitude: number): AstronomyData {
@@ -52,6 +53,7 @@ export function getAstronomyData(date: Date, latitude: number, longitude: number
         moonIllumination,
         twilightSegments: buildTwilightSegments(date, sunTimes),
         birdingSegments: buildBirdingSegments(date, sunTimes),
+        moonSegment: buildMoonSegment(date, moonTimes),
         date,
         latitude,
         longitude
@@ -62,14 +64,19 @@ function buildTwilightSegments(date: Date, sunTimes: SunCalc.SunTimes): Timeline
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
+    const midnightEnd = new Date(dayStart.getTime() + 60 * 60 * 1000);
+    const middayStart = isValidDate(sunTimes.solarNoon) ? new Date(sunTimes.solarNoon.getTime() - 60 * 60 * 1000) : null;
+    const middayEnd = isValidDate(sunTimes.solarNoon) ? new Date(sunTimes.solarNoon.getTime() + 60 * 60 * 1000) : null;
     const boundaries = [
         { id: 'day-start', at: dayStart },
+        { id: 'midnight-end', at: midnightEnd },
         { id: 'nightEnd', at: sunTimes.nightEnd },
         { id: 'nauticalDawn', at: sunTimes.nauticalDawn },
         { id: 'dawn', at: sunTimes.dawn },
         { id: 'sunrise', at: sunTimes.sunrise },
         { id: 'goldenHourEnd', at: sunTimes.goldenHourEnd },
-        { id: 'solarNoon', at: sunTimes.solarNoon },
+        { id: 'midday-start', at: middayStart },
+        { id: 'midday-end', at: middayEnd },
         { id: 'goldenHour', at: sunTimes.goldenHour },
         { id: 'sunset', at: sunTimes.sunset },
         { id: 'dusk', at: sunTimes.dusk },
@@ -109,25 +116,38 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
         return [];
     }
 
-    const earlyMorningEnd = new Date(sunrise.getTime() + 2 * 60 * 60 * 1000);
-    const middayStart = new Date(solarNoon.getTime() - 30 * 60 * 1000);
-    const middayEnd = new Date(solarNoon.getTime() + 30 * 60 * 1000);
-    const eveningStart = isValidDate(sunTimes.goldenHour) ? sunTimes.goldenHour : new Date(sunset.getTime() - 60 * 60 * 1000);
+    const daylightMilliseconds = Math.max(sunset.getTime() - sunrise.getTime(), 60 * 60 * 1000);
+    const daylightPoint = (fraction: number) => new Date(sunrise.getTime() + daylightMilliseconds * fraction);
+    const morningCallStart = isValidDate(sunTimes.dawn) ? sunTimes.dawn : sunrise;
+    const morningCallEnd = daylightPoint(0.12);
+    const morningForageStart = morningCallEnd;
+    const morningForageEnd = daylightPoint(0.28);
+    const middayStart = new Date(solarNoon.getTime() - daylightMilliseconds * 0.06);
+    const middayEnd = new Date(solarNoon.getTime() + daylightMilliseconds * 0.06);
+    const raptorThermalStart = morningForageEnd;
+    const raptorThermalEnd = middayStart;
+    const afternoonStart = middayEnd;
+    const afternoonEnd = daylightPoint(0.84);
+    const eveningDustStart = sunset;
+    const eveningDustEnd = isValidDate(sunTimes.dusk) ? sunTimes.dusk : new Date(sunset.getTime() + daylightMilliseconds * 0.08);
     const definitions = [
         {
-            id: 'early-morning', label: 'Early morning', description: 'Dawn chorus and the first feeding burst, often the most active period for songbirds.', start: sunrise, end: earlyMorningEnd, color: birdingPalette.early
+            id: 'morning-call', label: 'Morning bird call', description: 'The dawn chorus and first feeding burst, often the most active period for songbirds.', start: morningCallStart, end: morningCallEnd, color: birdingPalette.early
         },
         {
-            id: 'mid-morning', label: 'Mid-morning', description: 'A productive search window as birds move between feeding and cover before the heat builds.', start: earlyMorningEnd, end: new Date(middayStart), color: birdingPalette.midMorning
+            id: 'morning-forage', label: 'Morning forage', description: 'A focused feeding window as birds move between cover and food before the heat builds.', start: morningForageStart, end: morningForageEnd, color: birdingPalette.midMorning
         },
         {
-            id: 'midday', label: 'Midday', description: 'Solar noon and the quieter roosting interval; watch water, shade and soaring species.', start: middayStart, end: middayEnd, color: birdingPalette.midday
+            id: 'raptor-thermals', label: 'Raptor thermals', description: 'Late-morning warming creates thermals that raptors use to begin soaring and searching for prey.', start: raptorThermalStart, end: raptorThermalEnd, color: birdingPalette.midday
         },
         {
-            id: 'afternoon', label: 'Afternoon', description: 'Activity gradually returns as temperatures ease and birds begin moving toward evening roosts.', start: middayEnd, end: eveningStart, color: birdingPalette.afternoon
+            id: 'midday-bath', label: 'Midday bird bath', description: 'The warmer, quieter interval around solar noon when water, shade and bathing spots can be more productive.', start: middayStart, end: middayEnd, color: birdingPalette.midday
         },
         {
-            id: 'evening', label: 'Evening', description: 'The last feeding movement and evening song before sunset and the return to cover.', start: eveningStart, end: sunset, color: birdingPalette.evening
+            id: 'afternoon-movement', label: 'Late-day movement', description: 'Activity builds again as temperatures ease and birds move toward evening feeding and roosting areas.', start: afternoonStart, end: afternoonEnd, color: birdingPalette.afternoon
+        },
+        {
+            id: 'evening-dust', label: 'Evening dust', description: 'The dusk transition, when the last daylight movement overlaps with the first activity of owls.', start: eveningDustStart, end: eveningDustEnd, color: birdingPalette.evening
         }
     ];
 
@@ -136,15 +156,55 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
         .map(({ id, label, description, start, end, color }) => createSegment(id, label, description, start, end, color));
 }
 
+function buildMoonSegment(date: Date, moonTimes: SunCalc.MoonTimes): TimelineSegment | null {
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+
+    if (moonTimes.alwaysDown) {
+        return null;
+    }
+
+    const rise = moonTimes.alwaysUp ? dayStart : moonTimes.rise;
+    let set = moonTimes.alwaysUp ? dayEnd : moonTimes.set;
+
+    if (!isValidDate(rise) || !isValidDate(set)) {
+        return null;
+    }
+
+    if (set <= rise) {
+        set = new Date(set);
+        set.setDate(set.getDate() + 1);
+    }
+
+    const start = rise < dayStart ? dayStart : rise;
+    const end = set;
+
+    if (end <= start) {
+        return null;
+    }
+
+    return createSegment(
+        'moonlight',
+        'Moonlight',
+        'The Moon is above the horizon during this interval; nocturnal species may be easier to hear or observe.',
+        start,
+        end,
+        '#8997a8'
+    );
+}
+
 function getTwilightDefinition(id: string): { label: string; description: string; color: string } | null {
     const definitions: Record<string, { label: string; description: string; color: string }> = {
-        'day-start': { label: 'Night', description: 'Darkness before the astronomical dawn.', color: twilightPalette.night },
+        'day-start': { label: 'Midnight', description: 'The biological midnight window, centered on the darkest part of the local night.', color: twilightPalette.night },
+        'midnight-end': { label: 'Night', description: 'Darkness before the astronomical dawn.', color: twilightPalette.night },
         nightEnd: { label: 'Astronomical twilight', description: 'The faintest dawn glow; the Sun is 18 to 12 degrees below the horizon.', color: twilightPalette.astronomical },
         nauticalDawn: { label: 'Nautical twilight', description: 'The horizon becomes readable and brighter stars begin to fade.', color: twilightPalette.nautical },
         dawn: { label: 'Civil twilight', description: 'Enough natural light for most outdoor activity before the Sun appears.', color: twilightPalette.civil },
         sunrise: { label: 'Dawn chorus', description: 'Sunrise and the strong early-morning song and feeding period for many birds.', color: twilightPalette.dawn },
         goldenHourEnd: { label: 'Morning light', description: 'Soft, low-angle light after the morning golden hour.', color: twilightPalette.morning },
-        solarNoon: { label: 'Afternoon light', description: 'The broad afternoon interval after solar noon, when activity gradually shifts toward evening.', color: twilightPalette.afternoon },
+        'midday-start': { label: 'Midday light', description: 'The bright approach to solar noon, when the Sun is highest in the sky.', color: twilightPalette.morning },
+        'midday-end': { label: 'Afternoon light', description: 'The broad afternoon interval after solar noon, when activity gradually shifts toward evening.', color: twilightPalette.afternoon },
         goldenHour: { label: 'Evening golden hour', description: 'Warm, low-angle light before sunset; a useful time for open-country movement.', color: twilightPalette.evening },
         sunset: { label: 'Civil twilight', description: 'The post-sunset glow while the landscape remains naturally lit.', color: twilightPalette.civil },
         dusk: { label: 'Nautical twilight', description: 'The horizon fades and the first stars become prominent.', color: twilightPalette.nautical },
@@ -163,9 +223,16 @@ function createSegment(id: string, label: string, description: string, start: Da
         start,
         end,
         startMinutes: minutesSinceMidnight(start),
-        endMinutes: minutesSinceMidnight(end),
+        endMinutes: minutesOnTimeline(end, start),
         color
     };
+}
+
+function minutesOnTimeline(date: Date, timelineStart: Date): number {
+    const startDay = Date.UTC(timelineStart.getFullYear(), timelineStart.getMonth(), timelineStart.getDate());
+    const dateDay = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const dayOffset = Math.round((dateDay - startDay) / 86400000);
+    return minutesSinceMidnight(date) + dayOffset * 1440;
 }
 
 function minutesSinceMidnight(date: Date): number {
@@ -192,12 +259,12 @@ export function formatDateInput(date: Date): string {
 }
 
 export function describeMoonPhase(phase: number): string {
-    if (phase < 0.0625 || phase >= 0.9375) return 'New Moon';
-    if (phase < 0.1875) return 'Waxing Crescent';
-    if (phase < 0.3125) return 'First Quarter';
-    if (phase < 0.4375) return 'Waxing Gibbous';
-    if (phase < 0.5625) return 'Full Moon';
-    if (phase < 0.6875) return 'Waning Gibbous';
-    if (phase < 0.8125) return 'Last Quarter';
-    return 'Waning Crescent';
+    if (phase < 0.0625 || phase >= 0.9375) return 'New moon';
+    if (phase < 0.1875) return 'Waxing crescent';
+    if (phase < 0.3125) return 'First quarter';
+    if (phase < 0.4375) return 'Waxing gibbous';
+    if (phase < 0.5625) return 'Full moon';
+    if (phase < 0.6875) return 'Waning gibbous';
+    if (phase < 0.8125) return 'Last quarter';
+    return 'Waning crescent';
 }

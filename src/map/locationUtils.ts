@@ -90,10 +90,6 @@ export function getInitialLocationKeys(): string[] {
         .filter((value) => !reservedAppPaths.has(slugifyLocationName(value)));
 }
 
-export function isAstraPath(pathname: string): boolean {
-    return reservedAppPaths.has(getLocationSlugFromPathname(pathname));
-}
-
 export function getLocationSlugFromPathname(pathname: string): string {
     const basePath = getBasePathname();
     const normalizedPath = pathname.replace(/\/+/g, '/');

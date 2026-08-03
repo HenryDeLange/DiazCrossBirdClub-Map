@@ -1,10 +1,12 @@
 import type { INatCount, INatSpeciesCount } from '../../iNatTypes';
 
 export type SpeciesListControlProps = {
-    mapHeight: number;
+    drawerHeight: number;
+    onDrawerHeightChange: (height: number) => void;
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
+    onBack?: () => void;
 }
 
 export type INatSpeciesCardProps = {

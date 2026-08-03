@@ -1,25 +1,34 @@
 # Project Context
 
-DiazCrossBirdClub-Map is a Vite + React + TypeScript web app that shows birding spots for the Diaz Cross Bird Club on an interactive Leaflet map.
+DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz Cross Bird Club birding locations on a Leaflet map.
 
-## What matters
+## Application Flow
 
-- Main app entry: `src/App.tsx` selects the Leaflet map at `/` and the standalone SunCalc astronomy view at `/astra`.
-- The map uses React Leaflet, Google tile layers, and localStorage for saved map state.
-- Core UI controls are organized under `src/map/controls/` (for example `locations/`, `species/`, `logo/`, and `LocateControl.tsx`) and use shared primitives from `src/map/components/` (for example drawer and control button components).
-- The `/astra` view is self-contained in `src/astra/`: `AstraPage.tsx` owns the responsive circular light and moon UI, `sunTimes.ts` owns SunCalc calculations and timeline data, and `astra.css` owns its visual theme.
-- `src/map/controls/AstraControl.tsx` provides the bottom-left sun/moon navigation button; Point headings use `src/map/controls/locations/LocationAstronomySummary.tsx` to open Astra in an embedded drawer with the Point GPS in the URL.
-- `src/map/locationUtils.ts` reserves the `astra` route from location deep-link parsing and provides the base-aware Astra pathname.
-- Reusable feature rendering logic is grouped under `src/map/features/`, and map layer components live under `src/map/layers/`.
-- GeoJSON data is grouped under `src/map/geojson/` by type: `outings`, `paths`, `points`, and `spots`.
+- `src/App.tsx` dispatches `/` to `BirdingMap` and `/astra` to the standalone astronomy page. `src/appRouting.ts` and `src/map/locationUtils.ts` handle base-path-aware routes, location slugs, and the reserved `astra` path.
+- `src/map/BirdingMap.tsx` owns the Leaflet map, localStorage map center/zoom, layer state, drawer state, nested drawer history, location deep links, and astronomy coordinates.
+- Shared drawer and map-control primitives are in `src/map/components/`. `MapDrawer` supports resizing, back navigation, and an optional header action.
+- `src/map/controls/` contains the feature controls: `locations/`, `species/`, `AstraControl.tsx`, `LocateControl.tsx`, and `logo/`. Location controls preserve the selected tab and nested Astra context.
 
-## Useful commands
+## Source Layout
 
-- `npm run dev` for local development
-- `npm run build` for typecheck + production build
-- `npm run lint` for ESLint
+- `src/astra/`: `AstraPage.tsx` renders the responsive sun, moon, and birding timeline; `sunTimes.ts` owns SunCalc calculations and event data; `astra.css` owns the astronomy theme and responsive layout. Astra can render standalone or embedded in a drawer.
+- `src/map/geojson/`: static GeoJSON grouped as `outings/`, `paths/`, `points/`, and `spots/`, with shared types in `types.ts`.
+- `src/map/features/`: GeoJSON feature styling, labels, and popup/text rendering.
+- `src/map/layers/`: `GenericGeoJSONLayer`, persisted layer state, and `LayerStateSync`.
+- `src/map/controls/species/`: iNaturalist species list/card UI and observation hooks/types.
+- `src/map/map.css`, `src/main.module.css`: global map and application styling. `src/LoadingOrError.tsx` handles lazy-load fallback UI.
 
-## Editing notes
+## Working Notes
 
-- Keep changes focused and minimal.
-- Do not hand-edit generated GeoJSON unless the task specifically requires data changes.
+- Use existing React Leaflet, Leaflet, Lucide, SunCalc, and local helper patterns; keep edits focused.
+- Use `getBasePathname()`, `getAstraPathname()`, and location helpers for links instead of hard-coding `/` paths.
+- Keep drawer scrolling owned by the embedded page and preserve the drawer's flex/overflow constraints.
+- Do not hand-edit generated files or GeoJSON data unless the task specifically requires it.
+- Follow `.docs/ai/TASK_GUIDELINES.md`; builds and linting are run only when requested.
+
+## Commands
+
+- `npm run dev` starts Vite development.
+- `npm run build` runs TypeScript build and the production Vite build.
+- `npm run lint` runs ESLint.
+- `npm run preview` serves the production build locally.
