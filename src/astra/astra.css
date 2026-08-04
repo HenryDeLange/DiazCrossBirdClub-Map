@@ -152,6 +152,13 @@
     padding: 0.4rem 0.45rem;
 }
 
+.astra-coordinate-controls input:read-only {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
 .astra-icon-button,
 .astra-map-link {
     display: inline-grid;
@@ -181,6 +188,10 @@
     border-color: var(--astra-ink);
     background: var(--astra-selected);
     color: var(--astra-ink) !important;
+}
+
+.drawer-header-action.astra-header-action {
+    border: 0;
 }
 
 .astra-ghost-button {
@@ -722,7 +733,12 @@ button.astra-event-row:focus-visible,
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2.25rem;
         align-items: end;
+        min-width: 0;
         width: 100%;
+    }
+
+    .astra-coordinate-controls-readonly {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .astra-coordinate-controls label {

@@ -12,6 +12,7 @@ export type Coordinates = {
 type AstraPageProps = {
     embedded?: boolean;
     initialCoordinates?: Coordinates;
+    locationView?: boolean;
 }
 
 type LocationStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -33,14 +34,14 @@ const defaultCoordinates: Coordinates = {
 
 const decimalInputPattern = /^-?\d*(?:\.\d*)?$/;
 
-export default function AstraPage({ embedded = false, initialCoordinates }: Readonly<AstraPageProps>) {
+export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
     const queryDate = embedded ? null : getQueryDate();
     const hasExplicitCoordinates = initialCoordinates !== undefined || queryCoordinates !== null;
     const startingCoordinates = initialCoordinates ?? queryCoordinates ?? defaultCoordinates;
     const [coordinates, setCoordinates] = useState<Coordinates>(startingCoordinates);
-    const [latitudeInput, setLatitudeInput] = useState(String(startingCoordinates.latitude));
-    const [longitudeInput, setLongitudeInput] = useState(String(startingCoordinates.longitude));
+    const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(startingCoordinates.latitude));
+    const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(startingCoordinates.longitude));
     const [dateValue, setDateValue] = useState(queryDate ?? formatDateInput(new Date()));
     const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>('morning-call');
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
@@ -54,8 +55,8 @@ export default function AstraPage({ embedded = false, initialCoordinates }: Read
         }
 
         setCoordinates(initialCoordinates);
-        setLatitudeInput(String(initialCoordinates.latitude));
-        setLongitudeInput(String(initialCoordinates.longitude));
+        setLatitudeInput(formatCoordinate(initialCoordinates.latitude));
+        setLongitudeInput(formatCoordinate(initialCoordinates.longitude));
     }, [initialCoordinates]);
 
     useEffect(() => {
@@ -69,8 +70,8 @@ export default function AstraPage({ embedded = false, initialCoordinates }: Read
             (position) => {
                 const nextCoordinates = getCoordinatesFromPosition(position);
                 setCoordinates(nextCoordinates);
-                setLatitudeInput(String(nextCoordinates.latitude));
-                setLongitudeInput(String(nextCoordinates.longitude));
+                setLatitudeInput(formatCoordinate(nextCoordinates.latitude));
+                setLongitudeInput(formatCoordinate(nextCoordinates.longitude));
                 setLocationStatus('success');
                 setLocationStatusMessage('GPS point loaded');
             },
@@ -100,7 +101,7 @@ export default function AstraPage({ embedded = false, initialCoordinates }: Read
         return () => window.clearInterval(intervalId);
     }, []);
 
-    const selectedDate = new Date(`${dateValue}T12:00:00`);
+    const selectedDate = getSelectedDate(dateValue);
     const astronomy = getAstronomyData(selectedDate, coordinates.latitude, coordinates.longitude);
     const allSegments = [
         ...astronomy.twilightSegments,
@@ -160,7 +161,29 @@ export default function AstraPage({ embedded = false, initialCoordinates }: Read
             : numericValue >= -180 && numericValue <= 180;
 
         if (Number.isFinite(numericValue) && isInRange) {
-            setCoordinates((current) => ({ ...current, [kind]: numericValue }));
+            setCoordinates((current) => ({ ...current, [kind]: roundCoordinate(numericValue) }));
+        }
+    };
+
+    const normalizeCoordinateInput = (kind: keyof Coordinates) => {
+        const value = kind === 'latitude' ? latitudeInput : longitudeInput;
+        const numericValue = Number(value);
+        const isInRange = kind === 'latitude'
+            ? numericValue >= -90 && numericValue <= 90
+            : numericValue >= -180 && numericValue <= 180;
+
+        if (!Number.isFinite(numericValue) || !isInRange) {
+            return;
+        }
+
+        const roundedValue = roundCoordinate(numericValue);
+        setCoordinates((current) => ({ ...current, [kind]: roundedValue }));
+
+        if (kind === 'latitude') {
+            setLatitudeInput(formatCoordinate(roundedValue));
+        }
+        else {
+            setLongitudeInput(formatCoordinate(roundedValue));
         }
     };
 
@@ -205,10 +228,10 @@ export default function AstraPage({ embedded = false, initialCoordinates }: Read
                             </div>
                             <div className='astra-field-section astra-location-block'>
                                 <div className='astra-section-label' title='Location'><MapPin size={18} aria-hidden='true' /><span className='astra-visually-hidden'>Location</span></div>
-                                <div className='astra-coordinate-controls'>
-                                    <label><span className='astra-coordinate-label-full'>Latitude</span><span className='astra-coordinate-label-short'>Lat.</span><input aria-label='Latitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={latitudeInput} onChange={(event) => handleCoordinateInput('latitude', event.target.value)} onKeyDown={handleDecimalKeyDown} /></label>
-                                    <label><span className='astra-coordinate-label-full'>Longitude</span><span className='astra-coordinate-label-short'>Long.</span><input aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onKeyDown={handleDecimalKeyDown} /></label>
-                                    <button type='button' className={`astra-ghost-button ${locationStatus === 'loading' ? 'astra-location-loading' : ''} ${locationStatus === 'success' ? 'astra-location-success' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>
+                                <div className={`astra-coordinate-controls ${locationView ? 'astra-coordinate-controls-readonly' : ''}`}>
+                                    <label><span className='astra-coordinate-label-full'>Latitude</span><span className='astra-coordinate-label-short'>Lat.</span><input aria-label='Latitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={latitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('latitude', event.target.value)} onBlur={() => normalizeCoordinateInput('latitude')} onKeyDown={handleDecimalKeyDown} /></label>
+                                    <label><span className='astra-coordinate-label-full'>Longitude</span><span className='astra-coordinate-label-short'>Long.</span><input aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onBlur={() => normalizeCoordinateInput('longitude')} onKeyDown={handleDecimalKeyDown} /></label>
+                                    {!locationView && <button type='button' className={`astra-ghost-button ${locationStatus === 'loading' ? 'astra-location-loading' : ''} ${locationStatus === 'success' ? 'astra-location-success' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
                                 </div>
                                 {locationStatus === 'error' && <span className='astra-location-status astra-location-status-error' role='status' aria-live='polite'>{locationStatusMessage}</span>}
                             </div>
@@ -543,4 +566,17 @@ function orderSegmentsForSelection(segments: TimelineSegment[], selectedSegmentI
 
 function formatCurrentDate(date: Date): string {
     return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date);
+}
+
+function getSelectedDate(value: string): Date {
+    const date = value ? new Date(`${value}T12:00:00`) : new Date();
+    return isValidDate(date) ? date : new Date();
+}
+
+function roundCoordinate(value: number): number {
+    return Math.round(value * 100000) / 100000;
+}
+
+function formatCoordinate(value: number): string {
+    return roundCoordinate(value).toFixed(5);
 }

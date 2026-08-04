@@ -57,6 +57,7 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
                                 type='button'
                                 className='inat-card-attribution-trigger'
                                 aria-label='Show image attribution'
+                                aria-expanded={isAttributionOpen}
                                 onClick={() => setIsAttributionOpen((current) => !current)}
                             >
                                 <Copyright className='inat-card-attribution-icon' />

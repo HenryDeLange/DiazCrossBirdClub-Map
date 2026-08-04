@@ -107,7 +107,7 @@ export function LocationFeatureDetails({
                                                         className='location-card-nav location-card-nav-inat'
                                                         onClick={() => {
                                                             onLocationSelected(heading.properties.name);
-                                                            map.once('moveend', () => onOpenInat(tabLabel));
+                                                            map.once('moveend', () => onOpenInat(heading.properties.name));
                                                             focusLocationGroup(map, heading, group.items);
                                                         }}
                                                         aria-label={`Open iNaturalist observations near ${heading.properties.name}`}

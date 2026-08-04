@@ -7,6 +7,7 @@ export type SpeciesListControlProps = {
     onToggle: () => void;
     onClose: () => void;
     onBack?: () => void;
+    locationName?: string;
 }
 
 export type INatSpeciesCardProps = {

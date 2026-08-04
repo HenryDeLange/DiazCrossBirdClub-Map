@@ -21,7 +21,7 @@ export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCle
         initialTab && locationTabNames.includes(initialTab) ? initialTab : tabs[0].label
     );
     const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
-    const [debouncedSearchQuery] = useDebounceValue(searchQuery, 180);
+    const [debouncedSearchQuery] = useDebounceValue(searchQuery, 300);
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.matchMedia('(max-width: 820px)').matches : false);
     const contentRef = useRef<HTMLDivElement | null>(null);
     const previousSearchQueryRef = useRef(searchQuery);

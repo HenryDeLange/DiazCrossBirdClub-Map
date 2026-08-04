@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useMap } from 'react-leaflet';
+import { useDebounceValue } from 'usehooks-ts';
 import inatLogo from '../../../assets/inat-logo.png';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import { MapControlButton } from '../../components/MapControlButton';
@@ -8,12 +9,13 @@ import { INatSpeciesCard } from './INatSpeciesCard';
 import type { SpeciesListControlProps } from './types';
 import { useSpeciesObservations } from './useSpeciesObservations';
 
-export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack }: Readonly<SpeciesListControlProps>) {
+export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, locationName }: Readonly<SpeciesListControlProps>) {
     const map = useMap();
     const [searchInput, setSearchInput] = useState('');
+    const [debouncedSearchInput] = useDebounceValue(searchInput, 300);
     const { data, loading, reset } = useSpeciesObservations(map, isOpen);
 
-    const normalizedSearch = searchInput.trim().toLowerCase();
+    const normalizedSearch = debouncedSearchInput.trim().toLowerCase();
 
     const filteredResults = useMemo(() => {
         if (!data) {
@@ -56,6 +58,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 isOpen={isOpen}
                 onClose={onClose}
                 onBack={onBack}
+                backLabel={locationName}
                 label='Species List'
                 title='iNaturalist Observations'
                 height={drawerHeight}

@@ -5,6 +5,7 @@ type MapDrawerProps = {
     isOpen: boolean;
     onClose: () => void;
     onBack?: () => void;
+    backLabel?: string;
     label?: string;
     title: string;
     headerAction?: ReactNode;
@@ -21,6 +22,7 @@ export function MapDrawer({
     isOpen,
     onClose,
     onBack,
+    backLabel,
     label,
     title,
     headerAction,
@@ -108,11 +110,14 @@ export function MapDrawer({
                 style={{ height: panelHeight, maxHeight }}
             >
                 <div className='drawer-topbar'>
-                    {onBack ? (
-                        <button type='button' className='drawer-topbar-button drawer-back' onClick={onBack} aria-label='Back to previous drawer' title='Back to previous drawer'>
-                            <ArrowLeft className='drawer-topbar-icon' />
-                        </button>
-                    ) : <span className='drawer-topbar-spacer' aria-hidden='true' />}
+                    <div className='drawer-topbar-context'>
+                        {onBack ? (
+                            <button type='button' className='drawer-topbar-button drawer-back' onClick={onBack} aria-label='Back to previous drawer' title='Back to previous drawer'>
+                                <ArrowLeft className='drawer-topbar-icon' />
+                            </button>
+                        ) : <span className='drawer-topbar-spacer' aria-hidden='true' />}
+                        {onBack && backLabel && <span className='drawer-topbar-context-label' title={backLabel}>{backLabel}</span>}
+                    </div>
                     <button
                         type='button'
                         className='drawer-drag-handle'

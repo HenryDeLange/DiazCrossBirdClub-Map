@@ -11,6 +11,8 @@ export function LocateControl() {
     useEffect(() => {
         const layer = new LocateControlClass({
             position: 'bottomright',
+            icon: 'leaflet-control-locate-icon',
+            iconLoading: 'leaflet-control-locate-icon',
             strings: { title: 'Center on my location' }
         });
         layer.addTo(map);
@@ -26,22 +28,20 @@ export function LocateControl() {
                 ? <LocateFixed aria-hidden='true' />
                 : <Locate aria-hidden='true' />);
         };
-        const handleLocationFound = () => {
+        const handleLocationActivate = () => {
             setIcon(true);
-            control?.classList.add('leaflet-control-locate-fixed');
         };
-        const handleLocationError = () => {
+        const handleLocationDeactivate = () => {
             setIcon(false);
-            control?.classList.remove('leaflet-control-locate-fixed');
         };
 
         setIcon(false);
-        map.on('locationfound', handleLocationFound);
-        map.on('locationerror', handleLocationError);
+        map.on('locateactivate', handleLocationActivate);
+        map.on('locatedeactivate', handleLocationDeactivate);
 
         return () => {
-            map.off('locationfound', handleLocationFound);
-            map.off('locationerror', handleLocationError);
+            map.off('locateactivate', handleLocationActivate);
+            map.off('locatedeactivate', handleLocationDeactivate);
             map.removeControl(layer);
         };
     }, [map]);

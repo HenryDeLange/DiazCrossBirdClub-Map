@@ -39,7 +39,7 @@ export function LocationsControl({
                     geojson={outings}
                     searchQuery={searchQuery}
                     onClose={onClose}
-                    onOpenInat={() => onOpenInat('Outings')}
+                    onOpenInat={(locationName) => onOpenInat(locationName, 'Outings')}
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Outings'
@@ -54,7 +54,7 @@ export function LocationsControl({
                     geojson={spots}
                     searchQuery={searchQuery}
                     onClose={onClose}
-                    onOpenInat={() => onOpenInat('Spots')}
+                    onOpenInat={(locationName) => onOpenInat(locationName, 'Spots')}
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Spots'
@@ -69,7 +69,7 @@ export function LocationsControl({
                     geojson={paths}
                     searchQuery={searchQuery}
                     onClose={onClose}
-                    onOpenInat={() => onOpenInat('Paths')}
+                    onOpenInat={(locationName) => onOpenInat(locationName, 'Paths')}
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Paths'
@@ -84,7 +84,7 @@ export function LocationsControl({
                     geojson={points}
                     searchQuery={searchQuery}
                     onClose={onClose}
-                    onOpenInat={() => onOpenInat('Points')}
+                    onOpenInat={(locationName) => onOpenInat(locationName, 'Points')}
                     onLocationSelected={onLocationSelected}
                     initialFocusQuery={initialFocusQuery}
                     tabLabel='Points'

@@ -231,7 +231,10 @@ a:active {
     color: var(--action-color) !important;
 }
 
-.leaflet-control-locate-fixed a {
+.leaflet-control-locate:hover a .leaflet-locate-icon,
+.leaflet-control-locate:focus-within a .leaflet-locate-icon,
+.leaflet-control-locate.active a .leaflet-locate-icon,
+.leaflet-control-locate.following a .leaflet-locate-icon {
     color: var(--action-color) !important;
 }
 
@@ -384,11 +387,29 @@ a:active {
 
 .drawer-topbar {
     display: grid;
-    grid-template-columns: 2.25rem 1fr 2.25rem;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     min-height: 2.6rem;
     padding: 0.35rem 1.1rem 0;
     flex-shrink: 0;
+}
+
+.drawer-topbar-context {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 0.45rem;
+}
+
+.drawer-topbar-context-label {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--drawer-text);
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .drawer-topbar-button,
@@ -484,6 +505,7 @@ a:active {
 }
 
 .drawer-close {
+    justify-self: end;
     color: var(--drawer-muted);
 }
 
@@ -874,6 +896,7 @@ a:active {
 }
 
 .inat-card-meta-row {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -887,7 +910,7 @@ a:active {
 }
 
 .inat-card-attribution {
-    position: relative;
+    position: static;
     display: inline-flex;
     align-items: center;
 }
@@ -907,6 +930,10 @@ a:active {
     color: var(--action-color);
 }
 
+.inat-card-attribution-trigger[aria-expanded='true'] .inat-card-attribution-icon {
+    color: var(--action-color);
+}
+
 .inat-card-attribution-icon {
     width: 0.85rem;
     height: 0.85rem;
@@ -915,8 +942,9 @@ a:active {
 .inat-card-attribution-tooltip {
     position: absolute;
     bottom: calc(100% + 0.35rem);
-    left: 0;
+    right: 0;
     z-index: 20;
+    box-sizing: border-box;
     background: var(--drawer-card);
     border: 1px solid var(--control-border);
     border-radius: 0.4rem;
@@ -925,10 +953,11 @@ a:active {
     font-size: 0.68rem;
     line-height: 1.4;
     text-align: left;
-    max-width: 14rem;
-    width: max-content;
+    width: min(14rem, calc(100% - 0.25rem));
+    max-width: calc(100% - 0.25rem);
     box-shadow: 0 4px 12px var(--button-shadow);
     white-space: normal;
+    overflow-wrap: anywhere;
     pointer-events: none;
 }
 

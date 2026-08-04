@@ -8,7 +8,7 @@ export type LocationsControlProps = {
     isOpen: boolean;
     onToggle: () => void;
     onClose: () => void;
-    onOpenInat: (tab: LocationTabName) => void;
+    onOpenInat: (locationName: string, tab: LocationTabName) => void;
     onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     onSearchCleared: () => void;
@@ -33,7 +33,7 @@ export type FeatureDetailsProps = {
     geojson: FeatureCollection<Geometry, FeatureProps>[];
     searchQuery: string;
     onClose: () => void;
-    onOpenInat: (tab: LocationTabName) => void;
+    onOpenInat: (locationName: string) => void;
     onLocationSelected: (locationName: string) => void;
     initialFocusQuery?: string;
     tabLabel: LocationTabName;

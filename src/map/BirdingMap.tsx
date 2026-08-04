@@ -36,6 +36,7 @@ export default function BirdingMap() {
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
+    const [inatLocationName, setInatLocationName] = useState<string | null>(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
     const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
@@ -159,6 +160,7 @@ export default function BirdingMap() {
     };
 
     const handleOpenAstronomy = (location: AstronomyLocation, tab: LocationTabName) => {
+        setInatLocationName(null);
         setSelectedLocationsTab(tab);
         setLocationSearchQuery(location.name);
         setLocationSearchVersion((current) => current + 1);
@@ -166,6 +168,13 @@ export default function BirdingMap() {
         setLocationPath(location.name);
         setAstronomyLocation(location);
         openNestedDrawer('astra');
+    };
+
+    const handleOpenInat = (locationName: string, tab: LocationTabName) => {
+        setAstronomyLocation(null);
+        setInatLocationName(locationName);
+        setSelectedLocationsTab(tab);
+        openNestedDrawer('inat');
     };
 
     const handleTextMarkerClick = (searchText: string, tab: LocationTabName) => {
@@ -253,9 +262,14 @@ export default function BirdingMap() {
                 drawerHeight={drawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'inat'}
-                onToggle={() => toggleDrawer('inat')}
                 onClose={closeDrawer}
                 onBack={openDrawer === 'inat' && drawerBackTarget !== null ? handleDrawerBack : undefined}
+                locationName={inatLocationName ?? undefined}
+                onToggle={() => {
+                    setInatLocationName(null);
+                    setAstronomyLocation(null);
+                    toggleDrawer('inat');
+                }}
             />
             <LocationsControl
                 drawerHeight={drawerHeight}
@@ -263,10 +277,7 @@ export default function BirdingMap() {
                 isOpen={openDrawer === 'locations'}
                 onToggle={() => toggleDrawer('locations')}
                 onClose={closeDrawer}
-                onOpenInat={(tab) => {
-                    setSelectedLocationsTab(tab);
-                    openNestedDrawer('inat');
-                }}
+                onOpenInat={handleOpenInat}
                 onOpenAstronomy={handleOpenAstronomy}
                 onLocationSelected={handleLocationSelected}
                 onSearchCleared={handleLocationSearchCleared}
@@ -279,10 +290,15 @@ export default function BirdingMap() {
                 drawerHeight={drawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'astra'}
-                onToggle={() => toggleDrawer('astra')}
                 onClose={closeDrawer}
                 onBack={openDrawer === 'astra' && drawerBackTarget !== null ? handleDrawerBack : undefined}
                 coordinates={astronomyLocation}
+                locationName={astronomyLocation?.name}
+                onToggle={() => {
+                    setAstronomyLocation(null);
+                    setInatLocationName(null);
+                    toggleDrawer('astra');
+                }}
             />
             <AttributionControl
                 position='bottomleft'
