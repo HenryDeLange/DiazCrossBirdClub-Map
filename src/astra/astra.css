@@ -1,7 +1,7 @@
 .astra-page {
-    --astra-bg: #f4f4f4;
-    --astra-surface: #ffffff;
-    --astra-surface-muted: #ededed;
+    --astra-bg: var(--drawer-bg, #f4f4f4);
+    --astra-surface: #f8f8f8;
+    --astra-surface-muted: #e9e9e9;
     --astra-ink: #111111;
     --astra-muted: #626262;
     --astra-line: rgba(17, 17, 17, 0.18);
@@ -10,26 +10,30 @@
     --astra-shadow: rgba(0, 0, 0, 0.13);
     --astra-current: #111111;
     --astra-moon: #8997a8;
+    --astra-night: #1f2d3d;
     min-height: 100dvh;
+    height: 100%;
+    max-height: 100dvh;
     overflow-x: hidden;
     overflow-y: auto;
     box-sizing: border-box;
-    background: linear-gradient(135deg, #fafafa 0%, var(--astra-bg) 54%, #e9e9e9 100%);
+    background: var(--astra-bg);
     color: var(--astra-ink);
 }
 
 .astra-page-embedded {
     flex: 1 1 auto;
     min-height: 0;
-    height: auto;
+    height: 0;
+    max-height: none;
     overflow-y: auto;
 }
 
 @media (prefers-color-scheme: dark) {
     .astra-page {
-        --astra-bg: #161616;
-        --astra-surface: #202020;
-        --astra-surface-muted: #2c2c2c;
+        --astra-bg: var(--drawer-bg, #161616);
+        --astra-surface: #1c1c1c;
+        --astra-surface-muted: #282828;
         --astra-ink: #f4f4f4;
         --astra-muted: #b8b8b8;
         --astra-line: rgba(244, 244, 244, 0.2);
@@ -38,7 +42,7 @@
         --astra-shadow: rgba(0, 0, 0, 0.38);
         --astra-current: #ffffff;
         --astra-moon: #9baabd;
-        background: linear-gradient(135deg, #111111 0%, var(--astra-bg) 54%, #242424 100%);
+        --astra-night: #293c50;
     }
 }
 
@@ -300,13 +304,7 @@
 .astra-sun-track {
     fill: none;
     stroke: var(--astra-soft-line);
-    stroke-width: 35;
-}
-
-.astra-moon-track {
-    fill: none;
-    stroke: var(--astra-soft-line);
-    stroke-width: 14;
+    stroke-width: 40;
 }
 
 .astra-clock-solar-segment,
@@ -331,13 +329,14 @@
 .astra-moon-segment {
     fill: none;
     stroke: var(--astra-moon);
-    stroke-width: 8;
+    stroke-width: 10;
     opacity: 0.72;
+    stroke-linecap: butt;
+    transition: filter 150ms ease, stroke-width 150ms ease;
 }
 
 .astra-clock-solar-segment:hover,
-.astra-birding-segment:hover,
-.astra-moon-segment:hover {
+.astra-birding-segment:hover {
     opacity: 1;
 }
 
@@ -352,7 +351,13 @@
 }
 
 .astra-moon-segment.astra-clock-segment-selected {
-    stroke-width: 9;
+    stroke: var(--astra-moon);
+    stroke-width: 11;
+}
+
+.astra-moon-segment:focus-visible {
+    stroke: var(--astra-moon);
+    stroke-width: 11;
 }
 
 .astra-clock-center {
@@ -361,8 +366,12 @@
     stroke-width: 1;
 }
 
+.astra-clock-center-content {
+    pointer-events: none;
+}
+
 .astra-clock-center-icon {
-    color: #4c8a74;
+    color: #e6a63f;
 }
 
 .astra-clock-center-date,
@@ -370,17 +379,17 @@
 .astra-rim-marker text {
     fill: var(--astra-muted);
     font-family: inherit;
-    font-size: 7px;
+    font-size: 7.5px;
     font-weight: 800;
     letter-spacing: 0.4px;
 }
 
 .astra-clock-center-date {
-    font-size: 6.5px;
+    font-size: 7.5px;
 }
 
 .astra-clock-center-time {
-    font-size: 8px;
+    font-size: 9px;
     letter-spacing: 0;
 }
 
@@ -390,15 +399,36 @@
 }
 
 .astra-rim-marker text {
-    font-size: 6px;
+    font-size: 6.8px;
 }
 
 .astra-moon-percentage {
     fill: var(--astra-ink);
     font-family: inherit;
-    font-size: 6px;
+    font-size: 6.8px;
     font-weight: 800;
     pointer-events: none;
+}
+
+.astra-moon-percentage-icon {
+    color: var(--astra-ink);
+    stroke-width: 2;
+}
+
+.astra-birding-start-marker {
+    color: #347a72;
+    pointer-events: none;
+}
+
+.astra-birding-start-marker-pad {
+    fill: var(--astra-surface);
+    stroke: var(--astra-line);
+    stroke-width: 1;
+}
+
+.astra-birding-start-marker svg {
+    display: block;
+    stroke-width: 2;
 }
 
 .astra-chart-marker {
@@ -434,15 +464,15 @@
     color: var(--astra-current);
 }
 
-.astra-current-time-marker line {
-    stroke: var(--astra-current);
-    stroke-width: 1.25;
+.astra-current-time-hit-area {
+    fill: var(--astra-surface);
+    stroke: none;
+    pointer-events: all;
 }
 
-.astra-current-time-marker:hover line,
-.astra-current-time-marker:focus-visible line,
-.astra-current-time-marker.astra-chart-marker-selected line {
-    stroke-width: 1.25;
+.astra-current-time-marker.astra-chart-marker-selected .astra-current-time-hit-area {
+    stroke: currentColor;
+    stroke-width: 1.5;
 }
 
 .astra-current-time-marker svg {
@@ -450,9 +480,47 @@
     overflow: visible;
 }
 
+.astra-event-marker {
+    cursor: pointer;
+    outline: none;
+}
+
+.astra-event-marker line {
+    stroke: var(--astra-muted);
+    stroke-width: 1;
+}
+
+.astra-event-marker-hit-area {
+    fill: transparent;
+    pointer-events: all;
+}
+
+.astra-event-marker text {
+    fill: var(--astra-muted);
+    font-family: inherit;
+    font-size: 6.8px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.astra-event-marker-icon {
+    color: var(--astra-muted);
+}
+
+.astra-event-marker:hover,
+.astra-event-marker:focus-visible,
+.astra-event-marker-selected {
+    filter: drop-shadow(0 0 4px var(--astra-shadow));
+}
+
+.astra-event-marker:hover text,
+.astra-event-marker:focus-visible text,
+.astra-event-marker-selected text {
+    fill: var(--astra-ink);
+}
+
 .astra-event-icon svg {
     stroke-width: 2.5;
-    filter: drop-shadow(0 0 1px var(--astra-surface));
 }
 
 .astra-kicker {
@@ -558,7 +626,7 @@
 }
 
 .astra-event-table-heading h3 {
-    font-size: 1rem;
+    font-size: 1.05rem;
 }
 
 .astra-event-table {
@@ -604,13 +672,13 @@ button.astra-event-row:focus-visible,
     min-width: 0;
     overflow: hidden;
     color: var(--astra-muted);
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .astra-event-row strong {
-    font-size: 0.73rem;
+    font-size: 0.78rem;
     font-weight: 700;
     text-align: right;
     white-space: nowrap;

@@ -65,12 +65,9 @@ export default function BirdingMap() {
         };
     }, []);
 
-    useEffect(() => {
-        setDrawerHeight((currentHeight) => clampDrawerHeight(currentHeight, mapHeight));
-    }, [mapHeight]);
-
     const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
+    const clampedDrawerHeight = clampDrawerHeight(drawerHeight, mapHeight);
 
     const closeLocationsDrawer = useCallback(() => {
         setLocationSearchQuery('');
@@ -259,7 +256,7 @@ export default function BirdingMap() {
             <DrawerInteractionLock isOpen={openDrawer !== null} />
             <Logo />
             <SpeciesListControl
-                drawerHeight={drawerHeight}
+                drawerHeight={clampedDrawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'inat'}
                 onClose={closeDrawer}
@@ -272,7 +269,7 @@ export default function BirdingMap() {
                 }}
             />
             <LocationsControl
-                drawerHeight={drawerHeight}
+                drawerHeight={clampedDrawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'locations'}
                 onToggle={() => toggleDrawer('locations')}
@@ -287,7 +284,7 @@ export default function BirdingMap() {
                 searchVersion={locationSearchVersion}
             />
             <AstraControl
-                drawerHeight={drawerHeight}
+                drawerHeight={clampedDrawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'astra'}
                 onClose={closeDrawer}

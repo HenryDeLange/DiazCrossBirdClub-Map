@@ -24,27 +24,28 @@ export type AstronomyData = {
 }
 
 const twilightPalette = {
-    night: '#1f2d3d',
+    night: 'var(--astra-night)',
     astronomical: '#38556b',
     nautical: '#4f8799',
-    civil: '#72b4aa',
-    dawn: '#f0ae64',
-    morning: '#f3c96b',
-    afternoon: '#d6cf8e',
-    evening: '#d8835e'
+    civil: '#6faeaa',
+    dawn: '#e8a24b',
+    morning: '#f3cf72',
+    midday: '#f4e3a1',
+    afternoon: '#d9a06b',
+    evening: '#d96b4d'
 };
 
 const birdingPalette = {
-    early: '#e35d4e',
-    midMorning: '#e6963e',
-    midday: '#d7be55',
-    afternoon: '#6fa77d',
-    evening: '#6889ad'
+    early: '#809f59',
+    midMorning: '#719b61',
+    midday: '#63966b',
+    afternoon: '#548d75',
+    evening: '#447f7f'
 };
 
 export function getAstronomyData(date: Date, latitude: number, longitude: number): AstronomyData {
     const sunTimes = SunCalc.getTimes(date, latitude, longitude);
-    const moonTimes = SunCalc.getMoonTimes(date, latitude, longitude);
+    const moonTimes = getMoonTimesForCurrentRise(date, latitude, longitude);
     const moonIllumination = SunCalc.getMoonIllumination(date);
 
     return {
@@ -64,12 +65,13 @@ function buildTwilightSegments(date: Date, sunTimes: SunCalc.SunTimes): Timeline
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
-    const midnightEnd = new Date(dayStart.getTime() + 60 * 60 * 1000);
-    const middayStart = isValidDate(sunTimes.solarNoon) ? new Date(sunTimes.solarNoon.getTime() - 60 * 60 * 1000) : null;
-    const middayEnd = isValidDate(sunTimes.solarNoon) ? new Date(sunTimes.solarNoon.getTime() + 60 * 60 * 1000) : null;
+    const midnightWindow = getMidnightWindow(dayStart, dayEnd, sunTimes.nadir, sunTimes.nightEnd);
+    const middayStart = getDayPercentageBoundary(sunTimes.sunrise, sunTimes.solarNoon, sunTimes.sunset, -0.08);
+    const middayEnd = getDayPercentageBoundary(sunTimes.sunrise, sunTimes.solarNoon, sunTimes.sunset, 0.08);
     const boundaries = [
         { id: 'day-start', at: dayStart },
-        { id: 'midnight-end', at: midnightEnd },
+        { id: 'midnight-start', at: midnightWindow?.start ?? null },
+        { id: 'midnight-end', at: midnightWindow?.end ?? null },
         { id: 'nightEnd', at: sunTimes.nightEnd },
         { id: 'nauticalDawn', at: sunTimes.nauticalDawn },
         { id: 'dawn', at: sunTimes.dawn },
@@ -121,13 +123,13 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
     const morningCallStart = isValidDate(sunTimes.dawn) ? sunTimes.dawn : sunrise;
     const morningCallEnd = daylightPoint(0.12);
     const morningForageStart = morningCallEnd;
-    const morningForageEnd = daylightPoint(0.28);
+    const morningForageEnd = daylightPoint(0.22);
     const middayStart = new Date(solarNoon.getTime() - daylightMilliseconds * 0.06);
     const middayEnd = new Date(solarNoon.getTime() + daylightMilliseconds * 0.06);
-    const raptorThermalStart = morningForageEnd;
+    const raptorThermalStart = daylightPoint(0.30);
     const raptorThermalEnd = middayStart;
-    const afternoonStart = middayEnd;
-    const afternoonEnd = daylightPoint(0.84);
+    const afternoonStart = new Date(solarNoon.getTime() + daylightMilliseconds * 0.16);
+    const afternoonEnd = daylightPoint(0.94);
     const eveningDustStart = sunset;
     const eveningDustEnd = isValidDate(sunTimes.dusk) ? sunTimes.dusk : new Date(sunset.getTime() + daylightMilliseconds * 0.08);
     const definitions = [
@@ -166,18 +168,13 @@ function buildMoonSegment(date: Date, moonTimes: SunCalc.MoonTimes): TimelineSeg
     }
 
     const rise = moonTimes.alwaysUp ? dayStart : moonTimes.rise;
-    let set = moonTimes.alwaysUp ? dayEnd : moonTimes.set;
+    const set = moonTimes.alwaysUp ? dayEnd : moonTimes.set;
 
     if (!isValidDate(rise) || !isValidDate(set)) {
         return null;
     }
 
-    if (set <= rise) {
-        set = new Date(set);
-        set.setDate(set.getDate() + 1);
-    }
-
-    const start = rise < dayStart ? dayStart : rise;
+    const start = rise;
     const end = set;
 
     if (end <= start) {
@@ -196,23 +193,73 @@ function buildMoonSegment(date: Date, moonTimes: SunCalc.MoonTimes): TimelineSeg
 
 function getTwilightDefinition(id: string): { label: string; description: string; color: string } | null {
     const definitions: Record<string, { label: string; description: string; color: string }> = {
-        'day-start': { label: 'Midnight', description: 'The biological midnight window, centered on the darkest part of the local night.', color: twilightPalette.night },
-        'midnight-end': { label: 'Night', description: 'Darkness before the astronomical dawn.', color: twilightPalette.night },
+        'day-start': { label: 'Night', description: 'Night before the solar-midnight division.', color: twilightPalette.night },
+        'midnight-start': { label: 'Midnight', description: 'A central night window around local solar midnight, sized in proportion to the night.', color: twilightPalette.night },
+        'midnight-end': { label: 'Night', description: 'The darkest part of the night after the solar-midnight division.', color: twilightPalette.night },
         nightEnd: { label: 'Astronomical twilight', description: 'The faintest dawn glow; the Sun is 18 to 12 degrees below the horizon.', color: twilightPalette.astronomical },
         nauticalDawn: { label: 'Nautical twilight', description: 'The horizon becomes readable and brighter stars begin to fade.', color: twilightPalette.nautical },
-        dawn: { label: 'Civil twilight', description: 'Enough natural light for most outdoor activity before the Sun appears.', color: twilightPalette.civil },
-        sunrise: { label: 'Dawn chorus', description: 'Sunrise and the strong early-morning song and feeding period for many birds.', color: twilightPalette.dawn },
-        goldenHourEnd: { label: 'Morning light', description: 'Soft, low-angle light after the morning golden hour.', color: twilightPalette.morning },
-        'midday-start': { label: 'Midday light', description: 'The bright approach to solar noon, when the Sun is highest in the sky.', color: twilightPalette.morning },
-        'midday-end': { label: 'Afternoon light', description: 'The broad afternoon interval after solar noon, when activity gradually shifts toward evening.', color: twilightPalette.afternoon },
-        goldenHour: { label: 'Evening golden hour', description: 'Warm, low-angle light before sunset; a useful time for open-country movement.', color: twilightPalette.evening },
-        sunset: { label: 'Civil twilight', description: 'The post-sunset glow while the landscape remains naturally lit.', color: twilightPalette.civil },
+        dawn: { label: 'Civil twilight', description: 'The Sun is between 6 degrees below the horizon and sunrise.', color: twilightPalette.civil },
+        sunrise: { label: 'Morning golden hour', description: 'Low-angle light from sunrise until the Sun reaches 6 degrees above the horizon; duration varies with latitude and season.', color: twilightPalette.dawn },
+        goldenHourEnd: { label: 'Morning daylight', description: 'Daylight after the morning golden hour and before the proportional midday window.', color: twilightPalette.morning },
+        'midday-start': { label: 'Midday', description: 'The central daylight window around solar noon, sized as a proportion of the day length.', color: twilightPalette.midday },
+        'midday-end': { label: 'Afternoon daylight', description: 'Daylight after the proportional midday window and before the evening golden hour.', color: twilightPalette.afternoon },
+        goldenHour: { label: 'Evening golden hour', description: 'Low-angle light from the Sun reaching 6 degrees above the horizon until sunset; duration varies with latitude and season.', color: twilightPalette.evening },
+        sunset: { label: 'Civil twilight', description: 'The post-sunset interval while the Sun is between sunset and 6 degrees below the horizon.', color: twilightPalette.civil },
         dusk: { label: 'Nautical twilight', description: 'The horizon fades and the first stars become prominent.', color: twilightPalette.nautical },
         nauticalDusk: { label: 'Astronomical twilight', description: 'The final fading light before astronomical night.', color: twilightPalette.astronomical },
         night: { label: 'Night', description: 'Astronomical night, with the Sun more than 18 degrees below the horizon.', color: twilightPalette.night }
     };
 
     return definitions[id] ?? null;
+}
+
+function getMoonTimesForCurrentRise(date: Date, latitude: number, longitude: number): SunCalc.MoonTimes {
+    const currentTimes = SunCalc.getMoonTimes(date, latitude, longitude);
+
+    if (currentTimes.alwaysUp || currentTimes.alwaysDown) {
+        return currentTimes;
+    }
+
+    const rise = isDateOnSelectedDay(currentTimes.rise, date) ? currentTimes.rise : undefined;
+    if (!rise) {
+        return { rise: undefined, set: undefined };
+    }
+
+    let set = isValidDate(currentTimes.set) && currentTimes.set > rise ? currentTimes.set : undefined;
+    if (!set) {
+        const followingDate = new Date(date);
+        followingDate.setDate(followingDate.getDate() + 1);
+        const followingTimes = SunCalc.getMoonTimes(followingDate, latitude, longitude);
+        set = isValidDate(followingTimes.set) && followingTimes.set > rise ? followingTimes.set : undefined;
+    }
+
+    return { rise, set };
+}
+
+function isDateOnSelectedDay(value: Date | undefined, selectedDate: Date): value is Date {
+    return isValidDate(value)
+        && value.getFullYear() === selectedDate.getFullYear()
+        && value.getMonth() === selectedDate.getMonth()
+        && value.getDate() === selectedDate.getDate();
+}
+
+function getMidnightWindow(dayStart: Date, dayEnd: Date, nadir: Date | null | undefined, nightEnd: Date | null | undefined): { start: Date; end: Date } | null {
+    const center = isValidDate(nadir) && nadir >= dayStart && nadir <= dayEnd ? nadir : dayStart;
+    const halfWindow = isValidDate(nightEnd) && nightEnd > center
+        ? (nightEnd.getTime() - center.getTime()) * 0.15
+        : 60 * 60 * 1000;
+    const start = new Date(Math.max(dayStart.getTime(), center.getTime() - halfWindow));
+    const end = new Date(Math.min(dayEnd.getTime(), center.getTime() + halfWindow));
+
+    return end > start ? { start, end } : null;
+}
+
+function getDayPercentageBoundary(sunrise: Date | null | undefined, solarNoon: Date | null | undefined, sunset: Date | null | undefined, fractionFromNoon: number): Date | null {
+    if (!isValidDate(sunrise) || !isValidDate(solarNoon) || !isValidDate(sunset)) {
+        return null;
+    }
+
+    return new Date(solarNoon.getTime() + (sunset.getTime() - sunrise.getTime()) * fractionFromNoon);
 }
 
 function createSegment(id: string, label: string, description: string, start: Date, end: Date, color: string): TimelineSegment {

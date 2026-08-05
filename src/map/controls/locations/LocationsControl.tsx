@@ -113,7 +113,7 @@ export function LocationsControl({
                 maxHeight='calc(100dvh - 1rem)'
             >
                 <LocationTabs
-                    key={`locations-tabs-${searchVersion ?? 0}`}
+                    key={`locations-tabs-${searchVersion ?? 0}-${initialTab ?? ''}`}
                     tabs={tabs}
                     initialSearchQuery={initialSearchQuery}
                     initialTab={initialTab}

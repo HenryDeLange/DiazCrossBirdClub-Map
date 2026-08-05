@@ -46,12 +46,6 @@ export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCle
     }, []);
 
     useEffect(() => {
-        if (initialTab && locationTabNames.includes(initialTab)) {
-            setActiveTab(initialTab);
-        }
-    }, [initialTab]);
-
-    useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = 0;
         }

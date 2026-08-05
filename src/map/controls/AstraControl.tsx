@@ -39,7 +39,7 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'
             >
-                <AstraPage embedded initialCoordinates={coordinates ?? undefined} locationView={isLocationView} />
+                <AstraPage key={coordinates ? `${coordinates.latitude}:${coordinates.longitude}` : 'default'} embedded initialCoordinates={coordinates ?? undefined} locationView={isLocationView} />
             </MapDrawer>
         </>
     );

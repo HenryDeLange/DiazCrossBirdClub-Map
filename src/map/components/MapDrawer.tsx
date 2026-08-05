@@ -39,18 +39,32 @@ export function MapDrawer({
 
     useEffect(() => {
         if (isOpen) {
-            setIsRendered(true);
-            const frameId = requestAnimationFrame(() => setIsVisible(true));
-            return () => cancelAnimationFrame(frameId);
+            let visibleFrameId: number | undefined;
+            const renderTimeoutId = window.setTimeout(() => {
+                setIsRendered(true);
+                visibleFrameId = requestAnimationFrame(() => setIsVisible(true));
+            }, 0);
+
+            return () => {
+                window.clearTimeout(renderTimeoutId);
+                if (visibleFrameId !== undefined) {
+                    cancelAnimationFrame(visibleFrameId);
+                }
+            };
         }
 
-        setIsVisible(false);
+        const closeFrameId = requestAnimationFrame(() => setIsVisible(false));
         const timeoutId = window.setTimeout(() => setIsRendered(false), drawerTransitionDuration);
-        return () => window.clearTimeout(timeoutId);
+
+        return () => {
+            cancelAnimationFrame(closeFrameId);
+            window.clearTimeout(timeoutId);
+        };
     }, [isOpen]);
 
     useEffect(() => {
-        setPanelHeight(clampHeight(height, minHeight));
+        const frameId = requestAnimationFrame(() => setPanelHeight(clampHeight(height, minHeight)));
+        return () => cancelAnimationFrame(frameId);
     }, [height, minHeight]);
 
     const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
