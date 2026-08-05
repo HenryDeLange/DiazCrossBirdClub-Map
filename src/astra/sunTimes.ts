@@ -54,7 +54,7 @@ export function getAstronomyData(date: Date, latitude: number, longitude: number
         moonIllumination,
         twilightSegments: buildTwilightSegments(date, sunTimes),
         birdingSegments: buildBirdingSegments(date, sunTimes),
-        moonSegment: buildMoonSegment(date, moonTimes),
+        moonSegment: buildMoonSegment(date, latitude, longitude),
         date,
         latitude,
         longitude
@@ -158,24 +158,37 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
         .map(({ id, label, description, start, end, color }) => createSegment(id, label, description, start, end, color));
 }
 
-function buildMoonSegment(date: Date, moonTimes: SunCalc.MoonTimes): TimelineSegment | null {
+function buildMoonSegment(date: Date, latitude: number, longitude: number): TimelineSegment | null {
     const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
+    const currentTimes = SunCalc.getMoonTimes(date, latitude, longitude);
 
-    if (moonTimes.alwaysDown) {
+    if (currentTimes.alwaysDown) {
         return null;
     }
 
-    const rise = moonTimes.alwaysUp ? dayStart : moonTimes.rise;
-    const set = moonTimes.alwaysUp ? dayEnd : moonTimes.set;
+    if (currentTimes.alwaysUp) {
+        return createSegment(
+            'moonlight',
+            'Moonlight',
+            'The Moon is above the horizon during this interval; nocturnal species may be easier to hear or observe.',
+            dayStart,
+            dayEnd,
+            '#8997a8'
+        );
+    }
 
-    if (!isValidDate(rise) || !isValidDate(set)) {
+    const moonTimes = getMoonTimesForCurrentRise(date, latitude, longitude);
+    const rise = moonTimes.rise ?? null;
+    const set = moonTimes.set ?? null;
+
+    if (!rise && !set) {
         return null;
     }
 
-    const start = rise;
-    const end = set;
+    const start = rise ?? dayStart;
+    const end = set ?? dayEnd;
 
     if (end <= start) {
         return null;
@@ -187,7 +200,8 @@ function buildMoonSegment(date: Date, moonTimes: SunCalc.MoonTimes): TimelineSeg
         'The Moon is above the horizon during this interval; nocturnal species may be easier to hear or observe.',
         start,
         end,
-        '#8997a8'
+        '#8997a8',
+        dayStart
     );
 }
 
@@ -214,33 +228,35 @@ function getTwilightDefinition(id: string): { label: string; description: string
 }
 
 function getMoonTimesForCurrentRise(date: Date, latitude: number, longitude: number): SunCalc.MoonTimes {
+    const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const previousDayStart = new Date(dayStart);
+    previousDayStart.setDate(previousDayStart.getDate() - 1);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    const followingDayEnd = new Date(dayEnd);
+    followingDayEnd.setDate(followingDayEnd.getDate() + 1);
+    const previousDate = new Date(previousDayStart);
+    previousDate.setHours(12, 0, 0, 0);
+    const followingDate = new Date(dayEnd);
+    followingDate.setHours(12, 0, 0, 0);
+    const previousTimes = SunCalc.getMoonTimes(previousDate, latitude, longitude);
     const currentTimes = SunCalc.getMoonTimes(date, latitude, longitude);
+    const followingTimes = SunCalc.getMoonTimes(followingDate, latitude, longitude);
 
     if (currentTimes.alwaysUp || currentTimes.alwaysDown) {
         return currentTimes;
     }
 
-    const rise = isDateOnSelectedDay(currentTimes.rise, date) ? currentTimes.rise : undefined;
-    if (!rise) {
-        return { rise: undefined, set: undefined };
-    }
-
-    let set = isValidDate(currentTimes.set) && currentTimes.set > rise ? currentTimes.set : undefined;
-    if (!set) {
-        const followingDate = new Date(date);
-        followingDate.setDate(followingDate.getDate() + 1);
-        const followingTimes = SunCalc.getMoonTimes(followingDate, latitude, longitude);
-        set = isValidDate(followingTimes.set) && followingTimes.set > rise ? followingTimes.set : undefined;
-    }
+    const riseCandidates = [previousTimes.rise, currentTimes.rise]
+        .filter((value): value is Date => isValidDate(value) && value >= previousDayStart && value < dayEnd)
+        .sort((first, second) => second.getTime() - first.getTime());
+    const rise = riseCandidates[0];
+    const setCandidates = [currentTimes.set, followingTimes.set]
+        .filter((value): value is Date => isValidDate(value) && value > (rise ?? dayStart) && value < followingDayEnd)
+        .sort((first, second) => first.getTime() - second.getTime());
+    const set = setCandidates[0];
 
     return { rise, set };
-}
-
-function isDateOnSelectedDay(value: Date | undefined, selectedDate: Date): value is Date {
-    return isValidDate(value)
-        && value.getFullYear() === selectedDate.getFullYear()
-        && value.getMonth() === selectedDate.getMonth()
-        && value.getDate() === selectedDate.getDate();
 }
 
 function getMidnightWindow(dayStart: Date, dayEnd: Date, nadir: Date | null | undefined, nightEnd: Date | null | undefined): { start: Date; end: Date } | null {
@@ -262,15 +278,15 @@ function getDayPercentageBoundary(sunrise: Date | null | undefined, solarNoon: D
     return new Date(solarNoon.getTime() + (sunset.getTime() - sunrise.getTime()) * fractionFromNoon);
 }
 
-function createSegment(id: string, label: string, description: string, start: Date, end: Date, color: string): TimelineSegment {
+function createSegment(id: string, label: string, description: string, start: Date, end: Date, color: string, timelineStart: Date = start): TimelineSegment {
     return {
         id,
         label,
         description,
         start,
         end,
-        startMinutes: minutesSinceMidnight(start),
-        endMinutes: minutesOnTimeline(end, start),
+        startMinutes: minutesOnTimeline(start, timelineStart),
+        endMinutes: minutesOnTimeline(end, timelineStart),
         color
     };
 }
