@@ -1,5 +1,6 @@
 import { ExternalLink, SunMoon } from 'lucide-react';
-import AstraPage, { type Coordinates } from '../../astra/AstraPage';
+import AstraPage from '../../astra/AstraPage';
+import type { Coordinates } from '../../inputfields/dateLocationUtils';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
 import { getAstraPathname } from '../locationUtils';

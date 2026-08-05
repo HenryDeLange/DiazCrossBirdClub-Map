@@ -7,6 +7,7 @@ import { LocationsControl } from './controls/locations/LocationsControl';
 import type { AstronomyLocation } from './controls/locations/types';
 import { Logo } from './controls/logo/Logo';
 import { SpeciesListControl } from './controls/species/SpeciesListControl';
+import { TidesControl } from './controls/TidesControl';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
@@ -19,7 +20,7 @@ import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, se
 import './map.css';
 import { MapEvents } from './MapEvents';
 
-type OpenDrawer = 'inat' | 'locations' | 'astra' | null;
+type OpenDrawer = 'inat' | 'locations' | 'tides' | 'astra' | null;
 
 const locationSources: LocationSource[] = [
     { tab: 'Outings', collections: outings },
@@ -282,6 +283,18 @@ export default function BirdingMap() {
                 initialTab={selectedLocationsTab}
                 initialFocusQuery={initialFocusQuery || undefined}
                 searchVersion={locationSearchVersion}
+            />
+            <TidesControl
+                drawerHeight={clampedDrawerHeight}
+                onDrawerHeightChange={setDrawerHeight}
+                isOpen={openDrawer === 'tides'}
+                onClose={closeDrawer}
+                onBack={openDrawer === 'tides' && drawerBackTarget !== null ? handleDrawerBack : undefined}
+                onToggle={() => {
+                    setAstronomyLocation(null);
+                    setInatLocationName(null);
+                    toggleDrawer('tides');
+                }}
             />
             <AstraControl
                 drawerHeight={clampedDrawerHeight}

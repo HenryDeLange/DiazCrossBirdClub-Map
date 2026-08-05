@@ -1,5 +1,4 @@
 import { LocateControl as LocateControlClass } from 'leaflet.locatecontrol';
-import 'leaflet.locatecontrol/dist/L.Control.Locate.css';
 import 'leaflet/dist/leaflet.css';
 import { Locate, LocateFixed } from 'lucide-react';
 import { useEffect } from 'react';

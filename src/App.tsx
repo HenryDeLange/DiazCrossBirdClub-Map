@@ -1,13 +1,16 @@
 import { Suspense } from 'react';
 import { LoadingOrError } from './LoadingOrError';
-import { isAstraPath } from './appRouting';
+import { isAstraPath, isTidesPath } from './appRouting';
 import AstraPage from './astra/AstraPage';
 import BirdingMap from './map/BirdingMap';
+import TidesPage from './tides/TidesPage';
 
 export default function App() {
     return (
         <Suspense fallback={<LoadingOrError />}>
-            {isAstraPath(window.location.pathname) ? <AstraPage /> : <BirdingMap />}
+            {isAstraPath(window.location.pathname) ? <AstraPage />
+                : isTidesPath(window.location.pathname) ? <TidesPage />
+                    : <BirdingMap />}
         </Suspense>
     );
 }

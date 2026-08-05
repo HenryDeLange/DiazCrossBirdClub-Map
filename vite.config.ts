@@ -34,6 +34,17 @@ export default defineConfig({
                 cleanupOutdatedCaches: true,
                 runtimeCaching: [
                     {
+                        // Tide station harmonic constituents (used for tide predictions)
+                        urlPattern: ({ url }) => url.origin === 'https://api.openwaters.io' && url.pathname === '/tides/stations',
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'tide-station-harmonics',
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
                         // Google Maps tile layers (Street / Hybrid / Satellite base layers)
                         urlPattern: ({ url }) => url.hostname.endsWith('.google.com') && url.pathname.startsWith('/vt'),
                         handler: 'CacheFirst',
@@ -129,19 +140,27 @@ export default defineConfig({
                     groups: [
                         {
                             name: 'react',
-                            test: /node_modules[\\/](react|react-dom)/,
+                            test: /node_modules[\\/](react|react-dom)/
                         },
                         {
                             name: 'leaflet',
-                            test: /node_modules[\\/](leaflet|leaflet.locatecontrol|react-leaflet)/,
+                            test: /node_modules[\\/](leaflet|leaflet.locatecontrol|react-leaflet)/
                         },
                         {
                             name: 'ui',
-                            test: /node_modules[\\/](lucide-react|usehooks-ts|geojson)/,
+                            test: /node_modules[\\/](lucide-react|usehooks-ts|geojson)/
                         },
                         {
                             name: 'geojson',
-                            test: /src[\\/]map[\\/]geojson[\\/].*\.json$/,
+                            test: /src[\\/]map[\\/]geojson[\\/].*\.json$/
+                        },
+                        {
+                            name: 'tides',
+                            test: /node_modules[\\/]@neaps[\\/]tide-predictor/
+                        },
+                        {
+                            name: 'astra',
+                            test: /node_modules[\\/]suncalc/
                         }
                     ]
                 }

@@ -1,23 +1,18 @@
-import { Bird, CalendarDays, Clock3, Locate, LocateFixed, Map, MapPin, Moon, MoonStar, Sun, SunMoon, Sunrise, Sunset } from 'lucide-react';
+import { Bird, Clock3, Map, Moon, MoonStar, Sun, SunMoon, Sunrise, Sunset } from 'lucide-react';
 import { useEffect, useState, type CSSProperties, type ComponentType, type KeyboardEvent, type ReactNode, type SVGProps } from 'react';
 import MoonriseIcon from '../assets/astra/moonrise.svg?react';
 import MoonsetIcon from '../assets/astra/moonset.svg?react';
+import { DateLocationControls } from '../inputfields/DateLocationControls';
+import { getQueryCoordinates, getQueryDate, type Coordinates } from '../inputfields/dateLocationUtils';
 import { getBasePathname } from '../map/locationUtils';
 import './astra.css';
 import { describeMoonPhase, formatDateInput, formatTime, getAstronomyData, type AstronomyData, type TimelineSegment } from './sunTimes';
-
-export type Coordinates = {
-    latitude: number;
-    longitude: number;
-}
 
 type AstraPageProps = {
     embedded?: boolean;
     initialCoordinates?: Coordinates;
     locationView?: boolean;
 }
-
-type LocationStatus = 'idle' | 'loading' | 'success' | 'error';
 
 type SkyEvent = {
     id: string;
@@ -37,8 +32,6 @@ const defaultCoordinates: Coordinates = {
     longitude: 26.724985724190617
 };
 
-const decimalInputPattern = /^-?\d*(?:\.\d*)?$/;
-
 export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
     const queryDate = embedded ? null : getQueryDate();
@@ -46,49 +39,10 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
     const startingCoordinates = initialCoordinates ?? queryCoordinates ?? defaultCoordinates;
     const shouldRequestLocation = !hasExplicitCoordinates && typeof navigator !== 'undefined' && Boolean(navigator.geolocation);
     const [coordinates, setCoordinates] = useState<Coordinates>(startingCoordinates);
-    const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(startingCoordinates.latitude));
-    const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(startingCoordinates.longitude));
     const [dateValue, setDateValue] = useState(queryDate ?? formatDateInput(new Date()));
     const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
-    const [locationStatus, setLocationStatus] = useState<LocationStatus>(shouldRequestLocation ? 'loading' : 'idle');
-    const [locationStatusMessage, setLocationStatusMessage] = useState(shouldRequestLocation ? 'Locating...' : '');
     const [now, setNow] = useState(() => new Date());
-
-    useEffect(() => {
-        if (!shouldRequestLocation) {
-            return;
-        }
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const nextCoordinates = getCoordinatesFromPosition(position);
-                setCoordinates(nextCoordinates);
-                setLatitudeInput(formatCoordinate(nextCoordinates.latitude));
-                setLongitudeInput(formatCoordinate(nextCoordinates.longitude));
-                setLocationStatus('success');
-                setLocationStatusMessage('GPS point loaded');
-            },
-            () => {
-                setLocationStatus('error');
-                setLocationStatusMessage('Could not load GPS point');
-            },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
-        );
-    }, [shouldRequestLocation]);
-
-    useEffect(() => {
-        if (locationStatus === 'idle' || locationStatus === 'loading') {
-            return;
-        }
-
-        const timeoutId = window.setTimeout(() => {
-            setLocationStatus('idle');
-            setLocationStatusMessage('');
-        }, locationStatus === 'success' ? 1900 : 2600);
-
-        return () => window.clearTimeout(timeoutId);
-    }, [locationStatus]);
 
     useEffect(() => {
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
@@ -147,102 +101,13 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
         }
     };
 
-    const handleCoordinateInput = (kind: keyof Coordinates, value: string) => {
-        if (!decimalInputPattern.test(value)) {
-            return;
-        }
-
-        if (kind === 'latitude') {
-            setLatitudeInput(value);
-        }
-        else {
-            setLongitudeInput(value);
-        }
-
-        if (value === '' || value === '-' || value === '.' || value === '-.') {
-            return;
-        }
-
-        const numericValue = Number(value);
-        const isInRange = kind === 'latitude'
-            ? numericValue >= -90 && numericValue <= 90
-            : numericValue >= -180 && numericValue <= 180;
-
-        if (Number.isFinite(numericValue) && isInRange) {
-            setCoordinates((current) => ({ ...current, [kind]: roundCoordinate(numericValue) }));
-        }
-    };
-
-    const normalizeCoordinateInput = (kind: keyof Coordinates) => {
-        const value = kind === 'latitude' ? latitudeInput : longitudeInput;
-        const numericValue = Number(value);
-        const isInRange = kind === 'latitude'
-            ? numericValue >= -90 && numericValue <= 90
-            : numericValue >= -180 && numericValue <= 180;
-
-        if (!Number.isFinite(numericValue) || !isInRange) {
-            return;
-        }
-
-        const roundedValue = roundCoordinate(numericValue);
-        setCoordinates((current) => ({ ...current, [kind]: roundedValue }));
-
-        if (kind === 'latitude') {
-            setLatitudeInput(formatCoordinate(roundedValue));
-        }
-        else {
-            setLongitudeInput(formatCoordinate(roundedValue));
-        }
-    };
-
-    const requestCurrentLocation = () => {
-        if (typeof navigator === 'undefined' || !navigator.geolocation) {
-            setLocationStatus('error');
-            setLocationStatusMessage('GPS is not available');
-            return;
-        }
-
-        setLocationStatus('loading');
-        setLocationStatusMessage('Locating...');
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                const nextCoordinates = getCoordinatesFromPosition(position);
-                setCoordinates(nextCoordinates);
-                setLatitudeInput(String(nextCoordinates.latitude));
-                setLongitudeInput(String(nextCoordinates.longitude));
-                setLocationStatus('success');
-                setLocationStatusMessage('GPS point loaded');
-            },
-            () => {
-                setLocationStatus('error');
-                setLocationStatusMessage('Could not load GPS point');
-            },
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 10000 }
-        );
-    };
-
     return (
         <main className={`astra-page ${embedded ? 'astra-page-embedded' : ''}`}>
             <div className='astra-shell'>
                 <header className='astra-header'>
                     <div className='astra-toolbar'>
                         <div className='astra-toolbar-controls'>
-                            <div className='astra-field-section astra-date-block'>
-                                <div className='astra-section-label astra-date-label' title='Date'>
-                                    <CalendarDays size={18} aria-hidden='true' />
-                                    <span className='astra-visually-hidden'>Date</span>
-                                </div>
-                                <input id='astra-date' type='date' aria-label='Date' value={dateValue} onChange={(event) => setDateValue(event.target.value)} />
-                            </div>
-                            <div className='astra-field-section astra-location-block'>
-                                <div className='astra-section-label' title='Location'><MapPin size={18} aria-hidden='true' /><span className='astra-visually-hidden'>Location</span></div>
-                                <div className={`astra-coordinate-controls ${locationView ? 'astra-coordinate-controls-readonly' : ''}`}>
-                                    <label><span className='astra-coordinate-label-full'>Latitude</span><span className='astra-coordinate-label-short'>Lat.</span><input aria-label='Latitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={latitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('latitude', event.target.value)} onBlur={() => normalizeCoordinateInput('latitude')} onKeyDown={handleDecimalKeyDown} /></label>
-                                    <label><span className='astra-coordinate-label-full'>Longitude</span><span className='astra-coordinate-label-short'>Long.</span><input aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onBlur={() => normalizeCoordinateInput('longitude')} onKeyDown={handleDecimalKeyDown} /></label>
-                                    {!locationView && <button type='button' className={`astra-ghost-button ${locationStatus === 'loading' ? 'astra-location-loading' : ''} ${locationStatus === 'success' ? 'astra-location-success' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
-                                </div>
-                                {locationStatus === 'error' && <span className='astra-location-status astra-location-status-error' role='status' aria-live='polite'>{locationStatusMessage}</span>}
-                            </div>
+                            <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={setCoordinates} coordinatePrecision={5} locationView={locationView} requestLocationOnMount={shouldRequestLocation} idPrefix='astra' />
                         </div>
                         {!embedded && (
                             <a className='astra-map-link' href={getMapPathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
@@ -543,50 +408,12 @@ function formatMoonTime(value: Date | undefined, alwaysUp?: boolean, alwaysDown?
     return formatTime(value);
 }
 
-function getCoordinatesFromPosition(position: GeolocationPosition): Coordinates {
-    return {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-    };
-}
-
-function handleDecimalKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.ctrlKey || event.metaKey || event.altKey || event.key.length > 1) {
-        return;
-    }
-
-    const input = event.currentTarget;
-    const nextValue = `${input.value.slice(0, input.selectionStart ?? input.value.length)}${event.key}${input.value.slice(input.selectionEnd ?? input.value.length)}`;
-    if (!decimalInputPattern.test(nextValue)) {
-        event.preventDefault();
-    }
-}
-
 function isValidDate(value: Date | null | undefined): value is Date {
     return value instanceof Date && !Number.isNaN(value.getTime());
 }
 
-function getQueryCoordinates(): Coordinates | null {
-    const params = new URLSearchParams(window.location.search);
-    const latitudeValue = params.get('lat');
-    const longitudeValue = params.get('lng');
-
-    if (latitudeValue === null || longitudeValue === null) {
-        return null;
-    }
-
-    const latitude = Number(latitudeValue);
-    const longitude = Number(longitudeValue);
-    return Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180 ? { latitude, longitude } : null;
-}
-
 function getMapPathname(): string {
     return getBasePathname();
-}
-
-function getQueryDate(): string | null {
-    const value = new URLSearchParams(window.location.search).get('date');
-    return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00`).getTime()) ? value : null;
 }
 
 function MoonPercentageMarker({ minutes, fraction, phaseName, selected, onSelect, onKeyDown }: Readonly<{ minutes: number; fraction: number; phaseName: string; selected: boolean; onSelect: (markerId: string) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, onSelect: () => void) => void }>) {
@@ -719,14 +546,6 @@ function formatCurrentDate(date: Date): string {
 function getSelectedDate(value: string): Date {
     const date = value ? new Date(`${value}T12:00:00`) : new Date();
     return isValidDate(date) ? date : new Date();
-}
-
-function roundCoordinate(value: number): number {
-    return Math.round(value * 100000) / 100000;
-}
-
-function formatCoordinate(value: number): string {
-    return roundCoordinate(value).toFixed(5);
 }
 
 function minutesOnTimeline(date: Date, timelineStart: Date): number {

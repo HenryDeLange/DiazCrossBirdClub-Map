@@ -1,5 +1,6 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { LatLngBounds, type LatLngExpression, type Map as LeafletMap } from 'leaflet';
+import { ASTRA_PATH, TIDES_PATH } from '../appRouting';
 import type { FeatureProps } from './geojson/types';
 
 export type LocationTabName = 'Outings' | 'Spots' | 'Paths' | 'Points';
@@ -14,7 +15,7 @@ export type LocationSelection = {
     name: string;
 };
 
-const reservedAppPaths = new Set(['astra']);
+const reservedAppPaths = new Set([ASTRA_PATH, TIDES_PATH]);
 
 type FeatureGroupItem = {
     feature: Feature<Geometry, FeatureProps>;
@@ -39,7 +40,11 @@ export function getBasePathname(): string {
 }
 
 export function getAstraPathname(): string {
-    return joinPath(getBasePathname(), 'astra');
+    return joinPath(getBasePathname(), ASTRA_PATH);
+}
+
+export function getTidesPathname(): string {
+    return joinPath(getBasePathname(), TIDES_PATH);
 }
 
 export function getLocationPathname(locationName: string): string {

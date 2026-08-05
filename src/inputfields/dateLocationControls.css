@@ -1,0 +1,219 @@
+.date-location-controls,
+.date-location-field-section,
+.date-location-section-label,
+.date-location-coordinate-controls,
+.date-location-coordinate-controls label {
+    display: flex;
+    align-items: center;
+}
+
+.date-location-controls {
+    flex-wrap: wrap;
+    gap: 0.7rem 1.2rem;
+    min-width: 0;
+}
+
+.date-location-field-section {
+    gap: 0.6rem;
+    min-height: 2.2rem;
+}
+
+.date-location-location-block {
+    position: relative;
+    gap: 0.8rem;
+    padding-left: 1.2rem;
+    border-left: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
+}
+
+.date-location-section-label {
+    color: var(--date-location-muted, #626262);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.date-location-date-label {
+    cursor: default;
+}
+
+.date-location-date-block input,
+.date-location-coordinate-input {
+    min-height: 1.9rem;
+    box-sizing: border-box;
+    border: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
+    border-radius: 0.35rem;
+    outline: none;
+    background: var(--date-location-surface, #f8f8f8);
+    color: var(--date-location-ink, #111111);
+    font: inherit;
+}
+
+.date-location-date-block input {
+    padding: 0 0.45rem;
+    cursor: pointer;
+}
+
+.date-location-date-block input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.date-location-date-block input:focus,
+.date-location-coordinate-input:focus {
+    border-color: var(--date-location-ink, #111111);
+    box-shadow: 0 0 0 2px var(--date-location-soft-line, rgba(17, 17, 17, 0.09));
+}
+
+.date-location-coordinate-controls {
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.date-location-coordinate-controls label {
+    gap: 0.3rem;
+    color: var(--date-location-muted, #626262);
+    font-size: 0.72rem;
+    font-weight: 800;
+}
+
+.date-location-coordinate-label-short {
+    display: none;
+}
+
+.date-location-coordinate-input {
+    width: 7rem;
+    padding: 0.22rem 0.45rem;
+}
+
+.date-location-coordinate-input:read-only {
+    border-color: transparent;
+    background: transparent;
+    box-shadow: none;
+    cursor: default;
+}
+
+.date-location-ghost-button {
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 2.25rem;
+    height: 2.25rem;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--date-location-muted, #626262);
+    cursor: pointer;
+    font: inherit;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.date-location-ghost-button:hover,
+.date-location-ghost-button:focus-visible {
+    border-color: transparent;
+    background: var(--date-location-selected, #e0e0e0);
+    color: var(--date-location-ink, #111111);
+    outline: none;
+}
+
+.date-location-ghost-button.date-location-loading {
+    color: var(--action-color, #111111) !important;
+    animation: date-location-pulse 900ms ease-in-out infinite alternate;
+}
+
+.date-location-ghost-button.date-location-success {
+    color: #16803c !important;
+}
+
+.date-location-ghost-button.date-location-success svg {
+    animation: date-location-success 1900ms ease-out both;
+}
+
+.date-location-status {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 1.2rem;
+    z-index: 2;
+    padding: 0.2rem 0.45rem;
+    border-radius: 0.25rem;
+    background: var(--date-location-surface, #f8f8f8);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+    animation: date-location-status-in 170ms ease-out both;
+}
+
+.date-location-status-error {
+    color: #b3261e;
+}
+
+.date-location-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+@keyframes date-location-pulse {
+    from { opacity: 0.5; }
+    to { opacity: 1; }
+}
+
+@keyframes date-location-success {
+    0% { transform: scale(0.7); }
+    55% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+@keyframes date-location-status-in {
+    from { opacity: 0; transform: translateY(-0.15rem); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .date-location-controls {
+        --date-location-line: rgba(244, 244, 244, 0.2);
+        --date-location-soft-line: rgba(244, 244, 244, 0.1);
+        --date-location-surface: #1c1c1c;
+        --date-location-selected: #353535;
+        --date-location-ink: #f4f4f4;
+        --date-location-muted: #b8b8b8;
+    }
+}
+
+@media (max-width: 720px) {
+    .date-location-controls {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 0.55rem;
+    }
+
+    .date-location-location-block {
+        padding-top: 0.55rem;
+        padding-left: 0;
+        border-top: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
+        border-left: 0;
+    }
+}
+
+@media (max-width: 470px) {
+    .date-location-coordinate-label-full {
+        display: none;
+    }
+
+    .date-location-coordinate-label-short {
+        display: inline;
+    }
+
+    .date-location-coordinate-input {
+        width: 6.25rem;
+    }
+}
