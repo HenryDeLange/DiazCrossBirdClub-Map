@@ -1,5 +1,5 @@
 import { useStation, type Extreme, type Station } from '@neaps/tide-predictor';
-import { roundCoordinate, type Coordinates } from '../inputfields/dateLocationUtils';
+import { roundCoordinate, type Coordinates } from '../components/dateLocationUtils';
 
 export type TideStation = Station & {
     distance?: number;
@@ -42,7 +42,7 @@ export async function fetchTideStations(coordinates: Coordinates, signal?: Abort
 
         const stations = parseStations(await response.json());
         if (stations.length === 0) {
-            throw new Error('No tide stations found for this location');
+            throw new Error('No tide stations with harmonic data found for this location');
         }
 
         return { stations, coordinates: roundedCoordinates };
@@ -141,6 +141,7 @@ function isTideStation(value: unknown): value is TideStation {
         && typeof station.longitude === 'number'
         && typeof station.timezone === 'string'
         && Array.isArray(station.harmonic_constituents)
+        && station.harmonic_constituents.length > 0
         && typeof station.datums === 'object'
         && station.datums !== null;
 }

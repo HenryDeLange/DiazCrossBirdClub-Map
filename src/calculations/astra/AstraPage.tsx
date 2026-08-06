@@ -1,10 +1,10 @@
 import { Bird, Clock3, Map, Moon, MoonStar, Sun, SunMoon, Sunrise, Sunset } from 'lucide-react';
 import { useEffect, useState, type CSSProperties, type ComponentType, type KeyboardEvent, type ReactNode, type SVGProps } from 'react';
-import MoonriseIcon from '../assets/astra/moonrise.svg?react';
-import MoonsetIcon from '../assets/astra/moonset.svg?react';
-import { DateLocationControls } from '../inputfields/DateLocationControls';
-import { getQueryCoordinates, getQueryDate, type Coordinates } from '../inputfields/dateLocationUtils';
-import { getBasePathname } from '../map/locationUtils';
+import { getBasePathname } from '../../appRouting';
+import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
+import MoonsetIcon from '../../assets/astra/moonset.svg?react';
+import { DateLocationControls } from '../components/DateLocationControls';
+import { getQueryCoordinates, getQueryDate, type Coordinates } from '../components/dateLocationUtils';
 import './astra.css';
 import { describeMoonPhase, formatDateInput, formatTime, getAstronomyData, type AstronomyData, type TimelineSegment } from './sunTimes';
 

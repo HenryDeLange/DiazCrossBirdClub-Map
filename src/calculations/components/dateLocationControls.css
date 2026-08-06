@@ -9,19 +9,19 @@
 
 .date-location-controls {
     flex-wrap: wrap;
-    gap: 0.7rem 1.2rem;
+    gap: 0.5rem 0.9rem;
     min-width: 0;
 }
 
 .date-location-field-section {
-    gap: 0.6rem;
-    min-height: 2.2rem;
+    gap: 0.45rem;
+    min-height: 2rem;
 }
 
 .date-location-location-block {
     position: relative;
-    gap: 0.8rem;
-    padding-left: 1.2rem;
+    gap: 0.6rem;
+    padding-left: 0.9rem;
     border-left: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
 }
 
@@ -41,7 +41,7 @@
 
 .date-location-date-block input,
 .date-location-coordinate-input {
-    min-height: 1.9rem;
+    min-height: 1.7rem;
     box-sizing: border-box;
     border: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
     border-radius: 0.35rem;
@@ -52,7 +52,7 @@
 }
 
 .date-location-date-block input {
-    padding: 0 0.45rem;
+    padding: 0 0.35rem;
     cursor: pointer;
 }
 
@@ -68,11 +68,11 @@
 
 .date-location-coordinate-controls {
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.35rem;
 }
 
 .date-location-coordinate-controls label {
-    gap: 0.3rem;
+    gap: 0.2rem;
     color: var(--date-location-muted, #626262);
     font-size: 0.72rem;
     font-weight: 800;
@@ -83,8 +83,8 @@
 }
 
 .date-location-coordinate-input {
-    width: 7rem;
-    padding: 0.22rem 0.45rem;
+    width: 5rem;
+    padding: 0.15rem 0.35rem;
 }
 
 .date-location-coordinate-input:read-only {
@@ -98,8 +98,8 @@
     display: inline-grid;
     place-items: center;
     flex-shrink: 0;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2rem;
+    height: 2rem;
     box-sizing: border-box;
     padding: 0;
     border: 1px solid transparent;
@@ -124,8 +124,13 @@
     animation: date-location-pulse 900ms ease-in-out infinite alternate;
 }
 
+.date-location-ghost-button.date-location-loading svg {
+    animation: date-location-spin 900ms linear infinite;
+    transform-origin: center;
+}
+
 .date-location-ghost-button.date-location-success {
-    color: #16803c !important;
+    color: var(--action-color, #111111) !important;
 }
 
 .date-location-ghost-button.date-location-success svg {
@@ -167,6 +172,10 @@
     to { opacity: 1; }
 }
 
+@keyframes date-location-spin {
+    to { transform: rotate(360deg); }
+}
+
 @keyframes date-location-success {
     0% { transform: scale(0.7); }
     55% { transform: scale(1.1); }
@@ -193,11 +202,11 @@
     .date-location-controls {
         align-items: stretch;
         flex-direction: column;
-        gap: 0.55rem;
+        gap: 0.4rem;
     }
 
     .date-location-location-block {
-        padding-top: 0.55rem;
+        padding-top: 0.4rem;
         padding-left: 0;
         border-top: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
         border-left: 0;
@@ -214,6 +223,6 @@
     }
 
     .date-location-coordinate-input {
-        width: 6.25rem;
+        width: 5rem;
     }
 }

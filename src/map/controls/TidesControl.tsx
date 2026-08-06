@@ -1,8 +1,8 @@
 import { ExternalLink, WavesHorizontal } from 'lucide-react';
-import TidesPage from '../../tides/TidesPage';
+import { getTidesPathname } from '../../appRouting';
+import TidesPage from '../../calculations/tides/TidesPage';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
-import { getTidesPathname } from '../locationUtils';
 
 type TidesControlProps = {
     drawerHeight: number;

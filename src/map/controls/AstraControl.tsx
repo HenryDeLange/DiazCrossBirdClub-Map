@@ -1,9 +1,9 @@
 import { ExternalLink, SunMoon } from 'lucide-react';
-import AstraPage from '../../astra/AstraPage';
-import type { Coordinates } from '../../inputfields/dateLocationUtils';
+import { getAstraPathname } from '../../appRouting';
+import AstraPage from '../../calculations/astra/AstraPage';
+import type { Coordinates } from '../../calculations/components/dateLocationUtils';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
-import { getAstraPathname } from '../locationUtils';
 
 type AstraControlProps = {
     drawerHeight: number;

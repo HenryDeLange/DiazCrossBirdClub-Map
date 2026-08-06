@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import { LatLngBounds, type LatLngExpression, type Map as LeafletMap } from 'leaflet';
-import { ASTRA_PATH, TIDES_PATH } from '../appRouting';
+import { ASTRA_PATH, getBasePathname, joinPath, TIDES_PATH } from '../appRouting';
 import type { FeatureProps } from './geojson/types';
 
 export type LocationTabName = 'Outings' | 'Spots' | 'Paths' | 'Points';
@@ -27,24 +27,6 @@ export function slugifyLocationName(locationName: string): string {
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
-}
-
-export function getBasePathname(): string {
-    const basePath = import.meta.env.BASE_URL || '/';
-
-    if (basePath === '/') {
-        return '/';
-    }
-
-    return basePath.endsWith('/') ? basePath : `${basePath}/`;
-}
-
-export function getAstraPathname(): string {
-    return joinPath(getBasePathname(), ASTRA_PATH);
-}
-
-export function getTidesPathname(): string {
-    return joinPath(getBasePathname(), TIDES_PATH);
 }
 
 export function getLocationPathname(locationName: string): string {
@@ -260,14 +242,4 @@ function collectCoordinates(value: unknown, points: LatLngExpression[]): void {
     }
 
     value.forEach((child) => collectCoordinates(child, points));
-}
-
-function joinPath(basePath: string, segment: string): string {
-    const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
-
-    if (!segment) {
-        return normalizedBase;
-    }
-
-    return `${normalizedBase}${segment}`;
 }

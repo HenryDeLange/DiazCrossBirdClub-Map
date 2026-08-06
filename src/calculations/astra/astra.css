@@ -51,11 +51,11 @@
     min-height: 100%;
     box-sizing: border-box;
     margin: 0 auto;
-    padding: 1rem 0 1.5rem;
+    padding: 0.75rem 0 1.25rem;
 }
 
 .astra-header {
-    padding: 0 0 0.9rem;
+    padding: 0 0 0.6rem;
 }
 
 .astra-toolbar,
@@ -271,13 +271,13 @@
 }
 
 .astra-clock-panel {
-    padding: 0.45rem;
+    padding: 0.3rem;
 }
 
 .astra-details-panel {
     display: flex;
     flex-direction: column;
-    padding: 0.9rem;
+    padding: 0.7rem;
 }
 
 .astra-clock-wrap {
@@ -297,8 +297,7 @@
 
 .astra-clock-face {
     fill: var(--astra-bg);
-    stroke: var(--astra-line);
-    stroke-width: 1;
+    stroke: none;
 }
 
 .astra-sun-track {
@@ -580,7 +579,7 @@
 }
 
 .astra-details-panel h2 {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
 }
 
 .astra-detail-description {
@@ -731,19 +730,45 @@ button.astra-event-row:focus-visible,
 }
 
 @keyframes astra-location-pulse {
-    from { box-shadow: 0 0 0 0 var(--astra-soft-line); }
-    to { box-shadow: 0 0 0 4px var(--astra-line); }
+    from {
+        box-shadow: 0 0 0 0 var(--astra-soft-line);
+    }
+
+    to {
+        box-shadow: 0 0 0 4px var(--astra-line);
+    }
 }
 
 @keyframes astra-status-in {
-    from { opacity: 0; transform: translateY(-0.2rem); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-0.2rem);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes astra-gps-success {
-    0% { opacity: 0; transform: translateY(-0.2rem); color: #16803c; }
-    16% { opacity: 1; transform: translateY(0); color: #16803c; }
-    100% { opacity: 0.38; transform: translateY(0); color: #16803c; }
+    0% {
+        opacity: 0;
+        transform: translateY(-0.2rem);
+        color: #16803c;
+    }
+
+    16% {
+        opacity: 1;
+        transform: translateY(0);
+        color: #16803c;
+    }
+
+    100% {
+        opacity: 0.38;
+        transform: translateY(0);
+        color: #16803c;
+    }
 }
 
 @media (max-width: 900px) {
@@ -783,7 +808,7 @@ button.astra-event-row:focus-visible,
 @media (max-width: 620px) {
     .astra-shell {
         width: min(100% - 1rem, 600px);
-        padding-top: 0.7rem;
+        padding-top: 0.5rem;
     }
 
     .astra-toolbar {
@@ -798,8 +823,8 @@ button.astra-event-row:focus-visible,
         gap: 0.65rem;
     }
 
-    .astra-toolbar > .astra-map-link,
-    .astra-toolbar > .astra-ghost-button {
+    .astra-toolbar>.astra-map-link,
+    .astra-toolbar>.astra-ghost-button {
         position: absolute;
         top: 0;
         right: 0;
@@ -868,7 +893,7 @@ button.astra-event-row:focus-visible,
     }
 
     .astra-clock-panel {
-        padding: 0.25rem;
+        padding: 0.2rem;
     }
 
     .astra-details-panel {
@@ -877,7 +902,7 @@ button.astra-event-row:focus-visible,
 
     .astra-event-table-wrap {
         margin-top: 0.4rem;
-        padding-top: 0.9rem;
+        padding-top: 0.65rem;
         padding-left: 0;
         border-top: 1px solid var(--astra-line);
         border-left: 0;

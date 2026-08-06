@@ -20,7 +20,7 @@ function getAppPathSlug(pathname: string): string {
     return normalizedPath.split('/').filter(Boolean)[0] ?? '';
 }
 
-function getBasePathname(): string {
+export function getBasePathname(): string {
     const basePath = import.meta.env.BASE_URL || '/';
 
     if (basePath === '/') {
@@ -28,4 +28,22 @@ function getBasePathname(): string {
     }
 
     return basePath.endsWith('/') ? basePath : `${basePath}/`;
+}
+
+export function getAstraPathname(): string {
+    return joinPath(getBasePathname(), ASTRA_PATH);
+}
+
+export function getTidesPathname(): string {
+    return joinPath(getBasePathname(), TIDES_PATH);
+}
+
+export function joinPath(basePath: string, segment: string): string {
+    const normalizedBase = basePath.endsWith('/') ? basePath : `${basePath}/`;
+
+    if (!segment) {
+        return normalizedBase;
+    }
+
+    return `${normalizedBase}${segment}`;
 }
