@@ -200,16 +200,80 @@
 
 @media (max-width: 720px) {
     .date-location-controls {
+        width: 100%;
+    }
+
+    .date-location-field-section {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .date-location-controls {
         align-items: stretch;
         flex-direction: column;
         gap: 0.4rem;
     }
 
+    .date-location-date-block {
+        display: grid;
+        grid-template-columns: 1.75rem minmax(0, 1fr);
+    }
+
+    .date-location-date-block input {
+        width: 100%;
+    }
+
     .date-location-location-block {
+        display: grid;
+        grid-template-columns: 1.75rem minmax(0, 1fr);
+        align-items: center;
+        gap: 0.4rem;
         padding-top: 0.4rem;
         padding-left: 0;
         border-top: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
         border-left: 0;
+    }
+
+    .date-location-coordinate-controls {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2rem;
+        align-items: end;
+        min-width: 0;
+        width: 100%;
+        gap: 0.25rem;
+    }
+
+    .date-location-coordinate-controls-readonly {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .date-location-coordinate-controls label {
+        display: grid;
+        grid-template-columns: 1.9rem minmax(0, 1fr);
+        align-items: center;
+        min-width: 0;
+        gap: 0.25rem;
+    }
+
+    .date-location-coordinate-label-full {
+        display: none;
+    }
+
+    .date-location-coordinate-label-short {
+        display: inline;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .date-location-coordinate-input {
+        width: 100%;
+        min-height: 1.55rem;
+        padding: 0.08rem 0.25rem;
+    }
+
+    .date-location-ghost-button {
+        width: 2rem;
+        height: 2rem;
     }
 }
 
@@ -223,6 +287,6 @@
     }
 
     .date-location-coordinate-input {
-        width: 5rem;
+        width: 100%;
     }
 }

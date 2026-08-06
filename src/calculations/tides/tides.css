@@ -358,10 +358,44 @@
 @media (max-width: 720px) {
     .tides-shell {
         width: min(100% - 1rem, 980px);
+        padding-top: 0.4rem;
+        padding-bottom: 0.8rem;
     }
 
     .tides-toolbar {
         align-items: flex-start;
+    }
+
+    .tides-header {
+        padding-bottom: 0.25rem;
+    }
+
+    .tides-dashboard {
+        gap: 0.65rem;
+    }
+
+    .tides-wave-header {
+        padding: 0.5rem 0.6rem;
+    }
+
+    .tides-wave-header h2 {
+        font-size: 0.98rem;
+    }
+
+    .tides-wave-graphic {
+        padding: 0.35rem 0.4rem 0.45rem;
+    }
+
+    .tides-wave-value {
+        font-size: 34px;
+    }
+
+    .tides-wave-time {
+        font-size: 24px;
+    }
+
+    .tides-wave-tick text {
+        font-size: 22px;
     }
 
     .tides-station-list {

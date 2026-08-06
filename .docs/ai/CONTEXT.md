@@ -1,38 +1,39 @@
 # Project Context
 
-DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz Cross Bird Club birding locations on a Leaflet map.
+DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz Cross Bird Club locations on a Leaflet map. `src/main.tsx` registers the VitePWA service worker and renders `App` in `StrictMode`.
 
-## Application Flow
+## Routing and State
 
-- `src/App.tsx` dispatches `/` to `BirdingMap`, `/astra` to the standalone astronomy page, and `/tides` to the standalone tide page. `src/appRouting.ts` and `src/map/locationUtils.ts` handle base-path-aware routes, location slugs, and the reserved `astra` and `tides` paths.
-- `src/map/BirdingMap.tsx` owns the Leaflet map, localStorage map center/zoom, layer state, drawer state, nested drawer history, location deep links, and astronomy coordinates.
-- Shared drawer and map-control primitives are in `src/map/components/`. `MapDrawer` supports resizing, back navigation, and an optional header action.
-- `src/map/controls/` contains the feature controls: `locations/`, `species/`, `AstraControl.tsx`, `TidesControl.tsx`, `LocateControl.tsx`, and `logo/`. Location controls preserve the selected tab and nested Astra context.
+- `src/App.tsx` selects the map, standalone `/astra`, or standalone `/tides` view. `src/appRouting.ts` is base-path aware; `src/map/locationUtils.ts` handles location slugs and reserves `astra` and `tides`.
+- `src/map/BirdingMap.tsx` owns the Leaflet map, responsive drawer state/height, nested drawer back navigation, Escape/popstate handling, location deep links, astronomy context, map center/zoom persistence, and layer state.
+- `src/map/components/MapDrawer.tsx` is the shared animated, resizable drawer with close/back controls and optional header actions. Embedded pages own their internal scrolling.
+- `src/map/controls/` contains the Locations, iNaturalist species, Astra, Tides, locate, and logo controls. Location controls preserve the selected tab and can open nested Astra or iNaturalist views.
 
 ## Source Layout
 
-- `src/astra/`: `AstraPage.tsx` renders the responsive sun, moon, and birding timeline; `sunTimes.ts` owns SunCalc calculations and event data; `astra.css` owns the astronomy theme and responsive layout. Astra can render standalone or embedded in a drawer.
-- `src/tides/`: `TidesPage.tsx` renders the standalone or drawer tide view; `tideData.ts` fetches the two nearest station harmonic records from the Open Waters API, caches the last successful response locally, and uses `@neaps/tide-predictor` for local high/low calculations; `tides.css` owns the matching sparse theme.
-- `src/inputfields/`: `DateLocationControls.tsx` and `dateLocationUtils.ts` provide the shared date, coordinate, and current-location inputs used by Astra and Tides. Tides rounds coordinates to one decimal before requesting station harmonics; Astra keeps five-decimal precision.
-- `src/map/geojson/`: static GeoJSON grouped as `outings/`, `paths/`, `points/`, and `spots/`, with shared types in `types.ts`.
-- `src/map/features/`: GeoJSON feature styling, labels, and popup/text rendering.
-- `src/map/layers/`: `GenericGeoJSONLayer`, persisted layer state, and `LayerStateSync`.
-- `src/map/controls/species/`: iNaturalist species list/card UI and observation hooks/types.
-- `src/map/map.css`, `src/main.module.css`: global map and application styling. `src/LoadingOrError.tsx` handles lazy-load fallback UI.
+- `src/map/`: map orchestration, controls, feature rendering, static GeoJSON, and persisted layer modules. GeoJSON is grouped under `geojson/{outings,paths,points,spots}`; `features/` handles styles, labels, and popups; `layers/` contains `GenericGeoJSONLayer`, `layerState`, and `LayerStateSync`.
+- `src/map/controls/locations/`: location search/tabs, feature details, astronomy summaries, category icons, sharing, and location types. `controls/species/` contains iNaturalist observation hooks, types, and cards.
+- `src/calculations/components/`: shared `DateLocationControls` and coordinate/date utilities used by both calculation pages. Astra uses five-decimal coordinates; Tides rounds coordinates to one decimal for station lookup.
+- `src/calculations/astra/`: `AstraPage.tsx`, `sunTimes.ts`, and `astra.css`. The page works standalone or embedded and renders the SVG solar, birding, moonlight, current-time, and outer event-time rings. Event indicators are grouped upright icon/time units placed by minute-of-day angle.
+- `src/calculations/tides/`: `TidesPage.tsx`, `tideData.ts`, and `tides.css`. It fetches up to two nearby harmonic stations, calculates high/low tides in-browser, and renders a weighted chart plus station panels.
+- `src/assets/astra/` contains custom moonrise/moonset SVG icons. `src/LoadingOrError.tsx`, `src/main.module.css`, and `src/map/map.css` provide shared fallback and application styling.
 
-## Working Notes
+## Data, Persistence, and PWA
 
-- Use existing React Leaflet, Leaflet, Lucide, SunCalc, and local helper patterns; keep edits focused.
-- Tides uses only `https://api.openwaters.io/tides/stations` for station harmonics. Tide times are calculated in-browser with `@neaps/tide-predictor`; it does not use the Open Waters prediction endpoints. VitePWA caches coarse station responses in `tide-station-harmonics` for ten years, with a last-successful response fallback in local storage.
-- Do not import the `neaps` wrapper or `@neaps/tide-database` into the browser bundle: the full station database is approximately 58 MB unpacked. The lightweight predictor is used with fetched station records instead.
-- Use `getBasePathname()`, `getAstraPathname()`, and location helpers for links instead of hard-coding `/` paths.
-- Keep drawer scrolling owned by the embedded page and preserve the drawer's flex/overflow constraints.
-- Do not hand-edit generated files or GeoJSON data unless the task specifically requires it.
+- Tide stations come only from `https://api.openwaters.io/tides/stations`; `@neaps/tide-predictor` calculates predictions from returned harmonic records. Do not add the full `@neaps/tide-database` or `neaps` wrapper to the browser bundle.
+- iNaturalist observations/photos and Google map tiles are external runtime data. `vite.config.ts` defines PWA runtime caches for tide station harmonics, map tiles, iNaturalist species counts, and iNaturalist photos.
+- Map center/zoom use `mapCenter` and `mapZoom` in local storage; layer selections use `mapLayerState`.
+
+## Agent Guidance
+
+- Follow existing React Leaflet, Leaflet, Lucide, SunCalc, tide predictor, and local helper patterns. Keep changes focused and preserve drawer flex/overflow constraints.
+- Use `getBasePathname()`, `getAstraPathname()`, `getTidesPathname()`, and location helpers instead of hard-coded application paths.
+- Do not hand-edit generated output (`dist/`, `dev-dist/`) or static GeoJSON unless the task requires it.
 - Follow `.docs/ai/TASK_GUIDELINES.md`; builds and linting are run only when requested.
 
 ## Commands
 
-- `npm run dev` starts Vite development.
-- `npm run build` runs TypeScript build and the production Vite build.
+- `npm run dev` starts Vite.
+- `npm run build` runs the TypeScript and production Vite builds.
 - `npm run lint` runs ESLint.
-- `npm run preview` serves the production build locally.
+- `npm run preview` serves the production build.

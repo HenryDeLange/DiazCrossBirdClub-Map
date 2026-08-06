@@ -32,6 +32,14 @@ const defaultCoordinates: Coordinates = {
     longitude: 26.724985724190617
 };
 
+const eventMarkerTextHalfHeight = 5;
+const eventMarkerTextHalfWidth = 19;
+const eventMarkerLabelGap = 4;
+const eventMarkerMinimumRadius = 160;
+const eventMarkerMaximumRadius = 200;
+const eventMarkerFrame = { left: -40, right: 360, top: -40, bottom: 360 };
+const eventMarkerFramePadding = 1;
+
 export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
     const queryDate = embedded ? null : getQueryDate();
@@ -209,15 +217,15 @@ type TimelineClockProps = {
 
 function TimelineClock({ solarSegments, birdingSegments, moonSegment, currentMinutes, selectedSegmentId, sunTimes, moonTimes, moonIlluminationFraction, moonPhaseName, currentDate, currentTime, selectedMarkerId, onSelect, onKeyDown, onSelectCurrentTime, onSelectMarker, onMarkerKeyDown, isCurrentTimeSelected }: Readonly<TimelineClockProps>) {
     const eventMarkerLayouts = getEventMarkerLayouts([
-        { id: 'sunrise', time: sunTimes.sunrise, iconSize: 12 },
-        { id: 'solar-noon', time: sunTimes.solarNoon, iconSize: 12 },
-        { id: 'sunset', time: sunTimes.sunset, iconSize: 12 },
-        { id: 'moonrise', time: moonTimes.rise, iconSize: 16 },
-        { id: 'moonset', time: moonTimes.set, iconSize: 16 }
+        { id: 'sunrise', time: sunTimes.sunrise, iconSize: 16 },
+        { id: 'solar-noon', time: sunTimes.solarNoon, iconSize: 16 },
+        { id: 'sunset', time: sunTimes.sunset, iconSize: 16 },
+        { id: 'moonrise', time: moonTimes.rise, iconSize: 20 },
+        { id: 'moonset', time: moonTimes.set, iconSize: 20 }
     ]);
 
     return (
-        <svg className='astra-clock' viewBox='-42 -42 404 404' role='img' aria-label='Clickable circular timeline of solar light, moonlight and birding periods'>
+        <svg className='astra-clock' viewBox='-40 -40 400 400' role='img' aria-label='Clickable circular timeline of solar light, moonlight and birding periods'>
             <circle className='astra-clock-face' cx='160' cy='160' r='148' />
             <circle className='astra-sun-track' cx='160' cy='160' r='126' />
             {orderSegmentsForSelection(solarSegments, selectedSegmentId).map((segment) => <RingSegment key={segment.id} segment={segment} innerRadius={106} outerRadius={146} selected={segment.id === selectedSegmentId} onSelect={onSelect} onKeyDown={onKeyDown} />)}
@@ -228,14 +236,14 @@ function TimelineClock({ solarSegments, birdingSegments, moonSegment, currentMin
             <circle className='astra-clock-center' cx='160' cy='160' r='52' />
             <g className='astra-clock-center-content' transform='translate(160 160)'>
                 <text className='astra-clock-center-date' x='0' y='-18' textAnchor='middle'>{currentDate}</text>
-                <SunMoon className='astra-clock-center-icon' x='-10' y='-10' width='20' height='20' aria-hidden='true' />
+                <SunMoon className='astra-clock-center-icon' x='-12' y='-12' width='24' height='24' aria-hidden='true' />
                 <text className='astra-clock-center-time' x='0' y='20' textAnchor='middle'>{currentTime}</text>
             </g>
             <EventMarker time={sunTimes.sunrise} label='Sunrise' icon={Sunrise} layout={eventMarkerLayouts.sunrise} markerId='sunrise' selected={selectedMarkerId === 'sunrise'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
             <EventMarker time={sunTimes.solarNoon} label='Solar noon' icon={Sun} layout={eventMarkerLayouts['solar-noon']} markerId='solar-noon' selected={selectedMarkerId === 'solar-noon'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
             <EventMarker time={sunTimes.sunset} label='Sunset' icon={Sunset} layout={eventMarkerLayouts.sunset} markerId='sunset' selected={selectedMarkerId === 'sunset'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
-            <EventMarker time={moonTimes.rise} label='Moonrise' icon={MoonriseIcon} iconSize={16} layout={eventMarkerLayouts.moonrise} markerId='moonrise' selected={selectedMarkerId === 'moonrise'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
-            <EventMarker time={moonTimes.set} label='Moonset' icon={MoonsetIcon} iconSize={16} layout={eventMarkerLayouts.moonset} markerId='moonset' selected={selectedMarkerId === 'moonset'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
+            <EventMarker time={moonTimes.rise} label='Moonrise' icon={MoonriseIcon} iconSize={20} layout={eventMarkerLayouts.moonrise} markerId='moonrise' selected={selectedMarkerId === 'moonrise'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
+            <EventMarker time={moonTimes.set} label='Moonset' icon={MoonsetIcon} iconSize={20} layout={eventMarkerLayouts.moonset} markerId='moonset' selected={selectedMarkerId === 'moonset'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
             <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={onSelectCurrentTime} onKeyDown={onMarkerKeyDown} />
         </svg>
     );
@@ -252,7 +260,7 @@ function BirdingSegment({ segment, innerRadius, outerRadius, selected, onSelect,
 function BirdingStartMarker({ minutes, selected, onSelect, onKeyDown }: Readonly<{ minutes: number; selected: boolean; onSelect: (markerId: string) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, onSelect: () => void) => void }>) {
     const point = polarPoint(minutes - 30, 88);
     const select = () => onSelect('birding-times');
-    return <g className={`astra-birding-start-marker ${selected ? 'astra-birding-marker-selected' : ''}`} role='button' tabIndex={0} aria-label='Prominent birding times' onClick={select} onKeyDown={(event) => onKeyDown(event, select)}><circle className='astra-birding-start-marker-pad' cx={point.x} cy={point.y} r='10' /><Bird x={point.x - 5} y={point.y - 5} width='10' height='10' aria-hidden='true' /></g>;
+    return <g className={`astra-birding-start-marker ${selected ? 'astra-birding-marker-selected' : ''}`} role='button' tabIndex={0} aria-label='Prominent birding times' onClick={select} onKeyDown={(event) => onKeyDown(event, select)}><circle className='astra-birding-start-marker-pad' cx={point.x} cy={point.y} r='10' /><Bird x={point.x - 7} y={point.y - 7} width='14' height='14' aria-hidden='true' /></g>;
 }
 
 function MoonRingSegment({ segment, selected, onSelect, onKeyDown }: Readonly<{ segment: TimelineSegment; selected: boolean; onSelect: (segment: TimelineSegment) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, segment: TimelineSegment) => void }>) {
@@ -267,26 +275,34 @@ function MoonRingSegment({ segment, selected, onSelect, onKeyDown }: Readonly<{ 
 }
 
 type EventMarkerLayout = {
-    lineStart: { x: number; y: number };
-    lineEnd: { x: number; y: number };
-    textPoint: { x: number; y: number };
-    iconPoint: { x: number; y: number };
-    textAnchor: 'start' | 'middle' | 'end';
+    contentPoint: { x: number; y: number };
 }
 
-function EventMarker({ time, icon: Icon, iconSize = 12, layout, label, markerId, selected, onSelect, onKeyDown }: Readonly<{ time: Date | null | undefined; label: string; icon: ChartIcon; iconSize?: number; layout: EventMarkerLayout | null; markerId: string; selected: boolean; onSelect: (markerId: string) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, onSelect: () => void) => void }>) {
+function EventMarker({ time, icon: Icon, iconSize = 16, layout, label, markerId, selected, onSelect, onKeyDown }: Readonly<{ time: Date | null | undefined; label: string; icon: ChartIcon; iconSize?: number; layout: EventMarkerLayout | null; markerId: string; selected: boolean; onSelect: (markerId: string) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, onSelect: () => void) => void }>) {
     if (!isValidDate(time) || !layout) {
         return null;
     }
 
     const select = () => onSelect(markerId);
 
+    const iconCenter = getEventMarkerIconCenter(layout, iconSize);
+
     return (
         <g className={`astra-event-marker ${selected ? 'astra-event-marker-selected' : ''}`} role='button' tabIndex={0} aria-label={`${label} ${formatTime(time)}`} onClick={select} onKeyDown={(event) => onKeyDown(event, select)}>
-            <circle className='astra-event-marker-hit-area' cx={layout.iconPoint.x} cy={layout.iconPoint.y} r='10' />
-            <line x1={layout.lineStart.x} y1={layout.lineStart.y} x2={layout.lineEnd.x} y2={layout.lineEnd.y} />
-            <Icon className='astra-event-marker-icon' x={layout.iconPoint.x - iconSize / 2} y={layout.iconPoint.y - iconSize / 2} width={iconSize} height={iconSize} aria-hidden='true' />
-            <text x={layout.textPoint.x} y={layout.textPoint.y} textAnchor={layout.textAnchor} dominantBaseline='middle'>{formatTime(time)}</text>
+            <circle className='astra-event-marker-hit-area' cx={iconCenter.x} cy={iconCenter.y} r='10' />
+            <EventMarkerContent time={time} icon={Icon} iconSize={iconSize} layout={layout} />
+        </g>
+    );
+}
+
+function EventMarkerContent({ time, icon: Icon, iconSize, layout }: Readonly<{ time: Date; icon: ChartIcon; iconSize: number; layout: EventMarkerLayout }>) {
+    const iconX = -iconSize / 2;
+    const iconY = -iconSize - eventMarkerLabelGap - eventMarkerTextHalfHeight;
+
+    return (
+        <g className='astra-event-marker-content' transform={`translate(${layout.contentPoint.x} ${layout.contentPoint.y})`}>
+            <Icon className='astra-event-marker-icon' x={iconX} y={iconY} width={iconSize} height={iconSize} aria-hidden='true' />
+            <text className='astra-event-marker-label' x='0' y='0' textAnchor='middle' dominantBaseline='middle'>{formatTime(time)}</text>
         </g>
     );
 }
@@ -423,7 +439,7 @@ function MoonPercentageMarker({ minutes, fraction, phaseName, selected, onSelect
     return (
         <g className={`astra-birding-phase-marker ${selected ? 'astra-birding-marker-selected' : ''}`} role='button' tabIndex={0} aria-label={`${phaseName}, ${Math.round(fraction * 100)} percent illuminated`} onClick={select} onKeyDown={(event) => onKeyDown(event, select)}>
             <circle className='astra-birding-phase-marker-pad' cx={point.x} cy={point.y} r='17' />
-            <Moon className='astra-birding-phase-icon' x={point.x - 5} y={point.y - 9} width='10' height='10' aria-hidden='true' />
+            <Moon className='astra-birding-phase-icon' x={point.x - 7} y={point.y - 11} width='14' height='14' aria-hidden='true' />
             <text x={point.x} y={point.y + 8} textAnchor='middle' dominantBaseline='middle'>{Math.round(fraction * 100)}%</text>
         </g>
     );
@@ -459,8 +475,6 @@ type ChartBounds = {
 
 function getEventMarkerLayouts(definitions: EventMarkerDefinition[]): Record<string, EventMarkerLayout | null> {
     const layouts: Record<string, EventMarkerLayout | null> = {};
-    const placedBounds: ChartBounds[] = [];
-    const displayOffsets = [0, -24, 24, -36, 36, -48, 48, -72, 72, -108, 108];
 
     for (const definition of definitions) {
         if (!isValidDate(definition.time)) {
@@ -469,70 +483,73 @@ function getEventMarkerLayouts(definitions: EventMarkerDefinition[]): Record<str
         }
 
         const eventMinutes = minutesSinceMidnight(definition.time);
-        let chosenLayout: EventMarkerLayout | null = null;
-        let chosenBounds: ChartBounds | null = null;
-
-        for (const displayOffset of displayOffsets) {
-            const layout = getEventMarkerLayout(eventMinutes, definition.iconSize, eventMinutes + displayOffset);
-            const bounds = getEventMarkerBounds(layout, definition.iconSize);
-            if (!placedBounds.some((placed) => boundsOverlap(bounds, placed, 4))) {
-                chosenLayout = layout;
-                chosenBounds = bounds;
-                break;
-            }
-        }
-
-        chosenLayout ??= getEventMarkerLayout(eventMinutes, definition.iconSize, eventMinutes + displayOffsets[displayOffsets.length - 1]);
-        chosenBounds ??= getEventMarkerBounds(chosenLayout, definition.iconSize);
-        layouts[definition.id] = chosenLayout;
-        placedBounds.push(chosenBounds);
+        layouts[definition.id] = getEventMarkerLayout(eventMinutes, definition.iconSize);
     }
 
     return layouts;
 }
 
-function getEventMarkerLayout(eventMinutes: number, iconSize: number, displayMinutes: number): EventMarkerLayout {
-    const labelRadius = 171;
-    const labelHeight = 10;
-    const labelGap = 4;
-    const iconTextCenterGap = iconSize / 2 + labelGap + labelHeight / 2;
-    const angle = (displayMinutes / 1440) * Math.PI * 2 - Math.PI / 2;
-    const labelPoint = polarPoint(displayMinutes, labelRadius);
-    const isSideMarker = Math.abs(Math.cos(angle)) >= 0.75;
-    const textAnchor = isSideMarker ? (Math.cos(angle) > 0 ? 'start' : 'end') : 'middle';
-    const iconPoint = isSideMarker
-        ? {
-            x: labelPoint.x + (Math.cos(angle) > 0 ? iconSize / 2 : -iconSize / 2),
-            y: labelPoint.y - iconTextCenterGap
+function getEventMarkerLayout(eventMinutes: number, iconSize: number): EventMarkerLayout {
+    const localPoints = getEventMarkerLocalPoints(iconSize);
+    let labelRadius = eventMarkerMinimumRadius;
+
+    while (labelRadius < eventMarkerMaximumRadius) {
+        const contentPoint = polarPoint(eventMinutes, labelRadius);
+        const bounds = getEventMarkerBounds(contentPoint, localPoints);
+        if (getEventMarkerInnerRadius(eventMinutes, labelRadius, localPoints) >= eventMarkerMinimumRadius && isWithinEventMarkerFrame(bounds)) {
+            break;
         }
-        : polarPoint(displayMinutes, labelRadius + iconTextCenterGap);
+        labelRadius += 1;
+    }
+
+    const contentPoint = polarPoint(eventMinutes, labelRadius);
 
     return {
-        lineStart: polarPoint(eventMinutes, 146),
-        lineEnd: polarPoint(eventMinutes, 160),
-        textPoint: labelPoint,
-        iconPoint,
-        textAnchor
+        contentPoint
     };
 }
 
-function getEventMarkerBounds(layout: EventMarkerLayout, iconSize: number): ChartBounds {
-    const textHalfWidth = 26;
-    const textHalfHeight = 5;
-    const iconHalfSize = iconSize / 2 + 2;
-    const textLeft = layout.textAnchor === 'start' ? layout.textPoint.x : layout.textAnchor === 'end' ? layout.textPoint.x - textHalfWidth : layout.textPoint.x - textHalfWidth;
-    const textRight = layout.textAnchor === 'start' ? layout.textPoint.x + textHalfWidth : layout.textAnchor === 'end' ? layout.textPoint.x : layout.textPoint.x + textHalfWidth;
+function getEventMarkerLocalPoints(iconSize: number): { x: number; y: number }[] {
+    const iconTop = -iconSize - eventMarkerLabelGap - eventMarkerTextHalfHeight;
+    const iconBottom = -eventMarkerLabelGap - eventMarkerTextHalfHeight;
+    return [
+        { x: -eventMarkerTextHalfWidth, y: -eventMarkerTextHalfHeight },
+        { x: eventMarkerTextHalfWidth, y: -eventMarkerTextHalfHeight },
+        { x: -eventMarkerTextHalfWidth, y: eventMarkerTextHalfHeight },
+        { x: eventMarkerTextHalfWidth, y: eventMarkerTextHalfHeight },
+        { x: -iconSize / 2, y: iconTop },
+        { x: iconSize / 2, y: iconTop },
+        { x: -iconSize / 2, y: iconBottom },
+        { x: iconSize / 2, y: iconBottom }
+    ];
+}
+
+function getEventMarkerBounds(contentPoint: { x: number; y: number }, localPoints: { x: number; y: number }[]): ChartBounds {
+    const points = localPoints.map(({ x, y }) => ({ x: contentPoint.x + x, y: contentPoint.y + y }));
 
     return {
-        left: Math.min(textLeft, layout.iconPoint.x - iconHalfSize),
-        right: Math.max(textRight, layout.iconPoint.x + iconHalfSize),
-        top: Math.min(layout.textPoint.y - textHalfHeight, layout.iconPoint.y - iconHalfSize),
-        bottom: Math.max(layout.textPoint.y + textHalfHeight, layout.iconPoint.y + iconHalfSize)
+        left: Math.min(...points.map(({ x }) => x)),
+        right: Math.max(...points.map(({ x }) => x)),
+        top: Math.min(...points.map(({ y }) => y)),
+        bottom: Math.max(...points.map(({ y }) => y))
     };
 }
 
-function boundsOverlap(first: ChartBounds, second: ChartBounds, padding: number): boolean {
-    return first.left < second.right + padding && first.right + padding > second.left && first.top < second.bottom + padding && first.bottom + padding > second.top;
+function getEventMarkerInnerRadius(eventMinutes: number, labelRadius: number, localPoints: { x: number; y: number }[]): number {
+    const angle = (eventMinutes / 1440) * Math.PI * 2 - Math.PI / 2;
+    const outward = { x: Math.cos(angle), y: Math.sin(angle) };
+    return labelRadius + Math.min(...localPoints.map(({ x, y }) => x * outward.x + y * outward.y));
+}
+
+function isWithinEventMarkerFrame(bounds: ChartBounds): boolean {
+    return bounds.left >= eventMarkerFrame.left + eventMarkerFramePadding && bounds.right <= eventMarkerFrame.right - eventMarkerFramePadding && bounds.top >= eventMarkerFrame.top + eventMarkerFramePadding && bounds.bottom <= eventMarkerFrame.bottom - eventMarkerFramePadding;
+}
+
+function getEventMarkerIconCenter(layout: EventMarkerLayout, iconSize: number): { x: number; y: number } {
+    return {
+        x: layout.contentPoint.x,
+        y: layout.contentPoint.y - iconSize / 2 - eventMarkerLabelGap - eventMarkerTextHalfHeight
+    };
 }
 
 function orderSegmentsForSelection(segments: TimelineSegment[], selectedSegmentId?: string | null): TimelineSegment[] {

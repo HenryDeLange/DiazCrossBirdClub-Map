@@ -271,7 +271,7 @@
 }
 
 .astra-clock-panel {
-    padding: 0.3rem;
+    padding: 0.15rem;
 }
 
 .astra-details-panel {
@@ -283,7 +283,7 @@
 .astra-clock-wrap {
     display: grid;
     place-items: center;
-    width: min(100%, 660px);
+    width: min(100%, 680px);
     margin: 0 auto;
     padding: 0.1rem 0 0.25rem;
 }
@@ -505,11 +505,6 @@
 .astra-event-marker {
     cursor: pointer;
     outline: none;
-}
-
-.astra-event-marker line {
-    stroke: var(--astra-muted);
-    stroke-width: 1;
 }
 
 .astra-event-marker-hit-area {
@@ -808,7 +803,17 @@ button.astra-event-row:focus-visible,
 @media (max-width: 620px) {
     .astra-shell {
         width: min(100% - 1rem, 600px);
-        padding-top: 0.5rem;
+        padding-top: 0.4rem;
+        padding-bottom: 0.8rem;
+    }
+
+    .astra-header {
+        padding-bottom: 0.25rem;
+    }
+
+    .astra-dashboard {
+        gap: 0.65rem;
+        margin-top: 0.25rem;
     }
 
     .astra-toolbar {
@@ -821,6 +826,10 @@ button.astra-event-row:focus-visible,
         width: 100%;
         padding-right: 2.75rem;
         gap: 0.65rem;
+    }
+
+    .astra-page-embedded .astra-toolbar-controls {
+        padding-right: 0;
     }
 
     .astra-toolbar>.astra-map-link,
@@ -893,16 +902,21 @@ button.astra-event-row:focus-visible,
     }
 
     .astra-clock-panel {
-        padding: 0.2rem;
+        padding: 0;
+    }
+
+    .astra-clock-wrap {
+        padding: 0;
     }
 
     .astra-details-panel {
         display: flex;
+        padding: 0.55rem;
     }
 
     .astra-event-table-wrap {
-        margin-top: 0.4rem;
-        padding-top: 0.65rem;
+        margin-top: 0.25rem;
+        padding-top: 0.5rem;
         padding-left: 0;
         border-top: 1px solid var(--astra-line);
         border-left: 0;
@@ -910,6 +924,50 @@ button.astra-event-row:focus-visible,
 
     .astra-event-table {
         max-height: none;
+    }
+
+    .astra-event-marker text {
+        font-size: 8px;
+        letter-spacing: 0;
+    }
+
+    .astra-event-marker-icon {
+        width: auto;
+        height: auto;
+    }
+
+    .astra-clock-center-date,
+    .astra-clock-center-time {
+        font-size: 11px;
+    }
+
+    .astra-clock-center-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .astra-birding-start-marker svg {
+        width: auto;
+        height: auto;
+    }
+
+    .astra-birding-phase-marker text {
+        font-size: 11px;
+    }
+
+    .astra-birding-phase-icon {
+        width: auto;
+        height: auto;
+    }
+
+    .astra-event-row {
+        grid-template-columns: 1rem minmax(0, 1fr) auto;
+        gap: 0.3rem;
+        padding: 0.34rem 0.35rem;
+    }
+
+    .astra-event-table-heading h3 {
+        font-size: 0.95rem;
     }
 
 }
