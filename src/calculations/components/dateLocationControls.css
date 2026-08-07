@@ -85,6 +85,7 @@
 .date-location-coordinate-input {
     width: 5rem;
     padding: 0.15rem 0.35rem;
+    font-weight: 400;
 }
 
 .date-location-coordinate-input:read-only {
@@ -100,7 +101,7 @@
     flex-shrink: 0;
     width: 2rem;
     height: 2rem;
-    box-sizing: border-box;
+    font-weight: 400;
     padding: 0;
     border: 1px solid transparent;
     border-radius: 0.35rem;
@@ -237,7 +238,7 @@
     .date-location-coordinate-controls {
         display: grid;
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2rem;
-        align-items: end;
+            align-items: center;
         min-width: 0;
         width: 100%;
         gap: 0.25rem;

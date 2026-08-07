@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
 import inatLogo from '../../../assets/inat-logo.png';
+import { roundCoordinate } from '../../../calculations/components/dateLocationUtils';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import { MapControlButton } from '../../components/MapControlButton';
 import { MapDrawer } from '../../components/MapDrawer';
@@ -36,7 +37,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
     const bounds = map.getBounds();
     const northEast = bounds.getNorthEast();
     const southWest = bounds.getSouthWest();
-    const inatUrl = `https://www.inaturalist.org/observations?captive=false&subview=map&view=species&iconic_taxa=Aves&nelat=${Number(northEast.lat)}&nelng=${Number(northEast.lng)}&swlat=${Number(southWest.lat)}&swlng=${Number(southWest.lng)}`;
+    const inatUrl = `https://www.inaturalist.org/observations?captive=false&subview=map&view=species&iconic_taxa=Aves&nelat=${roundCoordinate(northEast.lat, 2)}&nelng=${roundCoordinate(northEast.lng, 2)}&swlat=${roundCoordinate(southWest.lat, 2)}&swlng=${roundCoordinate(southWest.lng, 2)}`;
 
     return (
         <>

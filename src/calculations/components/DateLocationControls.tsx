@@ -1,7 +1,7 @@
 import { CalendarDays, Locate, LocateFixed, MapPin } from 'lucide-react';
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import './dateLocationControls.css';
-import { formatCoordinate, roundCoordinate, type Coordinates } from './dateLocationUtils';
+import { formatCoordinate, isValidDateInput, roundCoordinate, type Coordinates } from './dateLocationUtils';
 
 type DateLocationControlsProps = {
     dateValue: string;
@@ -12,6 +12,7 @@ type DateLocationControlsProps = {
     locationView?: boolean;
     requestLocationOnMount?: boolean;
     onLocationError?: () => void;
+    onInputValidityChange?: (isValid: boolean) => void;
     idPrefix: string;
 }
 
@@ -19,7 +20,7 @@ type LocationStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const decimalInputPattern = /^-?\d*(?:\.\d*)?$/;
 
-export function DateLocationControls({ dateValue, onDateChange, coordinates, onCoordinatesChange, coordinatePrecision = 5, locationView = false, requestLocationOnMount = false, onLocationError, idPrefix }: Readonly<DateLocationControlsProps>) {
+export function DateLocationControls({ dateValue, onDateChange, coordinates, onCoordinatesChange, coordinatePrecision = 5, locationView = false, requestLocationOnMount = false, onLocationError, onInputValidityChange, idPrefix }: Readonly<DateLocationControlsProps>) {
     const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(coordinates.latitude, coordinatePrecision));
     const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(coordinates.longitude, coordinatePrecision));
     const [locationStatus, setLocationStatus] = useState<LocationStatus>(requestLocationOnMount ? 'loading' : 'idle');
@@ -59,6 +60,12 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
         return () => window.clearTimeout(timeoutId);
     }, [locationStatus]);
 
+    useEffect(() => {
+        const hasValidLatitude = isValidCoordinateInput(latitudeInput, 'latitude');
+        const hasValidLongitude = isValidCoordinateInput(longitudeInput, 'longitude');
+        onInputValidityChange?.(isValidDateInput(dateValue) && hasValidLatitude && hasValidLongitude);
+    }, [dateValue, latitudeInput, longitudeInput, onInputValidityChange]);
+
     const handleCoordinateInput = (kind: keyof Coordinates, value: string) => {
         if (!decimalInputPattern.test(value)) {
             return;
@@ -70,6 +77,10 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
         else {
             setLongitudeInput(value);
         }
+
+        const nextLatitude = kind === 'latitude' ? value : latitudeInput;
+        const nextLongitude = kind === 'longitude' ? value : longitudeInput;
+        onInputValidityChange?.(isValidDateInput(dateValue) && isValidCoordinateInput(nextLatitude, 'latitude') && isValidCoordinateInput(nextLongitude, 'longitude'));
 
         if (value === '' || value === '-' || value === '.' || value === '-.') {
             return;
@@ -85,8 +96,18 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
         }
     };
 
+    const handleDateInput = (value: string) => {
+        onDateChange(value);
+        onInputValidityChange?.(isValidDateInput(value) && isValidCoordinateInput(latitudeInput, 'latitude') && isValidCoordinateInput(longitudeInput, 'longitude'));
+    };
+
     const normalizeCoordinateInput = (kind: keyof Coordinates) => {
         const value = kind === 'latitude' ? latitudeInput : longitudeInput;
+
+        if (value === '' || value === '-' || value === '.' || value === '-.') {
+            return;
+        }
+
         const numericValue = Number(value);
         const isInRange = kind === 'latitude'
             ? numericValue >= -90 && numericValue <= 90
@@ -140,7 +161,7 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
                     <CalendarDays size={18} aria-hidden='true' />
                     <span className='date-location-visually-hidden'>Date</span>
                 </div>
-                <input id={`${idPrefix}-date`} type='date' aria-label='Date' value={dateValue} onChange={(event) => onDateChange(event.target.value)} />
+                <input id={`${idPrefix}-date`} type='date' aria-label='Date' value={dateValue} onChange={(event) => handleDateInput(event.target.value)} />
             </div>
             <div className='date-location-field-section date-location-location-block'>
                 <div className='date-location-section-label' title='Location'>
@@ -192,4 +213,17 @@ function handleDecimalKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (!decimalInputPattern.test(nextValue)) {
         event.preventDefault();
     }
+}
+
+function isValidCoordinateInput(value: string, kind: keyof Coordinates): boolean {
+    if (value === '' || value === '-' || value === '.' || value === '-.') {
+        return false;
+    }
+
+    const numericValue = Number(value);
+    const isInRange = kind === 'latitude'
+        ? numericValue >= -90 && numericValue <= 90
+        : numericValue >= -180 && numericValue <= 180;
+
+    return Number.isFinite(numericValue) && isInRange;
 }

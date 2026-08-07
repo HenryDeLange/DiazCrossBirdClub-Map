@@ -1,5 +1,6 @@
 import type { Map as LeafletMap } from 'leaflet';
 import { useEffect, useState } from 'react';
+import { roundCoordinate } from '../../../calculations/components/dateLocationUtils';
 import type { INatSpeciesCount } from '../../iNatTypes';
 import type { UseSpeciesObservationsResult } from './types';
 
@@ -14,14 +15,18 @@ export function useSpeciesObservations(map: LeafletMap, isOpen: boolean): UseSpe
         const bounds = map.getBounds();
         const northEast = bounds.getNorthEast();
         const southWest = bounds.getSouthWest();
+        const northEastLatitude = roundCoordinate(northEast.lat, 2);
+        const northEastLongitude = roundCoordinate(northEast.lng, 2);
+        const southWestLatitude = roundCoordinate(southWest.lat, 2);
+        const southWestLongitude = roundCoordinate(southWest.lng, 2);
 
         const query = new URLSearchParams({
             captive: 'false',
             iconic_taxa: 'Aves',
-            nelat: String(Number(northEast.lat)),
-            nelng: String(Number(northEast.lng)),
-            swlat: String(Number(southWest.lat)),
-            swlng: String(Number(southWest.lng)),
+            nelat: String(northEastLatitude),
+            nelng: String(northEastLongitude),
+            swlat: String(southWestLatitude),
+            swlng: String(southWestLongitude),
             verifiable: 'true',
             per_page: '500'
         });

@@ -21,6 +21,11 @@ export type WeightedTideExtreme = Pick<Extreme, 'high' | 'label' | 'level' | 'ti
     timeZone: string;
 }
 
+export type WeightedTideLevel = {
+    level: number;
+    timeZone: string;
+}
+
 const stationApiUrl = 'https://api.openwaters.io/tides/stations';
 
 export async function fetchTideStations(coordinates: Coordinates, signal?: AbortSignal): Promise<TideStationResult> {
@@ -119,6 +124,39 @@ export function getWeightedTideExtremes(predictions: TidePrediction[]): Weighted
             timeZone: entries[0].station.timezone
         };
     }).filter((extreme): extreme is WeightedTideExtreme => extreme !== null);
+}
+
+export function getWeightedTideLevel(predictions: TidePrediction[], time: Date): WeightedTideLevel | null {
+    const entries = predictions.flatMap(({ station, error }) => {
+        if (error) {
+            return [];
+        }
+
+        try {
+            const prediction = useStation(station, station.distance).getWaterLevelAtTime({ time });
+            return Number.isFinite(prediction.level) ? [{ station, level: prediction.level }] : [];
+        }
+        catch {
+            return [];
+        }
+    });
+
+    if (entries.length === 0) {
+        return null;
+    }
+
+    const weightedValues = entries.reduce((result, entry) => {
+        const weight = getDistanceWeight(entry.station.distance);
+        return {
+            weight: result.weight + weight,
+            level: result.level + entry.level * weight
+        };
+    }, { weight: 0, level: 0 });
+
+    return {
+        level: weightedValues.level / weightedValues.weight,
+        timeZone: entries[0].station.timezone
+    };
 }
 
 function parseStations(value: unknown): TideStation[] {

@@ -123,6 +123,70 @@
     box-shadow: 0 14px 40px var(--tides-shadow);
 }
 
+.tides-current-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--tides-line);
+    background: color-mix(in srgb, var(--tides-surface) 94%, transparent);
+    box-shadow: 0 10px 28px var(--tides-shadow);
+}
+
+.tides-current-time,
+.tides-current-direction {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 0.55rem;
+}
+
+.tides-current-time {
+    color: var(--tides-muted);
+}
+
+.tides-current-time svg,
+.tides-current-direction svg {
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 1.4rem;
+}
+
+.tides-current-time svg {
+    color: var(--tides-muted);
+}
+
+.tides-current-direction-incoming svg {
+    color: #416b8d;
+}
+
+.tides-current-direction-outgoing svg {
+    color: #b06d4d;
+}
+
+.tides-current-panel div > div {
+    display: grid;
+    gap: 0.08rem;
+    min-width: 0;
+}
+
+.tides-current-panel span {
+    color: var(--tides-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.tides-current-panel strong {
+    color: var(--tides-ink);
+    font-size: 1rem;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
 .tides-wave-header {
     padding: 0.6rem 0.75rem;
     border-bottom: 1px solid var(--tides-soft-line);
@@ -384,6 +448,10 @@
 
     .tides-wave-graphic {
         padding: 0.35rem 0.4rem 0.45rem;
+    }
+
+    .tides-current-panel {
+        padding: 0.6rem;
     }
 
     .tides-wave-value {

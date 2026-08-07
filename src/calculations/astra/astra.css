@@ -262,6 +262,19 @@
     margin-top: 0.5rem;
 }
 
+.astra-message {
+    display: grid;
+    grid-column: 1 / -1;
+    place-items: center;
+    min-height: 12rem;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1.5rem;
+    border: 1px solid var(--astra-line);
+    color: var(--astra-muted);
+    text-align: center;
+}
+
 .astra-clock-panel,
 .astra-details-panel {
     min-width: 0;
@@ -328,7 +341,7 @@
 .astra-moon-segment {
     fill: none;
     stroke: var(--astra-moon);
-    stroke-width: 10;
+    stroke-width: 12;
     opacity: 0.72;
     stroke-linecap: butt;
     transition: filter 150ms ease, stroke-width 150ms ease;
@@ -373,9 +386,26 @@
     color: var(--astra-muted);
 }
 
+.astra-clock-center-event-group {
+    color: var(--astra-muted);
+}
+
+.astra-clock-center-event-group svg {
+    display: block;
+    color: color-mix(in srgb, currentColor 72%, var(--astra-muted));
+    stroke-width: 2;
+}
+
+.astra-clock-center-event-group text {
+    fill: var(--astra-muted);
+    font-family: inherit;
+    font-size: 6.7px;
+    font-weight: 800;
+    letter-spacing: 0;
+}
+
 .astra-clock-center-date,
-.astra-clock-center-time,
-.astra-rim-marker text {
+.astra-clock-center-time {
     fill: var(--astra-muted);
     font-family: inherit;
     font-size: 7.5px;
@@ -384,21 +414,13 @@
 }
 
 .astra-clock-center-date {
-    font-size: 9px;
+    font-size: 10.5px;
+    letter-spacing: 0.25px;
 }
 
 .astra-clock-center-time {
-    font-size: 9px;
+    font-size: 8.5px;
     letter-spacing: 0;
-}
-
-.astra-rim-marker line {
-    stroke: var(--astra-muted);
-    stroke-width: 1;
-}
-
-.astra-rim-marker text {
-    font-size: 8px;
 }
 
 .astra-birding-start-marker,
@@ -486,6 +508,13 @@
     color: var(--astra-current);
 }
 
+.astra-current-time-line {
+    stroke: var(--astra-muted);
+    stroke-opacity: 0.42;
+    stroke-width: 1.5;
+    pointer-events: none;
+}
+
 .astra-current-time-hit-area {
     fill: var(--astra-surface);
     stroke: none;
@@ -500,43 +529,6 @@
 .astra-current-time-marker svg {
     display: block;
     overflow: visible;
-}
-
-.astra-event-marker {
-    cursor: pointer;
-    outline: none;
-}
-
-.astra-event-marker-hit-area {
-    fill: transparent;
-    pointer-events: all;
-}
-
-.astra-event-marker text {
-    fill: var(--astra-muted);
-    font-family: inherit;
-    font-size: 6.8px;
-    font-weight: 800;
-    letter-spacing: 0.4px;
-}
-
-.astra-event-marker-icon {
-    color: var(--astra-muted);
-}
-
-.astra-event-marker:focus-visible,
-.astra-event-marker-selected {
-    filter: drop-shadow(0 0 4px var(--astra-shadow));
-}
-
-.astra-event-marker:focus-visible text,
-.astra-event-marker-selected text {
-    fill: var(--astra-ink);
-}
-
-.astra-event-marker:focus-visible .astra-event-marker-icon,
-.astra-event-marker-selected .astra-event-marker-icon {
-    color: var(--astra-ink);
 }
 
 .astra-event-icon svg {
@@ -926,19 +918,12 @@ button.astra-event-row:focus-visible,
         max-height: none;
     }
 
-    .astra-event-marker text {
-        font-size: 8px;
-        letter-spacing: 0;
+    .astra-clock-center-date {
+        font-size: 13px;
     }
 
-    .astra-event-marker-icon {
-        width: auto;
-        height: auto;
-    }
-
-    .astra-clock-center-date,
     .astra-clock-center-time {
-        font-size: 11px;
+        font-size: 10px;
     }
 
     .astra-clock-center-icon {

@@ -28,7 +28,21 @@ export function getQueryCoordinates(): Coordinates | null {
 
 export function getQueryDate(): string | null {
     const value = new URLSearchParams(window.location.search).get('date');
-    return value && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T12:00:00`).getTime()) ? value : null;
+    return value && isValidDateInput(value) ? value : null;
+}
+
+export function isValidDateInput(value: string): boolean {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+        return false;
+    }
+
+    const date = new Date(`${value}T12:00:00`);
+    if (Number.isNaN(date.getTime())) {
+        return false;
+    }
+
+    const [year, month, day] = value.split('-').map(Number);
+    return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
 
 export function getSelectedDate(value: string): Date {

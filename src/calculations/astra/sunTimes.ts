@@ -66,10 +66,20 @@ function buildTwilightSegments(date: Date, sunTimes: SunCalc.SunTimes): Timeline
     const dayEnd = new Date(dayStart);
     dayEnd.setDate(dayEnd.getDate() + 1);
     const midnightWindow = getMidnightWindow(dayStart, dayEnd, sunTimes.nadir, sunTimes.nightEnd);
+    const midnightStart = midnightWindow?.start ?? null;
+    const timelineStart = midnightStart !== null && midnightStart < dayStart ? midnightStart : dayStart;
+    const midnightStartsBeforeDay = timelineStart < dayStart;
+    const timelineEnd = new Date(timelineStart);
+    if (midnightStartsBeforeDay) {
+        timelineEnd.setDate(timelineEnd.getDate() + 1);
+    }
+    else {
+        timelineEnd.setTime(dayEnd.getTime());
+    }
     const middayStart = getDayPercentageBoundary(sunTimes.sunrise, sunTimes.solarNoon, sunTimes.sunset, -0.08);
     const middayEnd = getDayPercentageBoundary(sunTimes.sunrise, sunTimes.solarNoon, sunTimes.sunset, 0.08);
     const boundaries = [
-        { id: 'day-start', at: dayStart },
+        ...(!midnightStartsBeforeDay ? [{ id: 'day-start', at: dayStart }] : []),
         { id: 'midnight-start', at: midnightWindow?.start ?? null },
         { id: 'midnight-end', at: midnightWindow?.end ?? null },
         { id: 'nightEnd', at: sunTimes.nightEnd },
@@ -84,10 +94,10 @@ function buildTwilightSegments(date: Date, sunTimes: SunCalc.SunTimes): Timeline
         { id: 'dusk', at: sunTimes.dusk },
         { id: 'nauticalDusk', at: sunTimes.nauticalDusk },
         { id: 'night', at: sunTimes.night },
-        { id: 'day-end', at: dayEnd }
+        { id: 'day-end', at: timelineEnd }
     ]
         .filter((boundary): boundary is { id: string; at: Date } => isValidDate(boundary.at))
-        .filter(({ at }) => at >= dayStart && at <= dayEnd)
+        .filter(({ at }) => at >= timelineStart && at <= timelineEnd)
         .sort((first, second) => first.at.getTime() - second.at.getTime());
 
     return boundaries.slice(0, -1).flatMap((boundary, index) => {
@@ -104,7 +114,8 @@ function buildTwilightSegments(date: Date, sunTimes: SunCalc.SunTimes): Timeline
             definition.description,
             boundary.at,
             nextBoundary.at,
-            definition.color
+            definition.color,
+            dayStart
         )];
     });
 }
@@ -125,13 +136,17 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
     const morningForageStart = morningCallEnd;
     const morningForageEnd = daylightPoint(0.22);
     const middayStart = new Date(solarNoon.getTime() - daylightMilliseconds * 0.06);
-    const middayEnd = new Date(solarNoon.getTime() + daylightMilliseconds * 0.06);
     const raptorThermalStart = daylightPoint(0.30);
     const raptorThermalEnd = middayStart;
-    const afternoonStart = new Date(solarNoon.getTime() + daylightMilliseconds * 0.16);
-    const afternoonEnd = daylightPoint(0.94);
+    const afternoonStart = new Date(solarNoon.getTime() + daylightMilliseconds * 0.34);
+    const eveningLightStart = isValidDate(sunTimes.goldenHour)
+        ? sunTimes.goldenHour
+        : new Date(sunset.getTime() - daylightMilliseconds * 0.1);
+    const afternoonEnd = new Date(eveningLightStart.getTime() + (sunset.getTime() - eveningLightStart.getTime()) * 0.5);
     const eveningDustStart = sunset;
-    const eveningDustEnd = isValidDate(sunTimes.dusk) ? sunTimes.dusk : new Date(sunset.getTime() + daylightMilliseconds * 0.08);
+    const eveningDustEnd = isValidDate(sunTimes.night)
+        ? new Date(sunTimes.night.getTime() + 15 * 60 * 1000)
+        : new Date(sunset.getTime() + daylightMilliseconds * 0.24);
     const definitions = [
         {
             id: 'morning-call', label: 'Morning bird call', description: 'The dawn chorus and first feeding burst, often the most active period for songbirds.', start: morningCallStart, end: morningCallEnd, color: birdingPalette.early
@@ -143,13 +158,10 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
             id: 'raptor-thermals', label: 'Raptor thermals', description: 'Late-morning warming creates thermals that raptors use to begin soaring and searching for prey.', start: raptorThermalStart, end: raptorThermalEnd, color: birdingPalette.midday
         },
         {
-            id: 'midday-bath', label: 'Midday bird bath', description: 'The warmer, quieter interval around solar noon when water, shade and bathing spots can be more productive.', start: middayStart, end: middayEnd, color: birdingPalette.midday
-        },
-        {
             id: 'afternoon-movement', label: 'Late-day movement', description: 'Activity builds again as temperatures ease and birds move toward evening feeding and roosting areas.', start: afternoonStart, end: afternoonEnd, color: birdingPalette.afternoon
         },
         {
-            id: 'evening-dust', label: 'Evening dust', description: 'The dusk transition, when the last daylight movement overlaps with the first activity of owls.', start: eveningDustStart, end: eveningDustEnd, color: birdingPalette.evening
+            id: 'evening-dust', label: 'Evening owl activity', description: 'Evening twilight and the first quiet stretch of night, when owls begin moving and calling.', start: eveningDustStart, end: eveningDustEnd, color: birdingPalette.evening
         }
     ];
 
@@ -264,8 +276,8 @@ function getMidnightWindow(dayStart: Date, dayEnd: Date, nadir: Date | null | un
     const halfWindow = isValidDate(nightEnd) && nightEnd > center
         ? (nightEnd.getTime() - center.getTime()) * 0.15
         : 60 * 60 * 1000;
-    const start = new Date(Math.max(dayStart.getTime(), center.getTime() - halfWindow));
-    const end = new Date(Math.min(dayEnd.getTime(), center.getTime() + halfWindow));
+    const start = new Date(center.getTime() - halfWindow);
+    const end = new Date(center.getTime() + halfWindow);
 
     return end > start ? { start, end } : null;
 }
@@ -311,7 +323,7 @@ export function formatTime(value: Date | null | undefined): string {
         return 'Not visible';
     }
 
-    return new Intl.DateTimeFormat(undefined, { hour: 'numeric', minute: '2-digit' }).format(value);
+    return new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(value);
 }
 
 export function formatDateInput(date: Date): string {
