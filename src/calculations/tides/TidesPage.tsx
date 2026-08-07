@@ -1,6 +1,7 @@
-import { Clock3, Map, WavesArrowDown, WavesArrowUp, WavesHorizontal } from 'lucide-react';
+import { Clock3, Map, Share2, WavesArrowDown, WavesArrowUp, WavesHorizontal } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { getBasePathname } from '../../appRouting';
+import { getBasePathname, getTidesPathname } from '../../appRouting';
+import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, type Coordinates } from '../components/dateLocationUtils';
 import { fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
@@ -71,6 +72,18 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
         return () => window.clearInterval(intervalId);
     }, []);
 
+    useEffect(() => {
+        if (embedded) {
+            return;
+        }
+
+        const previousTitle = document.title;
+        document.title = 'Tide Guide | DCBC Birding Map';
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [embedded]);
+
     const selectedDate = getTideSelectedDate(dateValue);
     const handleCoordinatesChange = useCallback((nextCoordinates: Coordinates) => {
         setLocationReady(true);
@@ -81,6 +94,18 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
         setLocationReady(false);
         setStationState({ status: 'error', stations: [], message: 'GPS location is unavailable. Allow location access or enter coordinates to view tides.' });
     }, []);
+    const handleShare = () => {
+        const url = getPageShareUrl(getTidesPathname(), {
+            date: dateValue || undefined,
+            lat: coordinates.latitude,
+            lng: coordinates.longitude
+        });
+        void shareAppUrl({
+            title: 'Tide Guide',
+            text: 'Tide predictions for the Diaz Cross Bird Club area.',
+            url
+        });
+    };
     const predictions = stationState.status === 'success' && selectedDate !== null
         ? getTidePredictions(stationState.stations, selectedDate).sort(sortByStationDistance)
         : [];
@@ -95,7 +120,12 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
                 <header className='tides-header'>
                     <div className='tides-toolbar'>
                         <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={handleCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={shouldRequestLocation} onLocationError={handleLocationError} idPrefix='tides' />
-                        {!embedded && <a className='tides-map-link' href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>}
+                        {!embedded && (
+                            <div className='tides-toolbar-actions'>
+                                <a className='tides-map-link' href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
+                                <button type='button' className='tides-map-link tides-share-link' onClick={handleShare} aria-label='Share these tide predictions' title='Share these tide predictions'><Share2 size={18} /></button>
+                            </div>
+                        )}
                     </div>
                 </header>
 

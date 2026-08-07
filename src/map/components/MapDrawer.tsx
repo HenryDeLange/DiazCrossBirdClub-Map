@@ -7,7 +7,7 @@ type MapDrawerProps = {
     onBack?: () => void;
     backLabel?: string;
     label?: string;
-    title: string;
+    title: ReactNode;
     headerAction?: ReactNode;
     height: number;
     onHeightChange?: (height: number) => void;

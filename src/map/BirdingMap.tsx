@@ -1,6 +1,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AttributionControl, LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
+import { LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
+import { InstallAppButton } from '../pwa/InstallAppButton';
+import { PwaCacheDrawer } from '../pwa/PwaCacheDrawer';
+import { useTheme } from '../theme/useTheme';
+import { MapLegendFooter } from './components/MapLegendFooter';
 import { AstraControl } from './controls/AstraControl';
 import { LocateControl } from './controls/LocateControl';
 import { LocationsControl } from './controls/locations/LocationsControl';
@@ -20,7 +24,7 @@ import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, se
 import './map.css';
 import { MapEvents } from './MapEvents';
 
-type OpenDrawer = 'inat' | 'locations' | 'tides' | 'astra' | null;
+type OpenDrawer = 'inat' | 'locations' | 'tides' | 'astra' | 'cache' | null;
 
 const locationSources: LocationSource[] = [
     { tab: 'Outings', collections: outings },
@@ -34,7 +38,6 @@ export default function BirdingMap() {
     const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
     const [drawerHeight, setDrawerHeight] = useState(() => getDefaultDrawerHeight(window.innerHeight));
-    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
     const [inatLocationName, setInatLocationName] = useState<string | null>(null);
@@ -48,21 +51,15 @@ export default function BirdingMap() {
     const [drawerBackTarget, setDrawerBackTarget] = useState<OpenDrawer>(null);
     const openDrawerRef = useRef<OpenDrawer>(openDrawer);
     const drawerHistoryEntryRef = useRef(false);
+    const { isDarkMode } = useTheme();
 
     useEffect(() => {
         const updateDimensions = () => setMapHeight(window.innerHeight);
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-        const handleColorSchemeChange = (event: MediaQueryListEvent) => {
-            setIsDarkMode(event.matches);
-        };
 
         window.addEventListener('resize', updateDimensions);
-        mediaQuery.addEventListener('change', handleColorSchemeChange);
 
         return () => {
             window.removeEventListener('resize', updateDimensions);
-            mediaQuery.removeEventListener('change', handleColorSchemeChange);
         };
     }, []);
 
@@ -310,9 +307,13 @@ export default function BirdingMap() {
                     toggleDrawer('astra');
                 }}
             />
-            <AttributionControl
-                position='bottomleft'
-                prefix={`<a href='https://github.com/HenryDeLange/DiazCrossBirdClub-Map' target='_blank' rel='noreferrer'>v${VITE_APP_VERSION}</a> | <a href='https://www.mywild.co.za' target='_blank' rel='noreferrer'>MyWild</a> | <a href='https://www.diazcrossbirdclub.co.za' target='_blank' rel='noreferrer'>DCBC</a> | Google Maps | Leaflet`}
+            <InstallAppButton />
+            <MapLegendFooter onOpenCache={() => toggleDrawer('cache')} />
+            <PwaCacheDrawer
+                isOpen={openDrawer === 'cache'}
+                onClose={closeDrawer}
+                height={clampedDrawerHeight}
+                onHeightChange={setDrawerHeight}
             />
             <ZoomControl position='bottomright' />
             <LocateControl />

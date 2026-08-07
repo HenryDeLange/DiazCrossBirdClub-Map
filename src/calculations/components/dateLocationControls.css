@@ -189,7 +189,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    .date-location-controls {
+    :root:not([data-theme='light']) .date-location-controls {
         --date-location-line: rgba(244, 244, 244, 0.2);
         --date-location-soft-line: rgba(244, 244, 244, 0.1);
         --date-location-surface: #1c1c1c;
@@ -197,6 +197,15 @@
         --date-location-ink: #f4f4f4;
         --date-location-muted: #b8b8b8;
     }
+}
+
+:root[data-theme='dark'] .date-location-controls {
+    --date-location-line: rgba(244, 244, 244, 0.2);
+    --date-location-soft-line: rgba(244, 244, 244, 0.1);
+    --date-location-surface: #1c1c1c;
+    --date-location-selected: #353535;
+    --date-location-ink: #f4f4f4;
+    --date-location-muted: #b8b8b8;
 }
 
 @media (max-width: 720px) {

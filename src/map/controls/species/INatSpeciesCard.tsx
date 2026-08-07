@@ -6,7 +6,9 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
     const [isAttributionOpen, setIsAttributionOpen] = useState(false);
     const attributionRef = useRef<HTMLDivElement | null>(null);
     const image = speciesCount.taxon.default_photo ?? null;
-    const imageUrl = image?.medium_url ?? image?.square_url ?? '';
+    const mediumImageUrl = image?.medium_url ?? '';
+    const squareImageUrl = image?.square_url ?? '';
+    const [imageUrl, setImageUrl] = useState(mediumImageUrl || squareImageUrl);
 
     useEffect(() => {
         if (!isAttributionOpen) {
@@ -31,6 +33,16 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
                         className='inat-card-image'
                         alt={speciesCount.taxon.name}
                         src={imageUrl}
+                        loading='lazy'
+                        decoding='async'
+                        onError={() => {
+                            if (imageUrl !== squareImageUrl && squareImageUrl) {
+                                setImageUrl(squareImageUrl);
+                                return;
+                            }
+
+                            setImageUrl('');
+                        }}
                     />
                 ) : (
                     <div className='inat-card-image inat-card-image-empty'>No image available</div>

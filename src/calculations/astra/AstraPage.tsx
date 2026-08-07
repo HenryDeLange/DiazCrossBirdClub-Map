@@ -1,6 +1,7 @@
-import { Bird, Clock3, Map, Moon, MoonStar, Sun, SunMoon } from 'lucide-react';
+import { Bird, Clock3, Map, Moon, MoonStar, Share2, Sun, SunMoon } from 'lucide-react';
 import { useEffect, useState, type CSSProperties, type ComponentType, type KeyboardEvent, type ReactNode, type SVGProps } from 'react';
-import { getBasePathname } from '../../appRouting';
+import { getAstraPathname, getBasePathname } from '../../appRouting';
+import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, isValidDateInput, type Coordinates } from '../components/dateLocationUtils';
 import './astra.css';
@@ -47,6 +48,18 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
         return () => window.clearInterval(intervalId);
     }, []);
+
+    useEffect(() => {
+        if (embedded) {
+            return;
+        }
+
+        const previousTitle = document.title;
+        document.title = 'Sun and Moon Guide | DCBC Birding Map';
+        return () => {
+            document.title = previousTitle;
+        };
+    }, [embedded]);
 
     const selectedDate = getSelectedDate(dateValue);
     const hasValidCoordinates = Number.isFinite(coordinates.latitude) && Number.isFinite(coordinates.longitude);
@@ -95,6 +108,19 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
         }
     };
 
+    const handleShare = () => {
+        const url = getPageShareUrl(getAstraPathname(), {
+            date: isValidDateInput(dateValue) ? dateValue : undefined,
+            lat: coordinates.latitude,
+            lng: coordinates.longitude
+        });
+        void shareAppUrl({
+            title: 'Sun and Moon Guide',
+            text: 'Sun and moon guide for the Diaz Cross Bird Club area.',
+            url
+        });
+    };
+
     const selectCurrentTime = () => {
         selectMarker('current-time');
     };
@@ -115,7 +141,10 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
                             <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={setCoordinates} coordinatePrecision={5} locationView={locationView} requestLocationOnMount={shouldRequestLocation} onInputValidityChange={setInputFieldsReady} idPrefix='astra' />
                         </div>
                         {!embedded && (
-                            <a className='astra-map-link' href={getMapPathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
+                            <div className='astra-toolbar-actions'>
+                                <a className='astra-map-link' href={getMapPathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
+                                <button type='button' className='astra-map-link astra-share-link' onClick={handleShare} aria-label='Share this sun and moon guide' title='Share this sun and moon guide'><Share2 size={18} /></button>
+                            </div>
                         )}
                     </div>
                 </header>
@@ -264,10 +293,6 @@ function MoonRingSegment({ segment, selected, onSelect, onKeyDown }: Readonly<{ 
     }
 
     return <path className={className} d={ringArcPath(segment.startMinutes, segment.endMinutes, 153)} tabIndex={0} role='button' aria-label={`${segment.label}, ${formatTime(segment.start)} to ${formatTime(segment.end)}`} onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
-}
-
-type EventMarkerLayout = {
-    contentPoint: { x: number; y: number };
 }
 
 function CenterEventGroup({ rise, set, icon: Icon, side, color }: Readonly<{ rise: Date | null | undefined; set: Date | null | undefined; icon: AstraIcon; side: 'left' | 'right'; color: string }>) {

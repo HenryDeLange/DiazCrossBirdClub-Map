@@ -30,7 +30,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    .astra-page {
+    :root:not([data-theme='light']) .astra-page {
         --astra-bg: var(--drawer-bg, #161616);
         --astra-surface: #1c1c1c;
         --astra-surface-muted: #282828;
@@ -44,6 +44,21 @@
         --astra-moon: #9baabd;
         --astra-night: #293c50;
     }
+}
+
+:root[data-theme='dark'] .astra-page {
+    --astra-bg: var(--drawer-bg, #161616);
+    --astra-surface: #1c1c1c;
+    --astra-surface-muted: #282828;
+    --astra-ink: #f4f4f4;
+    --astra-muted: #b8b8b8;
+    --astra-line: rgba(244, 244, 244, 0.2);
+    --astra-soft-line: rgba(244, 244, 244, 0.1);
+    --astra-selected: #353535;
+    --astra-shadow: rgba(0, 0, 0, 0.38);
+    --astra-current: #ffffff;
+    --astra-moon: #9baabd;
+    --astra-night: #293c50;
 }
 
 .astra-shell {
@@ -74,6 +89,13 @@
 .astra-toolbar {
     justify-content: space-between;
     gap: 1rem;
+}
+
+.astra-toolbar-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 0.45rem;
 }
 
 .astra-toolbar-controls {
@@ -175,7 +197,9 @@
     border-radius: 50%;
     background: var(--astra-surface);
     color: var(--astra-ink) !important;
+    padding: 0;
     cursor: pointer;
+    font: inherit;
     font-style: normal;
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
 }
@@ -815,16 +839,17 @@ button.astra-event-row:focus-visible,
 
     .astra-toolbar-controls {
         display: grid;
-        width: 100%;
-        padding-right: 2.75rem;
+        width: calc(100% - 5.25rem);
+        padding-right: 0;
         gap: 0.65rem;
     }
 
     .astra-page-embedded .astra-toolbar-controls {
+        width: 100%;
         padding-right: 0;
     }
 
-    .astra-toolbar>.astra-map-link,
+    .astra-toolbar>.astra-toolbar-actions,
     .astra-toolbar>.astra-ghost-button {
         position: absolute;
         top: 0;
