@@ -24,18 +24,22 @@ export type AstronomyLocation = {
     longitude: number;
 }
 
+export type LocationCollectionSource = {
+    tab: LocationTabName;
+    geojson: FeatureCollection<Geometry, FeatureProps>[];
+}
+
 export type FeatureGroup = {
     heading: Feature<Geometry, FeatureProps> | null;
     items: Array<{ feature: Feature<Geometry, FeatureProps>; featureIndex: number }>;
 }
 
 export type FeatureDetailsProps = {
-    geojson: FeatureCollection<Geometry, FeatureProps>[];
+    sources: LocationCollectionSource[];
     searchQuery: string;
     onClose: () => void;
-    onOpenInat: (locationName: string) => void;
+    onOpenInat: (locationName: string, tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     initialFocusQuery?: string;
-    tabLabel: LocationTabName;
     onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
 }

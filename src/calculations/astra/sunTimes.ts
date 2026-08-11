@@ -39,7 +39,6 @@ const birdingPalette = {
     early: '#809f59',
     midMorning: '#719b61',
     midday: '#63966b',
-    afternoon: '#548d75',
     evening: '#447f7f'
 };
 
@@ -138,11 +137,6 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
     const middayStart = new Date(solarNoon.getTime() - daylightMilliseconds * 0.06);
     const raptorThermalStart = daylightPoint(0.30);
     const raptorThermalEnd = middayStart;
-    const afternoonStart = new Date(solarNoon.getTime() + daylightMilliseconds * 0.34);
-    const eveningLightStart = isValidDate(sunTimes.goldenHour)
-        ? sunTimes.goldenHour
-        : new Date(sunset.getTime() - daylightMilliseconds * 0.1);
-    const afternoonEnd = new Date(eveningLightStart.getTime() + (sunset.getTime() - eveningLightStart.getTime()) * 0.5);
     const eveningDustStart = sunset;
     const eveningDustEnd = isValidDate(sunTimes.night)
         ? new Date(sunTimes.night.getTime() + 15 * 60 * 1000)
@@ -156,9 +150,6 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
         },
         {
             id: 'raptor-thermals', label: 'Raptor thermals', description: 'Late-morning warming creates thermals that raptors use to begin soaring and searching for prey.', start: raptorThermalStart, end: raptorThermalEnd, color: birdingPalette.midday
-        },
-        {
-            id: 'afternoon-movement', label: 'Late-day movement', description: 'Activity builds again as temperatures ease and birds move toward evening feeding and roosting areas.', start: afternoonStart, end: afternoonEnd, color: birdingPalette.afternoon
         },
         {
             id: 'evening-dust', label: 'Evening owl activity', description: 'Evening twilight and the first quiet stretch of night, when owls begin moving and calling.', start: eveningDustStart, end: eveningDustEnd, color: birdingPalette.evening

@@ -1,0 +1,10 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    width="6.75pt"
+    height="6.75pt"
+    viewBox="0 0 6.75 6.75">
+<defs/>
+<path id="shape0" transform="matrix(0.28125 0 0 0.28125 0.977735150838536 2.2341796875)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11.9917 11.1897C13.3347 10.3403 13.0992 10.4022 13.6174 8.9C11.9552 9.47335 10.1365 9.39992 8.526 8.69442C6.91548 7.98892 5.62844 6.70188 4.92294 5.09135C4.21744 3.48083 4.144 1.66216 4.71736 0C3.2152 0.518162 1.93334 1.53269 1.08395 2.87564C0.234572 4.21859 -0.132729 5.81155 0.0428502 7.39084C0.218429 8.97013 0.801634 10.131 1.92524 11.2546" /><path id="shape1" transform="matrix(0.28125 0 0 0.28125 5.05810546875 0.81298828125)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M0 6.9375L0 0" /><path id="shape2" transform="matrix(0.28125 0 0 0.28125 4.0341796875 0.7734375)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M0 3.46875L3.46875 0L6.9375 3.46875" /><path id="shape3" transform="matrix(0.28125 0 0 0.28125 0.5625 6.1875)" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 0L0 0" />
+</svg>

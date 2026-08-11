@@ -4,7 +4,7 @@ import { getBasePathname, getTidesPathname } from '../../appRouting';
 import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, type Coordinates } from '../components/dateLocationUtils';
-import { fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
+import { defaultTideCoordinates, fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
 import './tides.css';
 
 type TidesPageProps = {
@@ -19,18 +19,14 @@ type StationState = {
 
 type CurrentTideStatus = WeightedTideLevel & {
     incoming: boolean;
+    nextTide: WeightedTideExtreme;
 }
-
-const defaultCoordinates: Coordinates = {
-    latitude: -33.64013503503463,
-    longitude: 26.724985724190617
-};
 
 export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
     const queryDate = embedded ? null : getQueryDate();
     const hasExplicitCoordinates = queryCoordinates !== null;
-    const startingCoordinates = queryCoordinates ?? defaultCoordinates;
+    const startingCoordinates = queryCoordinates ?? defaultTideCoordinates;
     const shouldRequestLocation = !hasExplicitCoordinates && typeof navigator !== 'undefined' && Boolean(navigator.geolocation);
     const [coordinates, setCoordinates] = useState<Coordinates>(startingCoordinates);
     const [dateValue, setDateValue] = useState(queryDate ?? formatDateInput(new Date()));
@@ -91,8 +87,8 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
         setCoordinates(nextCoordinates);
     }, []);
     const handleLocationError = useCallback(() => {
-        setLocationReady(false);
-        setStationState({ status: 'error', stations: [], message: 'GPS location is unavailable. Allow location access or enter coordinates to view tides.' });
+        setLocationReady(true);
+        setStationState({ status: 'loading', stations: [], message: 'GPS location is unavailable. Using the default Diaz Cross area...' });
     }, []);
     const handleShare = () => {
         const url = getPageShareUrl(getTidesPathname(), {
@@ -137,8 +133,8 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
                     {selectedDate && locationReady && stationState.status === 'success' && !hasTideData && <p className='tides-message tides-message-error' role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>}
                     {selectedDate && locationReady && stationState.status === 'success' && hasTideData && <div className='tides-results'>
                         <div className='tides-wave-column'>
-                            {weightedExtremes.length > 0 && <TideWaveGraphic extremes={weightedExtremes} date={selectedDate} now={now} />}
                             {currentTide && <TideCurrentPanel currentTide={currentTide} now={now} />}
+                            {weightedExtremes.length > 0 && <TideWaveGraphic extremes={weightedExtremes} date={selectedDate} now={now} />}
                             <p className='tides-disclaimer'>Tide estimates are for planning birdwatching activities, not navigation.</p>
                         </div>
                         <div className='tides-station-list'>
@@ -202,16 +198,29 @@ function TideWaveGraphic({ extremes, date, now }: Readonly<{ extremes: WeightedT
 
 function TideCurrentPanel({ currentTide, now }: Readonly<{ currentTide: CurrentTideStatus; now: Date }>) {
     const DirectionIcon = currentTide.incoming ? WavesArrowUp : WavesArrowDown;
+    const NextTideIcon = currentTide.nextTide.high ? WavesArrowUp : WavesArrowDown;
 
     return (
-        <section className='tides-current-panel' aria-label='Current tide' aria-live='polite'>
-            <div className='tides-current-time'>
-                <Clock3 aria-hidden='true' />
-                <div><span>Now</span><strong>{formatTideTime(now, currentTide.timeZone)}</strong></div>
+        <section className='tides-current-panel' aria-label='Current and next tide' aria-live='polite'>
+            <div className='tides-current-row'>
+                <div className='tides-current-time'>
+                    <Clock3 aria-hidden='true' />
+                    <div className='tides-current-details'><span>Now</span><strong>{formatTideTime(now, currentTide.timeZone)}</strong></div>
+                </div>
+                <div className={`tides-current-direction ${currentTide.incoming ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing'}`}>
+                    <DirectionIcon aria-hidden='true' />
+                    <div className='tides-current-details'><span>{currentTide.incoming ? 'Incoming' : 'Outgoing'}</span><strong>{formatLevel(currentTide.level)} m</strong></div>
+                </div>
             </div>
-            <div className={`tides-current-direction ${currentTide.incoming ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing'}`}>
-                <DirectionIcon aria-hidden='true' />
-                <div><span>{currentTide.incoming ? 'Incoming' : 'Outgoing'}</span><strong>{formatLevel(currentTide.level)} m</strong></div>
+            <div className='tides-next-row'>
+                <div className='tides-current-time'>
+                    <Clock3 aria-hidden='true' />
+                    <div className='tides-current-details'><span>Next</span><strong>{formatTideTime(currentTide.nextTide.time, currentTide.nextTide.timeZone)}</strong></div>
+                </div>
+                <div className={`tides-next-tide ${currentTide.nextTide.high ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing'}`}>
+                    <NextTideIcon aria-hidden='true' />
+                    <div className='tides-current-details'><span>{currentTide.nextTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(currentTide.nextTide.level)} m</strong></div>
+                </div>
             </div>
         </section>
     );
@@ -298,7 +307,8 @@ function getCurrentTideStatus(predictions: TidePrediction[], extremes: WeightedT
 
     return {
         ...currentLevel,
-        incoming: nextExtreme.high
+        incoming: nextExtreme.high,
+        nextTide: nextExtreme
     };
 }
 

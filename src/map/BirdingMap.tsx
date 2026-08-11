@@ -37,7 +37,7 @@ export default function BirdingMap() {
     const initialLocationKeys = getInitialLocationKeys();
     const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
     const [mapHeight, setMapHeight] = useState(window.innerHeight);
-    const [drawerHeight, setDrawerHeight] = useState(() => getDefaultDrawerHeight(window.innerHeight));
+    const [drawerHeight, setDrawerHeight] = useState(() => getStoredDrawerHeight(window.innerHeight));
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
     const [inatLocationName, setInatLocationName] = useState<string | null>(null);
@@ -47,7 +47,7 @@ export default function BirdingMap() {
     const warnedInitialLocationKeyRef = useRef('');
 
     const [layerState, setLayerState] = useState<LayerState>(getInitialLayerState);
-    const [selectedLocationsTab, setSelectedLocationsTab] = useState<LocationTabName>(initialLocationSelection?.tab ?? 'Outings');
+    const [selectedLocationsTab, setSelectedLocationsTab] = useState<LocationTabName | undefined>(initialLocationSelection?.tab);
     const [drawerBackTarget, setDrawerBackTarget] = useState<OpenDrawer>(null);
     const openDrawerRef = useRef<OpenDrawer>(openDrawer);
     const drawerHistoryEntryRef = useRef(false);
@@ -70,6 +70,7 @@ export default function BirdingMap() {
     const closeLocationsDrawer = useCallback(() => {
         setLocationSearchQuery('');
         setInitialFocusQuery('');
+        setSelectedLocationsTab(undefined);
         clearLocationPath();
     }, []);
 
@@ -212,6 +213,10 @@ export default function BirdingMap() {
     useEffect(() => {
         localStorage.setItem('mapLayerState', JSON.stringify(layerState));
     }, [layerState]);
+
+    useEffect(() => {
+        localStorage.setItem('drawerHeight', String(drawerHeight));
+    }, [drawerHeight]);
 
     useEffect(() => {
         if (typeof window === 'undefined') {
@@ -405,6 +410,11 @@ const drawerMinHeight = 180;
 
 function getDefaultDrawerHeight(viewportHeight: number): number {
     return clampDrawerHeight(Math.min(viewportHeight * 0.82, 780), viewportHeight);
+}
+
+function getStoredDrawerHeight(viewportHeight: number): number {
+    const storedHeight = Number(localStorage.getItem('drawerHeight'));
+    return Number.isFinite(storedHeight) ? clampDrawerHeight(storedHeight, viewportHeight) : getDefaultDrawerHeight(viewportHeight);
 }
 
 function clampDrawerHeight(height: number, viewportHeight: number): number {

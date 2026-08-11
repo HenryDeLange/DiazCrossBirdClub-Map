@@ -1,38 +1,35 @@
-import type { FeatureCollection, Geometry } from 'geojson';
 import { MapPinSearch, Share2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import inatLogo from '../../../assets/inat-logo.png';
-import type { FeatureProps } from '../../geojson/types';
 import { findLocationGroupByName, focusLocationGroup } from '../../locationUtils';
 import { LocationAstronomySummary } from './LocationAstronomySummary';
 import { buildFeatureGroups, filterFeatureGroups, getFeatureLink } from './locationFeatureUtils';
 import { PrimaryCategoryIcon } from './PrimaryCategoryIcon';
 import { shareLocation } from './shareLocation';
-import type { AstronomyLocation, FeatureDetailsProps } from './types';
+import type { FeatureDetailsProps, FeatureGroup } from './types';
 
 export function LocationFeatureDetails({
-    geojson,
+    sources,
     searchQuery,
     onClose,
     onOpenInat,
     onLocationSelected,
     initialFocusQuery,
-    tabLabel,
     onOpenAstronomy
 }: Readonly<FeatureDetailsProps>) {
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const hasHandledInitialFocus = useRef(false);
     const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
-    const openAstronomy = (location: AstronomyLocation) => onOpenAstronomy(location, tabLabel);
+    const sourceGeojson = sources.flatMap(({ geojson }) => geojson);
 
     useEffect(() => {
         if (!initialFocusQuery || hasHandledInitialFocus.current) {
             return;
         }
 
-        const locationGroup = findLocationGroupByName(geojson, initialFocusQuery);
+        const locationGroup = findLocationGroupByName(sourceGeojson, initialFocusQuery);
         hasHandledInitialFocus.current = true;
 
         if (!locationGroup) {
@@ -41,37 +38,35 @@ export function LocationFeatureDetails({
         }
 
         focusLocationGroup(map, locationGroup.heading, locationGroup.items);
-    }, [geojson, initialFocusQuery, map]);
+    }, [initialFocusQuery, map, sourceGeojson]);
 
-    const allGroups = geojson.map((geojsonObject: FeatureCollection<Geometry, FeatureProps>) => (
-        filterFeatureGroups(buildFeatureGroups(geojsonObject.features), normalizedQuery)
-    ));
-    const hasAnyResults = allGroups.some((groups) => groups.length > 0);
+    const allGroups = sources
+        .flatMap(({ tab, geojson }) => geojson.flatMap((geojsonObject, collectionIndex) => (
+            filterFeatureGroups(buildFeatureGroups(geojsonObject.features), normalizedQuery).map((group, groupIndex) => ({
+                id: `${tab}-${collectionIndex}-${groupIndex}`,
+                tab,
+                group: {
+                    ...group,
+                    items: [...group.items].sort(compareLocationItems)
+                }
+            }))
+        )))
+        .sort((left, right) => compareNames(getGroupName(left.group), getGroupName(right.group)));
 
-    if (!hasAnyResults) {
+    if (allGroups.length === 0) {
         return <div className='drawer-empty'>No locations match your search.</div>;
     }
 
     return (
-        <>
-            {geojson.map((_geojsonObject, outingIndex) => {
-                const groups = allGroups[outingIndex];
-
-                if (groups.length === 0) {
-                    return null;
-                }
-
-                return (
-                    <div key={outingIndex} className='location-list'>
-                        {groups.map((group, groupIndex) => {
-                            const heading = group.heading;
+        <div className='location-list'>
+            {allGroups.map(({ group, tab, id: groupKey }) => {
+                const heading = group.heading;
                             const hasHeading = Boolean(heading?.properties.name);
-                            const groupKey = `${outingIndex}-${groupIndex}`;
                             const itemsId = `location-group-items-${groupKey}`;
                             const isExpanded = !collapsedGroups[groupKey];
 
                             return (
-                                <div key={`${outingIndex}-${groupIndex}`} className='location-group'>
+                                <div key={groupKey} className='location-group'>
                                     {hasHeading && heading && (
                                         <div className='location-group-header'>
                                             <div className='location-group-header-row'>
@@ -79,13 +74,13 @@ export function LocationFeatureDetails({
                                                     <button
                                                         type='button'
                                                         className='location-category-badge'
-                                                        title={`${isExpanded ? 'Collapse' : 'Expand'} ${tabLabel} category`}
+                                                        title={`${isExpanded ? 'Collapse' : 'Expand'} ${tab} category`}
                                                         aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${heading.properties.name}`}
                                                         aria-expanded={isExpanded}
                                                         aria-controls={itemsId}
                                                         onClick={() => setCollapsedGroups((current) => ({ ...current, [groupKey]: isExpanded }))}
                                                     >
-                                                        <PrimaryCategoryIcon tabLabel={tabLabel} />
+                                                        <PrimaryCategoryIcon tabLabel={tab} />
                                                     </button>
                                                     <div className='location-group-title'>{heading.properties.name}</div>
                                                 </div>
@@ -107,7 +102,7 @@ export function LocationFeatureDetails({
                                                         className='location-card-nav location-card-nav-inat'
                                                         onClick={() => {
                                                             onLocationSelected(heading.properties.name);
-                                                            map.once('moveend', () => onOpenInat(heading.properties.name));
+                                                            map.once('moveend', () => onOpenInat(heading.properties.name, tab));
                                                             focusLocationGroup(map, heading, group.items);
                                                         }}
                                                         aria-label={`Open iNaturalist observations near ${heading.properties.name}`}
@@ -122,7 +117,7 @@ export function LocationFeatureDetails({
                                                                 latitude: heading.geometry.coordinates[1],
                                                                 longitude: heading.geometry.coordinates[0]
                                                             }}
-                                                            onOpen={openAstronomy}
+                                                            onOpen={(location) => onOpenAstronomy(location, tab)}
                                                         />
                                                     )}
                                                     <button
@@ -207,10 +202,19 @@ export function LocationFeatureDetails({
                                     )}
                                 </div>
                             );
-                        })}
-                    </div>
-                );
             })}
-        </>
+        </div>
     );
+}
+
+function compareLocationItems(left: FeatureGroup['items'][number], right: FeatureGroup['items'][number]): number {
+    return compareNames(left.feature.properties.name ?? '', right.feature.properties.name ?? '');
+}
+
+function getGroupName(group: FeatureGroup): string {
+    return group.heading?.properties.name ?? group.items[0]?.feature.properties.name ?? '';
+}
+
+function compareNames(left: string, right: string): number {
+    return left.localeCompare(right, undefined, { numeric: true, sensitivity: 'base' });
 }

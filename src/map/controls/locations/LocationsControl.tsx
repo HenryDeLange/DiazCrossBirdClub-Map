@@ -6,15 +6,22 @@ import { outings } from '../../geojson/outings';
 import { paths } from '../../geojson/paths';
 import { points } from '../../geojson/points';
 import { spots } from '../../geojson/spots';
-import { type LocationTabName } from '../../locationUtils';
+import type { LocationTabName } from '../../locationUtils';
 import { LocationFeatureDetails } from './LocationFeatureDetails';
 import { LocationTabs } from './LocationTabs';
-import type { LocationsControlProps } from './types';
+import type { LocationCollectionSource, LocationsControlProps } from './types';
 
 type LocationTab = {
     label: LocationTabName;
     content: (searchQuery: string) => ReactElement;
 }
+
+const locationSources: LocationCollectionSource[] = [
+    { tab: 'Outings', geojson: outings },
+    { tab: 'Spots', geojson: spots },
+    { tab: 'Paths', geojson: paths },
+    { tab: 'Points', geojson: points }
+];
 
 export function LocationsControl({
     drawerHeight,
@@ -31,68 +38,21 @@ export function LocationsControl({
     initialFocusQuery,
     searchVersion
 }: Readonly<LocationsControlProps>) {
-    const tabs: LocationTab[] = [
-        {
-            label: 'Outings',
-            content: (searchQuery: string) => (
-                <LocationFeatureDetails
-                    geojson={outings}
-                    searchQuery={searchQuery}
-                    onClose={onClose}
-                    onOpenInat={(locationName) => onOpenInat(locationName, 'Outings')}
-                    onLocationSelected={onLocationSelected}
-                    initialFocusQuery={initialFocusQuery}
-                    tabLabel='Outings'
-                    onOpenAstronomy={(location) => onOpenAstronomy(location, 'Outings')}
-                />
-            )
-        },
-        {
-            label: 'Spots',
-            content: (searchQuery: string) => (
-                <LocationFeatureDetails
-                    geojson={spots}
-                    searchQuery={searchQuery}
-                    onClose={onClose}
-                    onOpenInat={(locationName) => onOpenInat(locationName, 'Spots')}
-                    onLocationSelected={onLocationSelected}
-                    initialFocusQuery={initialFocusQuery}
-                    tabLabel='Spots'
-                    onOpenAstronomy={(location) => onOpenAstronomy(location, 'Spots')}
-                />
-            )
-        },
-        {
-            label: 'Paths',
-            content: (searchQuery: string) => (
-                <LocationFeatureDetails
-                    geojson={paths}
-                    searchQuery={searchQuery}
-                    onClose={onClose}
-                    onOpenInat={(locationName) => onOpenInat(locationName, 'Paths')}
-                    onLocationSelected={onLocationSelected}
-                    initialFocusQuery={initialFocusQuery}
-                    tabLabel='Paths'
-                    onOpenAstronomy={(location) => onOpenAstronomy(location, 'Paths')}
-                />
-            )
-        },
-        {
-            label: 'Points',
-            content: (searchQuery: string) => (
-                <LocationFeatureDetails
-                    geojson={points}
-                    searchQuery={searchQuery}
-                    onClose={onClose}
-                    onOpenInat={(locationName) => onOpenInat(locationName, 'Points')}
-                    onLocationSelected={onLocationSelected}
-                    initialFocusQuery={initialFocusQuery}
-                    tabLabel='Points'
-                    onOpenAstronomy={(location) => onOpenAstronomy(location, 'Points')}
-                />
-            )
-        }
-    ];
+    const renderLocationDetails = (sources: LocationCollectionSource[]) => (searchQuery: string) => (
+        <LocationFeatureDetails
+            sources={sources}
+            searchQuery={searchQuery}
+            onClose={onClose}
+            onOpenInat={onOpenInat}
+            onLocationSelected={onLocationSelected}
+            initialFocusQuery={initialFocusQuery}
+            onOpenAstronomy={onOpenAstronomy}
+        />
+    );
+    const tabs: LocationTab[] = locationSources.map((source) => ({
+        label: source.tab,
+        content: renderLocationDetails([source])
+    }));
 
     return (
         <>
@@ -115,6 +75,7 @@ export function LocationsControl({
                 <LocationTabs
                     key={`locations-tabs-${searchVersion ?? 0}-${initialTab ?? ''}`}
                     tabs={tabs}
+                    allContent={renderLocationDetails(locationSources)}
                     initialSearchQuery={initialSearchQuery}
                     initialTab={initialTab}
                     onSearchCleared={onSearchCleared}

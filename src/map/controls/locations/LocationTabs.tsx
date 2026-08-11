@@ -9,16 +9,19 @@ type LocationTabsProps = {
         label: LocationTabName;
         content: (searchQuery: string) => ReactNode;
     }[];
+    allContent: (searchQuery: string) => ReactNode;
     initialSearchQuery?: string;
     initialTab?: LocationTabName;
     onSearchCleared: () => void;
 }
 
+type LocationTabSelection = LocationTabName | 'All';
+
 const locationTabNames: LocationTabName[] = ['Outings', 'Spots', 'Paths', 'Points'];
 
-export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
-    const [activeTab, setActiveTab] = useState<LocationTabName>(
-        initialTab && locationTabNames.includes(initialTab) ? initialTab : tabs[0].label
+export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
+    const [activeTab, setActiveTab] = useState<LocationTabSelection>(
+        initialTab && locationTabNames.includes(initialTab) ? initialTab : 'All'
     );
     const [searchQuery, setSearchQuery] = useState(initialSearchQuery ?? '');
     const [debouncedSearchQuery] = useDebounceValue(searchQuery, 300);
@@ -66,9 +69,10 @@ export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCle
                     <select
                         aria-label='Choose location type'
                         className='drawer-tab-select'
-                        onChange={(event) => setActiveTab(event.target.value as LocationTabName)}
+                        onChange={(event) => setActiveTab(event.target.value as LocationTabSelection)}
                         value={activeTab}
                     >
+                        <option value='All'>All</option>
                         {tabs.map((tab) => (
                             <option key={tab.label} value={tab.label}>
                                 {tab.label}
@@ -83,7 +87,8 @@ export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCle
                             key={tab.label}
                             type='button'
                             className={`drawer-tab ${activeTab === tab.label ? 'drawer-tab-active' : ''}`}
-                            onClick={() => setActiveTab(tab.label)}
+                            aria-pressed={activeTab === tab.label}
+                            onClick={() => setActiveTab((current) => current === tab.label ? 'All' : tab.label)}
                         >
                             {tab.label}
                         </button>
@@ -97,9 +102,11 @@ export function LocationTabs({ tabs, initialSearchQuery, initialTab, onSearchCle
                 value={searchQuery}
             />
             <div className='drawer-content' ref={contentRef}>
-                {tabs.map((tab) => activeTab === tab.label && (
-                    <div key={tab.label}>{tab.content(debouncedSearchQuery)}</div>
-                ))}
+                {activeTab === 'All'
+                    ? allContent(debouncedSearchQuery)
+                    : tabs.map((tab) => activeTab === tab.label && (
+                        <div key={tab.label}>{tab.content(debouncedSearchQuery)}</div>
+                    ))}
             </div>
         </>
     );

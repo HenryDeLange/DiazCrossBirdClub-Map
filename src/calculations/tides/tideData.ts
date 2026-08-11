@@ -1,5 +1,6 @@
 import { useStation, type Extreme, type Station } from '@neaps/tide-predictor';
 import { roundCoordinate, type Coordinates } from '../components/dateLocationUtils';
+import defaultTideStations from './defaultTideStations.json';
 
 export type TideStation = Station & {
     distance?: number;
@@ -28,6 +29,16 @@ export type WeightedTideLevel = {
 
 const stationApiUrl = 'https://api.openwaters.io/tides/stations';
 
+export const defaultTideCoordinates: Coordinates = {
+    latitude: -33.64013503503463,
+    longitude: 26.724985724190617
+};
+
+const defaultRoundedCoordinates = {
+    latitude: roundCoordinate(defaultTideCoordinates.latitude, 1),
+    longitude: roundCoordinate(defaultTideCoordinates.longitude, 1)
+};
+
 export async function fetchTideStations(coordinates: Coordinates, signal?: AbortSignal): Promise<TideStationResult> {
     const roundedCoordinates = {
         latitude: roundCoordinate(coordinates.latitude, 1),
@@ -55,6 +66,13 @@ export async function fetchTideStations(coordinates: Coordinates, signal?: Abort
     catch (error) {
         if (signal?.aborted) {
             throw error;
+        }
+
+        if (roundedCoordinates.latitude === defaultRoundedCoordinates.latitude && roundedCoordinates.longitude === defaultRoundedCoordinates.longitude) {
+            return {
+                stations: defaultTideStations as unknown as TideStation[],
+                coordinates: roundedCoordinates
+            };
         }
 
         throw error instanceof Error ? error : new Error('Could not load tide stations');

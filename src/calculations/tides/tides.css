@@ -32,6 +32,11 @@
     overflow-y: auto;
 }
 
+.tides-page-embedded .tides-shell {
+    width: 100%;
+    padding-inline: 1.1rem;
+}
+
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) .tides-page {
         --tides-bg: var(--drawer-bg, #161616);
@@ -146,18 +151,30 @@
 }
 
 .tides-current-panel {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    display: grid;
+    gap: 0.55rem;
     padding: 0.65rem 0.75rem;
     border: 1px solid var(--tides-line);
     background: color-mix(in srgb, var(--tides-surface) 94%, transparent);
     box-shadow: 0 10px 28px var(--tides-shadow);
 }
 
+.tides-current-row,
+.tides-next-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.tides-next-row {
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--tides-soft-line);
+}
+
 .tides-current-time,
-.tides-current-direction {
+.tides-current-direction,
+.tides-next-tide {
     display: flex;
     align-items: center;
     min-width: 0;
@@ -169,7 +186,8 @@
 }
 
 .tides-current-time svg,
-.tides-current-direction svg {
+.tides-current-direction svg,
+.tides-next-tide svg {
     flex-shrink: 0;
     width: 1.4rem;
     height: 1.4rem;
@@ -187,10 +205,15 @@
     color: #b06d4d;
 }
 
-.tides-current-panel div > div {
+.tides-current-details {
     display: grid;
     gap: 0.08rem;
     min-width: 0;
+}
+
+.tides-current-direction .tides-current-details,
+.tides-next-tide .tides-current-details {
+    text-align: right;
 }
 
 .tides-current-panel span {
