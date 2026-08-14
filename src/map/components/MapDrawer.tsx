@@ -34,10 +34,13 @@ export function MapDrawer({
 }: Readonly<MapDrawerProps>) {
     const [isRendered, setIsRendered] = useState(isOpen);
     const [isVisible, setIsVisible] = useState(false);
+    const [isSettled, setIsSettled] = useState(false);
     const [panelHeight, setPanelHeight] = useState(() => clampHeight(height, minHeight));
     const dragRef = useRef<{ pointerId: number; startY: number; startHeight: number } | null>(null);
 
     useEffect(() => {
+        const resetSettledFrameId = requestAnimationFrame(() => setIsSettled(false));
+
         if (isOpen) {
             let visibleFrameId: number | undefined;
             const renderTimeoutId = window.setTimeout(() => {
@@ -46,6 +49,7 @@ export function MapDrawer({
             }, 0);
 
             return () => {
+                cancelAnimationFrame(resetSettledFrameId);
                 window.clearTimeout(renderTimeoutId);
                 if (visibleFrameId !== undefined) {
                     cancelAnimationFrame(visibleFrameId);
@@ -57,6 +61,7 @@ export function MapDrawer({
         const timeoutId = window.setTimeout(() => setIsRendered(false), drawerTransitionDuration);
 
         return () => {
+            cancelAnimationFrame(resetSettledFrameId);
             cancelAnimationFrame(closeFrameId);
             window.clearTimeout(timeoutId);
         };
@@ -106,6 +111,12 @@ export function MapDrawer({
         }
     };
 
+    const handlePanelTransitionEnd = (event: React.TransitionEvent<HTMLDivElement>) => {
+        if (isVisible && event.target === event.currentTarget && event.propertyName === 'transform') {
+            setIsSettled(true);
+        }
+    };
+
     if (!isRendered) {
         return null;
     }
@@ -113,7 +124,8 @@ export function MapDrawer({
     return (
         <div className={`drawer-backdrop ${isVisible ? 'drawer-backdrop-open' : 'drawer-backdrop-closing'}`} onClick={onClose} onDoubleClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onTouchStart={(event) => event.stopPropagation()} onWheel={(event) => event.stopPropagation()}>
             <div
-                className={`drawer-panel ${isVisible ? 'drawer-open' : 'drawer-closing'}`}
+                className={`drawer-panel ${isVisible ? 'drawer-open' : 'drawer-closing'} ${isSettled ? 'drawer-settled' : ''}`}
+                onTransitionEnd={handlePanelTransitionEnd}
                 onClick={(event) => event.stopPropagation()}
                 onDoubleClick={(event) => event.stopPropagation()}
                 onMouseDown={(event) => event.stopPropagation()}
@@ -155,7 +167,9 @@ export function MapDrawer({
                     </div>
                     {headerAction}
                 </div>
-                {children}
+                <div className='drawer-body'>
+                    {children}
+                </div>
             </div>
         </div>
     );

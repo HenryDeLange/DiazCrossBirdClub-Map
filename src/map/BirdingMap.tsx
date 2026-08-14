@@ -1,6 +1,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
+import { defaultMapCenter } from '../common/defaultLocation';
 import { InstallAppButton } from '../pwa/InstallAppButton';
 import { PwaCacheDrawer } from '../pwa/PwaCacheDrawer';
 import { useTheme } from '../theme/useTheme';
@@ -63,7 +64,7 @@ export default function BirdingMap() {
         };
     }, []);
 
-    const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(startPosition));
+    const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(defaultMapCenter));
     const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
     const clampedDrawerHeight = clampDrawerHeight(drawerHeight, mapHeight);
 
@@ -397,11 +398,6 @@ export default function BirdingMap() {
     );
 }
 
-const startPosition = {
-    lat: -33.6,
-    lng: 26.73
-};
-
 const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
 
 const maxZoom = 20;
@@ -409,11 +405,12 @@ const maxZoom = 20;
 const drawerMinHeight = 180;
 
 function getDefaultDrawerHeight(viewportHeight: number): number {
-    return clampDrawerHeight(Math.min(viewportHeight * 0.82, 780), viewportHeight);
+    return clampDrawerHeight(Math.min(viewportHeight * (2 / 3), 780), viewportHeight);
 }
 
 function getStoredDrawerHeight(viewportHeight: number): number {
-    const storedHeight = Number(localStorage.getItem('drawerHeight'));
+    const storedValue = localStorage.getItem('drawerHeight');
+    const storedHeight = storedValue === null ? Number.NaN : Number(storedValue);
     return Number.isFinite(storedHeight) ? clampDrawerHeight(storedHeight, viewportHeight) : getDefaultDrawerHeight(viewportHeight);
 }
 

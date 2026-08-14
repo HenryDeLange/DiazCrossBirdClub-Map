@@ -17,3 +17,10 @@ svg,
 [role='button'] {
     -webkit-tap-highlight-color: transparent;
 }
+
+button,
+input,
+textarea {
+    -webkit-appearance: none;
+    appearance: none;
+}

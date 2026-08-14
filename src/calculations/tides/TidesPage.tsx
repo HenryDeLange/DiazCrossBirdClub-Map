@@ -1,10 +1,11 @@
 import { Clock3, Map, Share2, WavesArrowDown, WavesArrowUp, WavesHorizontal } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { getBasePathname, getTidesPathname } from '../../appRouting';
+import { defaultTideCoordinates } from '../../common/defaultLocation';
 import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, type Coordinates } from '../components/dateLocationUtils';
-import { defaultTideCoordinates, fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
+import { defaultTideStationsData, fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
 import './tides.css';
 
 type TidesPageProps = {
@@ -30,20 +31,17 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
     const shouldRequestLocation = !hasExplicitCoordinates && typeof navigator !== 'undefined' && Boolean(navigator.geolocation);
     const [coordinates, setCoordinates] = useState<Coordinates>(startingCoordinates);
     const [dateValue, setDateValue] = useState(queryDate ?? formatDateInput(new Date()));
-    const [locationReady, setLocationReady] = useState(hasExplicitCoordinates);
+    const [locationLocked, setLocationLocked] = useState(hasExplicitCoordinates);
     const [stationState, setStationState] = useState<StationState>(() => {
         if (hasExplicitCoordinates) {
             return { status: 'loading', stations: [], message: 'Loading nearby stations...' };
         }
 
-        return shouldRequestLocation
-            ? { status: 'loading', stations: [], message: 'Waiting for GPS location...' }
-            : { status: 'error', stations: [], message: 'GPS location is unavailable. Enter coordinates to view tides.' };
+        return { status: 'success', stations: defaultTideStationsData };
     });
     const [now, setNow] = useState(() => new Date());
-
     useEffect(() => {
-        if (!locationReady) {
+        if (!locationLocked) {
             return;
         }
 
@@ -61,7 +59,7 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
             });
 
         return () => controller.abort();
-    }, [coordinates, locationReady]);
+    }, [coordinates, locationLocked]);
 
     useEffect(() => {
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
@@ -82,13 +80,9 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
 
     const selectedDate = getTideSelectedDate(dateValue);
     const handleCoordinatesChange = useCallback((nextCoordinates: Coordinates) => {
-        setLocationReady(true);
+        setLocationLocked(true);
         setStationState({ status: 'loading', stations: [], message: 'Loading nearby stations...' });
         setCoordinates(nextCoordinates);
-    }, []);
-    const handleLocationError = useCallback(() => {
-        setLocationReady(true);
-        setStationState({ status: 'loading', stations: [], message: 'GPS location is unavailable. Using the default Diaz Cross area...' });
     }, []);
     const handleShare = () => {
         const url = getPageShareUrl(getTidesPathname(), {
@@ -115,7 +109,7 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
             <div className='tides-shell'>
                 <header className='tides-header'>
                     <div className='tides-toolbar'>
-                        <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={handleCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={shouldRequestLocation} onLocationError={handleLocationError} idPrefix='tides' />
+                        <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={handleCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={shouldRequestLocation} idPrefix='tides' />
                         {!embedded && (
                             <div className='tides-toolbar-actions'>
                                 <a className='tides-map-link' href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
@@ -127,11 +121,10 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
 
                 <section className='tides-dashboard'>
                     {!selectedDate && <p className='tides-message' role='alert'>Select a valid date to view tide predictions.</p>}
-                    {selectedDate && !locationReady && <p className={`tides-message ${stationState.status === 'error' ? 'tides-message-error' : ''}`} role={stationState.status === 'error' ? 'alert' : 'status'} aria-live='polite'>{stationState.message ?? 'Waiting for GPS location...'}</p>}
-                    {selectedDate && locationReady && stationState.status === 'loading' && <p className='tides-message' role='status' aria-live='polite'>{stationState.message ?? 'Loading nearby stations...'}</p>}
-                    {selectedDate && locationReady && stationState.status === 'error' && <p className='tides-message tides-message-error' role='alert'>{stationState.message}</p>}
-                    {selectedDate && locationReady && stationState.status === 'success' && !hasTideData && <p className='tides-message tides-message-error' role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>}
-                    {selectedDate && locationReady && stationState.status === 'success' && hasTideData && <div className='tides-results'>
+                    {selectedDate && stationState.status === 'loading' && <p className='tides-message' role='status' aria-live='polite'>{stationState.message ?? 'Loading nearby stations...'}</p>}
+                    {selectedDate && stationState.status === 'error' && <p className='tides-message tides-message-error' role='alert'>{stationState.message}</p>}
+                    {selectedDate && stationState.status === 'success' && !hasTideData && <p className='tides-message tides-message-error' role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>}
+                    {selectedDate && stationState.status === 'success' && hasTideData && <div className='tides-results'>
                         <div className='tides-wave-column'>
                             {currentTide && <TideCurrentPanel currentTide={currentTide} now={now} />}
                             {weightedExtremes.length > 0 && <TideWaveGraphic extremes={weightedExtremes} date={selectedDate} now={now} />}
@@ -403,3 +396,4 @@ function createSmoothPath(points: WaveChartPoint[]): string {
         return `${path} C ${controlX} ${previousPoint.y}, ${controlX} ${point.y}, ${point.x} ${point.y}`;
     }, '');
 }
+

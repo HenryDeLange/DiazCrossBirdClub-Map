@@ -3,6 +3,7 @@ import { useEffect, useState, type CSSProperties, type ComponentType, type Keybo
 import { getAstraPathname, getBasePathname } from '../../appRouting';
 import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
 import MoonsetIcon from '../../assets/astra/moonset.svg?react';
+import { defaultCoordinates } from '../../common/defaultLocation';
 import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, isValidDateInput, type Coordinates } from '../components/dateLocationUtils';
@@ -28,11 +29,6 @@ type SkyEvent = {
 
 type AstraIcon = ComponentType<SVGProps<SVGSVGElement>>;
 
-const defaultCoordinates: Coordinates = {
-    latitude: -33.64013503503463,
-    longitude: 26.724985724190617
-};
-
 export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
     const queryDate = embedded ? null : getQueryDate();
@@ -45,7 +41,6 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
     const [now, setNow] = useState(() => new Date());
     const [inputFieldsReady, setInputFieldsReady] = useState(true);
-
     useEffect(() => {
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
         return () => window.clearInterval(intervalId);
@@ -140,7 +135,7 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
                 <header className='astra-header'>
                     <div className='astra-toolbar'>
                         <div className='astra-toolbar-controls'>
-                            <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={setCoordinates} coordinatePrecision={5} locationView={locationView} requestLocationOnMount={shouldRequestLocation} onInputValidityChange={setInputFieldsReady} idPrefix='astra' />
+                            <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={setCoordinates} coordinatePrecision={4} locationView={locationView} requestLocationOnMount={shouldRequestLocation} onInputValidityChange={setInputFieldsReady} idPrefix='astra' />
                         </div>
                         {!embedded && (
                             <div className='astra-toolbar-actions'>

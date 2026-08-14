@@ -11,12 +11,14 @@ export type StorageInfo = {
 export type CacheBucketInfo = {
     name: string;
     entries: number;
-    bytes: number | null;
+    bytes: number;
+    unknownEntries: number;
 }
 
 export type AppStorageInfo = {
     cacheBuckets: CacheBucketInfo[];
     localStorage: StorageInfo;
+    estimatedUsageBytes: number | null;
 }
 
 export type AppStorageClearResult = {
@@ -29,11 +31,15 @@ export async function getAppStorageInfo(): Promise<AppStorageInfo> {
         throw new Error('App storage is not available outside a browser.');
     }
 
-    const cacheBuckets = 'caches' in window ? await Promise.all((await window.caches.keys()).map(getCacheBucketInfo)) : [];
+    const [cacheBuckets, estimatedUsageBytes] = await Promise.all([
+        'caches' in window ? Promise.all((await window.caches.keys()).map(getCacheBucketInfo)) : Promise.resolve([]),
+        getEstimatedUsageBytes()
+    ]);
 
     return {
         cacheBuckets,
-        localStorage: getStorageInfo(window.localStorage)
+        localStorage: getStorageInfo(window.localStorage),
+        estimatedUsageBytes
     };
 }
 
@@ -55,17 +61,54 @@ export async function clearAppCaches(): Promise<AppStorageClearResult> {
 async function getCacheBucketInfo(name: string): Promise<CacheBucketInfo> {
     const cache = await window.caches.open(name);
     const requests = await cache.keys();
-    const contentLengths = await Promise.all(requests.map(async (request) => {
+    const entryBytes = await Promise.all(requests.map(async (request) => {
         const response = await cache.match(request);
-        const contentLength = response?.headers.get('content-length');
-        return contentLength ? Number(contentLength) : null;
+        return response ? getResponseBytes(response) : null;
     }));
+    const bytes = entryBytes.reduce<number>((total, entryBytes) => total + (entryBytes ?? 0), 0);
 
     return {
         name,
         entries: requests.length,
-        bytes: contentLengths.every((value) => value !== null) ? contentLengths.reduce((total, value) => total + (value ?? 0), 0) : null
+        bytes,
+        unknownEntries: entryBytes.filter((value) => value === null).length
     };
+}
+
+async function getResponseBytes(response: Response): Promise<number | null> {
+    const contentLength = response.headers.get('content-length');
+    if (contentLength !== null) {
+        const bytes = Number(contentLength);
+        if (Number.isInteger(bytes) && bytes >= 0) {
+            return bytes;
+        }
+    }
+
+    if (response.type === 'opaque') {
+        return null;
+    }
+
+    try {
+        return (await response.clone().arrayBuffer()).byteLength;
+    }
+    catch {
+        return null;
+    }
+}
+
+async function getEstimatedUsageBytes(): Promise<number | null> {
+    const storageManager = window.navigator.storage;
+    if (typeof storageManager?.estimate !== 'function') {
+        return null;
+    }
+
+    try {
+        const estimate = await storageManager.estimate();
+        return typeof estimate.usage === 'number' && Number.isFinite(estimate.usage) ? estimate.usage : null;
+    }
+    catch {
+        return null;
+    }
 }
 
 function getStorageInfo(storage: Storage): StorageInfo {

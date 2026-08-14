@@ -60,11 +60,16 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 onClose={onClose}
                 onBack={onBack}
                 backLabel={locationName}
-                label='Species List'
                 title='iNaturalist Observations'
                 height={drawerHeight}
                 onHeightChange={onDrawerHeightChange}
             >
+                <DrawerSearchField
+                    ariaLabel='Search species by common or scientific name'
+                    onChange={setSearchInput}
+                    placeholder='Search common or scientific name'
+                    value={searchInput}
+                />
                 <div className='drawer-content'>
                     <div className='drawer-panel-subtitle'>
                         {data
@@ -81,12 +86,6 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                             View on iNaturalist
                         </a>
                     </div>
-                    <DrawerSearchField
-                        ariaLabel='Search species by common or scientific name'
-                        onChange={setSearchInput}
-                        placeholder='Search common or scientific name'
-                        value={searchInput}
-                    />
                     {loading && (
                         <div className='drawer-empty'>Loading species...</div>
                     )}

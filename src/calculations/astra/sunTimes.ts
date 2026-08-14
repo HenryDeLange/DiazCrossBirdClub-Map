@@ -137,7 +137,7 @@ function buildBirdingSegments(date: Date, sunTimes: SunCalc.SunTimes): TimelineS
     const middayStart = new Date(solarNoon.getTime() - daylightMilliseconds * 0.06);
     const raptorThermalStart = daylightPoint(0.30);
     const raptorThermalEnd = middayStart;
-    const eveningDustStart = sunset;
+    const eveningDustStart = isValidDate(sunTimes.dusk) ? sunTimes.dusk : sunset;
     const eveningDustEnd = isValidDate(sunTimes.night)
         ? new Date(sunTimes.night.getTime() + 15 * 60 * 1000)
         : new Date(sunset.getTime() + daylightMilliseconds * 0.24);

@@ -11,7 +11,6 @@ type DateLocationControlsProps = {
     coordinatePrecision?: number;
     locationView?: boolean;
     requestLocationOnMount?: boolean;
-    onLocationError?: () => void;
     onInputValidityChange?: (isValid: boolean) => void;
     idPrefix: string;
 }
@@ -20,11 +19,10 @@ type LocationStatus = 'idle' | 'loading' | 'success' | 'error';
 
 const decimalInputPattern = /^-?\d*(?:\.\d*)?$/;
 
-export function DateLocationControls({ dateValue, onDateChange, coordinates, onCoordinatesChange, coordinatePrecision = 5, locationView = false, requestLocationOnMount = false, onLocationError, onInputValidityChange, idPrefix }: Readonly<DateLocationControlsProps>) {
+export function DateLocationControls({ dateValue, onDateChange, coordinates, onCoordinatesChange, coordinatePrecision = 5, locationView = false, requestLocationOnMount = false, onInputValidityChange, idPrefix }: Readonly<DateLocationControlsProps>) {
     const [latitudeInput, setLatitudeInput] = useState(formatCoordinate(coordinates.latitude, coordinatePrecision));
     const [longitudeInput, setLongitudeInput] = useState(formatCoordinate(coordinates.longitude, coordinatePrecision));
     const [locationStatus, setLocationStatus] = useState<LocationStatus>(requestLocationOnMount ? 'loading' : 'idle');
-    const [locationStatusMessage, setLocationStatusMessage] = useState(requestLocationOnMount ? 'Locating...' : '');
 
     useEffect(() => {
         if (!requestLocationOnMount) {
@@ -37,15 +35,12 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
                 setLatitudeInput(formatCoordinate(nextCoordinates.latitude, coordinatePrecision));
                 setLongitudeInput(formatCoordinate(nextCoordinates.longitude, coordinatePrecision));
                 setLocationStatus('success');
-                setLocationStatusMessage('GPS point loaded');
             },
             () => {
                 setLocationStatus('error');
-                setLocationStatusMessage('Could not load GPS point');
-                onLocationError?.();
             }
         );
-    }, [coordinatePrecision, onCoordinatesChange, onLocationError, requestLocationOnMount]);
+    }, [coordinatePrecision, onCoordinatesChange, requestLocationOnMount]);
 
     useEffect(() => {
         if (locationStatus === 'idle' || locationStatus === 'loading') {
@@ -54,7 +49,6 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
 
         const timeoutId = window.setTimeout(() => {
             setLocationStatus('idle');
-            setLocationStatusMessage('');
         }, locationStatus === 'success' ? 1900 : 2600);
 
         return () => window.clearTimeout(timeoutId);
@@ -131,25 +125,19 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
     const requestCurrentLocation = () => {
         if (typeof navigator === 'undefined' || !navigator.geolocation) {
             setLocationStatus('error');
-            setLocationStatusMessage('GPS is not available');
-            onLocationError?.();
             return;
         }
 
         setLocationStatus('loading');
-        setLocationStatusMessage('Locating...');
         requestGeolocation(coordinatePrecision,
             (nextCoordinates) => {
                 onCoordinatesChange(nextCoordinates);
                 setLatitudeInput(formatCoordinate(nextCoordinates.latitude, coordinatePrecision));
                 setLongitudeInput(formatCoordinate(nextCoordinates.longitude, coordinatePrecision));
                 setLocationStatus('success');
-                setLocationStatusMessage('GPS point loaded');
             },
             () => {
                 setLocationStatus('error');
-                setLocationStatusMessage('Could not load GPS point');
-                onLocationError?.();
             }
         );
     };
@@ -179,9 +167,8 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
                         <span className='date-location-coordinate-label-short'>Lng</span>
                         <input className='date-location-coordinate-input' aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onBlur={() => normalizeCoordinateInput('longitude')} onKeyDown={handleDecimalKeyDown} />
                     </label>
-                    {!locationView && <button type='button' className={`date-location-ghost-button ${locationStatus === 'loading' ? 'date-location-loading' : ''} ${locationStatus === 'success' ? 'date-location-success' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
+                    {!locationView && <button type='button' className={`date-location-ghost-button ${locationStatus === 'loading' ? 'date-location-loading' : ''} ${locationStatus === 'success' ? 'date-location-success' : ''} ${locationStatus === 'error' ? 'date-location-error' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
                 </div>
-                {locationStatus === 'error' && <span className='date-location-status date-location-status-error' role='status' aria-live='polite'>{locationStatusMessage}</span>}
             </div>
         </div>
     );

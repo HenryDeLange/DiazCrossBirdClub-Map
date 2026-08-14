@@ -108,16 +108,17 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
                     <div className='pwa-cache-overview-heading'>
                         <div className='pwa-cache-overview-title'><HardDrive aria-hidden='true' /><h2 id='pwa-storage-title'>Storage in use</h2></div>
                     </div>
+                    {storageInfo && storageInfo.estimatedUsageBytes !== null && <p className='pwa-cache-info-message'>Browser storage estimate: {formatBytes(storageInfo.estimatedUsageBytes)} total for this site.</p>}
                     {storageInfoStatus === 'idle' && !storageInfo && <p className='pwa-cache-info-message' role='status'>Reading storage details...</p>}
                     {storageInfoStatus === 'error' && <p className='pwa-cache-info-message' role='alert'>Storage details are unavailable in this browser.</p>}
                     {storageInfo && (
                         <div className='pwa-cache-info-sections'>
                             <div className='pwa-cache-info-section'>
                                 <h3>Web request caches</h3>
-                                {storageInfo.cacheBuckets.length > 0 ? <ul>{storageInfo.cacheBuckets.map((bucket) => <li key={bucket.name}><code>{bucket.name}</code><span>{bucket.entries} entr{bucket.entries === 1 ? 'y' : 'ies'} · {formatBytes(bucket.bytes)}</span></li>)}</ul> : <p>None found.</p>}
+                                {storageInfo.cacheBuckets.length > 0 ? <ul>{storageInfo.cacheBuckets.map((bucket) => <li key={bucket.name}><code>{bucket.name}</code><span>{bucket.entries} entr{bucket.entries === 1 ? 'y' : 'ies'} · {formatCacheSize(bucket)}</span></li>)}</ul> : <p>None found.</p>}
                             </div>
                             <div className='pwa-cache-info-section'>
-                                <h3>Local settings storage</h3>
+                                <h3>Locally stored settings</h3>
                                 <StorageEntryList entries={storageInfo.localStorage.entries} />
                             </div>
                         </div>
@@ -139,10 +140,19 @@ function StorageEntryList({ entries }: Readonly<{ entries: AppStorageInfo['local
     return <ul>{entries.map((entry) => <li key={entry.key}><code>{entry.key}</code><span>{formatBytes(entry.bytes)}</span></li>)}</ul>;
 }
 
-function formatBytes(bytes: number | null): string {
-    if (bytes === null) {
+function formatCacheSize(bucket: AppStorageInfo['cacheBuckets'][number]): string {
+    if (bucket.unknownEntries === 0) {
+        return formatBytes(bucket.bytes);
+    }
+
+    if (bucket.bytes === 0) {
         return 'Size unavailable';
     }
+
+    return `${formatBytes(bucket.bytes)} + ${bucket.unknownEntries} unavailable`;
+}
+
+function formatBytes(bytes: number): string {
 
     if (bytes < 1024) {
         return `${bytes} B`;

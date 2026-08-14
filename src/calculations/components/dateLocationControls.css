@@ -14,8 +14,7 @@
 }
 
 .date-location-field-section {
-    gap: 0.45rem;
-    min-height: 2rem;
+    gap: 0.25rem;
 }
 
 .date-location-location-block {
@@ -49,6 +48,10 @@
     background: var(--date-location-surface, #f8f8f8);
     color: var(--date-location-ink, #111111);
     font: inherit;
+    overflow: hidden;
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .date-location-date-block input {
@@ -110,6 +113,9 @@
     cursor: pointer;
     font: inherit;
     transition: background-color 150ms ease, color 150ms ease;
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .date-location-ghost-button:hover,
@@ -138,22 +144,8 @@
     animation: date-location-success 1900ms ease-out both;
 }
 
-.date-location-status {
-    position: absolute;
-    top: calc(100% + 0.25rem);
-    left: 1.2rem;
-    z-index: 2;
-    padding: 0.2rem 0.45rem;
-    border-radius: 0.25rem;
-    background: var(--date-location-surface, #f8f8f8);
-    font-size: 0.72rem;
-    font-weight: 700;
-    white-space: nowrap;
-    animation: date-location-status-in 170ms ease-out both;
-}
-
-.date-location-status-error {
-    color: #b3261e;
+.date-location-ghost-button.date-location-error {
+    animation: date-location-error 2600ms ease-out both;
 }
 
 .date-location-visually-hidden {
@@ -183,9 +175,10 @@
     100% { transform: scale(1); }
 }
 
-@keyframes date-location-status-in {
-    from { opacity: 0; transform: translateY(-0.15rem); }
-    to { opacity: 1; transform: translateY(0); }
+@keyframes date-location-error {
+    0% { color: var(--date-location-muted, #626262); opacity: 0.5; }
+    30% { color: #b3261e; opacity: 1; }
+    100% { color: #b3261e; opacity: 0.72; }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -211,92 +204,98 @@
 @media (max-width: 720px) {
     .date-location-controls {
         width: 100%;
+        align-items: flex-end;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        gap: 0.35rem 0.6rem;
     }
 
     .date-location-field-section {
-        width: 100%;
+        width: auto;
+        min-width: 0;
         box-sizing: border-box;
     }
 
-    .date-location-controls {
-        align-items: stretch;
-        flex-direction: column;
-        gap: 0.4rem;
+    .date-location-section-label svg {
+        display: none;
     }
 
     .date-location-date-block {
-        display: grid;
-        grid-template-columns: 1.75rem minmax(0, 1fr);
+        display: flex;
+        flex: 0 0 auto;
+        align-items: flex-end;
+        gap: 0.25rem;
     }
 
     .date-location-date-block input {
-        width: 100%;
+        width: var(--date-location-date-width, 7.5rem);
+        min-width: var(--date-location-date-width, 7.5rem);
+        flex: 0 0 auto;
+        max-width: 100%;
     }
 
     .date-location-location-block {
-        display: grid;
-        grid-template-columns: 1.75rem minmax(0, 1fr);
-        align-items: center;
+        display: flex;
+        flex: 1 1 0;
+        align-items: flex-end;
         gap: 0.4rem;
-        padding-top: 0.4rem;
+        min-width: 0;
+        padding-top: 0;
         padding-left: 0;
-        border-top: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18));
+        border-top: 0;
         border-left: 0;
     }
 
     .date-location-coordinate-controls {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 2rem;
-            align-items: center;
+        display: flex;
+        flex: 1 1 auto;
+        align-items: flex-end;
+        flex-wrap: nowrap;
         min-width: 0;
-        width: 100%;
+        width: auto;
         gap: 0.25rem;
     }
 
     .date-location-coordinate-controls-readonly {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        flex: 1 1 auto;
     }
 
     .date-location-coordinate-controls label {
-        display: grid;
-        grid-template-columns: 1.9rem minmax(0, 1fr);
+        display: flex;
+        flex-direction: column;
         align-items: center;
+        flex: 1 1 var(--date-location-coordinate-width, 5rem);
         min-width: 0;
-        gap: 0.25rem;
+        gap: 0.08rem;
     }
 
     .date-location-coordinate-label-full {
-        display: none;
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.58rem;
+        letter-spacing: 0;
+        line-height: 0.72rem;
+        text-overflow: clip;
+        white-space: nowrap;
     }
 
     .date-location-coordinate-label-short {
-        display: inline;
-        overflow: hidden;
-        white-space: nowrap;
+        display: none;
     }
 
     .date-location-coordinate-input {
         width: 100%;
-        min-height: 1.55rem;
+        min-width: 0;
+        max-width: 100%;
+        flex: 1 1 auto;
+        min-height: 1.7rem;
         padding: 0.08rem 0.25rem;
     }
 
     .date-location-ghost-button {
+        align-self: flex-end;
         width: 2rem;
         height: 2rem;
-    }
-}
-
-@media (max-width: 470px) {
-    .date-location-coordinate-label-full {
-        display: none;
-    }
-
-    .date-location-coordinate-label-short {
-        display: inline;
-    }
-
-    .date-location-coordinate-input {
-        width: 100%;
     }
 }

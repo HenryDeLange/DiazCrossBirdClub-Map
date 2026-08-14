@@ -106,16 +106,21 @@
 /* INPUT STYLES */
 html,
 body,
-#root,
-button,
-input,
-textarea,
-select {
+#root {
     font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     margin: 0;
     min-height: 100%;
     background: var(--page-bg);
     color: var(--page-text);
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+    margin: 0;
+    color: inherit;
 }
 
 /* LINKS */
@@ -250,7 +255,9 @@ a:active {
 }
 
 @keyframes leaflet-locate-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Locate control arrow - specific styling */
@@ -449,6 +456,15 @@ a:active {
     pointer-events: auto;
 }
 
+.drawer-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .drawer-backdrop-open {
     opacity: 1;
     transition: opacity 380ms ease-out;
@@ -462,6 +478,11 @@ a:active {
 .drawer-open {
     transform: translateY(0);
     opacity: 1;
+}
+
+.drawer-settled {
+    transform: none;
+    transition: opacity 300ms ease-out;
 }
 
 .drawer-closed,
@@ -643,31 +664,47 @@ a:active {
 
 .drawer-tabs {
     display: flex;
+    flex: 1 1 0;
     gap: 0.5rem;
-    flex-wrap: wrap;
-    padding: 0 1rem 0.9rem;
+    min-width: 0;
+    padding: 0;
 }
 
 .drawer-tab-select-row {
+    display: none;
+}
+
+.drawer-location-filters {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
     padding: 0 1rem 0.9rem;
+}
+
+.drawer-location-filters .drawer-tab-select-row {
+    flex: 0 0 auto;
+    padding: 0;
 }
 
 .drawer-tab-select {
     display: none;
-    width: 100%;
+    width: auto;
+    min-width: 0;
+    box-sizing: border-box;
     appearance: auto;
     -webkit-appearance: auto;
-    padding: 0.7rem 0.75rem;
-    border-radius: 0.8rem;
+    padding: 0.45rem 0.55rem;
+    border-radius: 0.4rem;
     border: 1px solid var(--control-border);
     background-color: var(--drawer-card);
     color: var(--drawer-text);
     font: inherit;
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 800;
     line-height: 1.2;
     cursor: pointer;
-    box-shadow: inset 0 1px 0 var(--drawer-border);
+    white-space: nowrap;
 }
 
 .drawer-tab-select option {
@@ -683,8 +720,9 @@ a:active {
 }
 
 .drawer-tab {
-    flex: 1 1 22%;
-    min-width: 7rem;
+    flex: 1 1 0;
+    min-width: 6rem;
+    box-sizing: border-box;
     padding: 0.6rem 0.9rem;
     border-radius: 0.4rem;
     border: 1px solid var(--control-border);
@@ -693,6 +731,7 @@ a:active {
     font-weight: 700;
     cursor: pointer;
     text-align: center;
+    white-space: nowrap;
 }
 
 .drawer-tab-active {
@@ -717,10 +756,13 @@ a:active {
 }
 
 .drawer-content {
-    flex: 1;
+    flex: 1 1 auto;
     min-height: 0;
-    overflow: auto;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
     padding: 0 1rem 1.1rem;
+    box-sizing: border-box;
 }
 
 .location-list {
@@ -800,6 +842,9 @@ a:active {
     color: var(--drawer-muted);
     cursor: pointer;
     transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .location-category-badge:hover,
@@ -872,6 +917,9 @@ a:active {
     background: var(--drawer-card);
     color: var(--drawer-muted);
     cursor: pointer;
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .location-card-nav-title {
@@ -910,6 +958,27 @@ a:active {
 
 :root[data-theme='dark'] .location-card-nav-image {
     filter: saturate(0.01) brightness(1.35);
+}
+
+@media (max-width: 480px) {
+    .location-group-header-row {
+        flex-wrap: wrap;
+        gap: 0.1rem 0.75rem;
+
+    }
+
+    .location-group-header-main,
+    .location-group-header-actions {
+        width: 100%;
+    }
+
+    .location-group-header-main {
+        flex: 1 1 100%;
+    }
+
+    .location-group-header-actions {
+        justify-content: flex-end;
+    }
 }
 
 .location-card-description {
@@ -957,6 +1026,9 @@ a:active {
     object-fit: cover;
     border-radius: 0.5rem;
     background: rgba(255, 255, 255, 0.08);
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .drawer-item-image {
@@ -978,10 +1050,15 @@ a:active {
     background: var(--drawer-card);
     border: 1px solid var(--button-active-border);
     text-align: center;
+    /* HACK: For Android Edge clipping issue */
+    transform: translateZ(0);
+    will-change: transform;
 }
 
 .inat-card-media {
     position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
 }
 
 .inat-card-image {
@@ -1249,8 +1326,14 @@ a:active {
     border: 0;
     gap: 0.35rem;
     padding: 0 0.65rem;
+    color: var(--drawer-text);
     font-size: 0.9rem;
     white-space: nowrap;
+}
+
+.pwa-cache-clear svg {
+    color: inherit;
+    opacity: 1;
 }
 
 .pwa-cache-message-success {
@@ -1304,8 +1387,16 @@ a:active {
         padding: 0 0.9rem 0.8rem;
     }
 
+    .drawer-location-filters {
+        padding: 0 0.9rem 0.6rem;
+    }
+
     .drawer-tabs {
         display: none;
+    }
+
+    .drawer-tab-select-row {
+        display: block;
     }
 
     .drawer-tab-select {
