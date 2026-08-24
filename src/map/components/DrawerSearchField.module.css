@@ -10,7 +10,7 @@
 }
 
 .filters { flex: 1 1 auto; min-width: 0; margin: 0; }
-.panel { margin-top: -0.15rem; margin-bottom: 0.6rem; }
+.panel { margin-top: 0; margin-bottom: 0.6rem; }
 
 .searchIcon {
     width: 1rem;

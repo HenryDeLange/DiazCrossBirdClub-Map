@@ -64,6 +64,14 @@
 
 .leaflet-control-zoom a:hover { color: var(--action-color) !important; }
 .leaflet-control-layers-list label { color: var(--control-text); }
+.leaflet-control-layers-selector {
+    width: 1rem;
+    height: 1rem;
+    margin: 2px 0.35rem 0 0;
+    accent-color: var(--action-color);
+    -webkit-appearance: auto;
+    appearance: auto;
+}
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) .leaflet-popup-content-wrapper,
