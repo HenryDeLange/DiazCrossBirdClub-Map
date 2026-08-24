@@ -3,7 +3,6 @@
     --date-location-date-width: 6.5rem;
     --date-location-coordinate-width: 3rem;
     --tides-surface: #f8f8f8;
-    --tides-surface-muted: #e9e9e9;
     --tides-ink: #111111;
     --tides-muted: #626262;
     --tides-line: rgba(17, 17, 17, 0.18);
@@ -42,7 +41,6 @@
     :root:not([data-theme='light']) .tides-page {
         --tides-bg: var(--drawer-bg, #161616);
         --tides-surface: #1c1c1c;
-        --tides-surface-muted: #282828;
         --tides-ink: #f4f4f4;
         --tides-muted: #b8b8b8;
         --tides-line: rgba(244, 244, 244, 0.2);
@@ -55,7 +53,6 @@
 :root[data-theme='dark'] .tides-page {
     --tides-bg: var(--drawer-bg, #161616);
     --tides-surface: #1c1c1c;
-    --tides-surface-muted: #282828;
     --tides-ink: #f4f4f4;
     --tides-muted: #b8b8b8;
     --tides-line: rgba(244, 244, 244, 0.2);
@@ -120,16 +117,10 @@
     gap: 1rem;
 }
 
-.tides-cache-status,
 .tides-station-distance,
 .tides-disclaimer {
     margin: 0;
     color: var(--tides-muted);
-}
-
-.tides-cache-status {
-    width: 100%;
-    font-size: 0.75rem;
 }
 
 .tides-results {

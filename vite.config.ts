@@ -15,6 +15,11 @@ export default defineConfig({
     define: {
         VITE_APP_VERSION: JSON.stringify(version)
     },
+    css: {
+        modules: {
+            localsConvention: 'camelCaseOnly'
+        }
+    },
     plugins: [
         react(),
         babel({ presets: [reactCompilerPreset()] }),
