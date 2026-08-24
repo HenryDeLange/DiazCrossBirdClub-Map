@@ -4,7 +4,7 @@ import { Locate, LocateFixed } from 'lucide-react';
 import { useEffect } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { useMap } from 'react-leaflet';
-import './LocateControl.module.css';
+import './LocateControl.css';
 
 export function LocateControl() {
     const map = useMap();

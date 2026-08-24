@@ -1,11 +1,11 @@
-:global(.leaflet-control-locate) {
+.leaflet-control-locate {
     --locate-control-icon-color: var(--control-text);
     --locate-control-active-color: var(--action-color);
     border: 2px solid var(--locate-border) !important;
     border-radius: 50% !important;
 }
 
-:global(.leaflet-control-locate a) {
+.leaflet-control-locate a {
     display: grid !important;
     place-items: center;
     width: 2.25rem;
@@ -17,11 +17,11 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-:global(.leaflet-control-locate a:active) {
+.leaflet-control-locate a:active {
     background: var(--control-bg) !important;
 }
 
-:global(.leaflet-control-locate a .leaflet-locate-icon) {
+.leaflet-control-locate a .leaflet-locate-icon {
     display: grid;
     place-items: center;
     width: 1.1rem;
@@ -30,7 +30,7 @@
     color: var(--locate-control-icon-color) !important;
 }
 
-:global(.leaflet-control-locate a .leaflet-locate-icon svg) {
+.leaflet-control-locate a .leaflet-locate-icon svg {
     display: block;
     width: 1.1rem;
     height: 1.1rem;
@@ -40,22 +40,22 @@
     stroke-width: 2;
 }
 
-:global(.leaflet-control-locate.requesting a .leaflet-locate-icon svg) {
+.leaflet-control-locate.requesting a .leaflet-locate-icon svg {
     animation: locateSpin 900ms linear infinite;
     transform-origin: center;
 }
 
-:global(.leaflet-control-locate a:hover),
-:global(.leaflet-control-locate a:focus-visible),
-:global(.leaflet-control-locate.active a),
-:global(.leaflet-control-locate.following a) {
+.leaflet-control-locate a:hover,
+.leaflet-control-locate a:focus-visible,
+.leaflet-control-locate.active a,
+.leaflet-control-locate.following a {
     color: var(--action-color) !important;
 }
 
-:global(.leaflet-control-locate a:hover .leaflet-locate-icon),
-:global(.leaflet-control-locate a:focus-visible .leaflet-locate-icon),
-:global(.leaflet-control-locate.active a .leaflet-locate-icon),
-:global(.leaflet-control-locate.following a .leaflet-locate-icon) {
+.leaflet-control-locate a:hover .leaflet-locate-icon,
+.leaflet-control-locate a:focus-visible .leaflet-locate-icon,
+.leaflet-control-locate.active a .leaflet-locate-icon,
+.leaflet-control-locate.following a .leaflet-locate-icon {
     color: var(--action-color) !important;
 }
 

@@ -67,7 +67,6 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
     const onDateChange = useCallback((value: string) => setDateValue(value), []);
     const onCoordinatesChange = useCallback((nextCoordinates: Coordinates) => {
         setLocationLocked(true);
-        setStationState({ status: 'loading', stations: [], message: 'Loading nearby stations...' });
         setCoordinates(nextCoordinates);
     }, []);
     const onShare = useCallback(() => {
