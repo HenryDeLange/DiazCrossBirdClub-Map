@@ -1,7 +1,7 @@
 import { Map, Share2 } from 'lucide-react';
 import { memo } from 'react';
 import { getBasePathname } from '../../appRouting';
-import { DateLocationControls } from '../components/DateLocationControls';
+import { DateLocationInputs } from '../components/DateLocationInputs';
 import type { Coordinates } from '../components/dateLocationUtils';
 import styles from './AstraPage.module.css';
 
@@ -22,7 +22,7 @@ export const AstraHeader = memo(function AstraHeader({ embedded, dateValue, onDa
         <header className={styles.astraHeader}>
             <div className={styles.astraToolbar}>
                 <div className={styles.astraToolbarControls}>
-                    <DateLocationControls dateValue={dateValue} onDateChange={onDateChange} coordinates={coordinates} onCoordinatesChange={onCoordinatesChange} coordinatePrecision={4} locationView={locationView} requestLocationOnMount={requestLocationOnMount} onInputValidityChange={onInputValidityChange} idPrefix='astra' />
+                    <DateLocationInputs dateValue={dateValue} onDateChange={onDateChange} coordinates={coordinates} onCoordinatesChange={onCoordinatesChange} coordinatePrecision={4} locationView={locationView} requestLocationOnMount={requestLocationOnMount} onInputValidityChange={onInputValidityChange} idPrefix='astra' />
                 </div>
                 {!embedded && (
                     <div className={styles.astraToolbarActions}>

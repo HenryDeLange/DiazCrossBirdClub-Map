@@ -16,6 +16,7 @@ export type TidePrediction = {
     station: TideStation;
     extremes: Extreme[];
     chartExtremes: Extreme[];
+    statusExtremes: Extreme[];
     error?: string;
 }
 
@@ -92,30 +93,34 @@ export function getTidePredictions(stations: TideStation[], date: Date): TidePre
             });
             const selectedExtremes = prediction.extremes.filter((extreme) => extreme.time >= selectedStart && extreme.time < selectedEnd);
             const previousExtreme = prediction.extremes.filter((extreme) => extreme.time < selectedStart).at(-1);
-            const nextExtreme = prediction.extremes.find((extreme) => extreme.time >= selectedEnd);
-            const chartExtremes = [previousExtreme, ...selectedExtremes, nextExtreme].filter((extreme): extreme is Extreme => extreme !== undefined);
+            const upcomingExtremes = prediction.extremes.filter((extreme) => extreme.time >= selectedEnd).slice(0, 2);
+            const chartExtremes = [previousExtreme, ...selectedExtremes, upcomingExtremes[0]].filter((extreme): extreme is Extreme => extreme !== undefined);
+            const statusExtremes = [previousExtreme, ...selectedExtremes, ...upcomingExtremes].filter((extreme): extreme is Extreme => extreme !== undefined);
 
-            return { station, extremes: selectedExtremes, chartExtremes };
+            return { station, extremes: selectedExtremes, chartExtremes, statusExtremes };
         }
         catch (error) {
             return {
                 station,
                 extremes: [],
                 chartExtremes: [],
+                statusExtremes: [],
                 error: error instanceof Error ? error.message : 'Could not calculate tides'
             };
         }
     });
 }
 
-export function getWeightedTideExtremes(predictions: TidePrediction[]): WeightedTideExtreme[] {
-    const availablePredictions = predictions.filter(({ chartExtremes }) => chartExtremes.length > 0);
-    const eventCount = Math.max(0, ...availablePredictions.map(({ chartExtremes }) => chartExtremes.length));
+type TideExtremeCollection = 'chartExtremes' | 'statusExtremes';
+
+export function getWeightedTideExtremes(predictions: TidePrediction[], collection: TideExtremeCollection = 'chartExtremes'): WeightedTideExtreme[] {
+    const availablePredictions = predictions.filter((prediction) => prediction[collection].length > 0);
+    const eventCount = Math.max(0, ...availablePredictions.map((prediction) => prediction[collection].length));
 
     return Array.from({ length: eventCount }, (_, eventIndex) => {
-        const entries = availablePredictions.flatMap(({ station, chartExtremes }) => {
-            const extreme = chartExtremes[eventIndex];
-            return extreme ? [{ station, extreme }] : [];
+        const entries = availablePredictions.flatMap((prediction) => {
+            const extreme = prediction[collection][eventIndex];
+            return extreme ? [{ station: prediction.station, extreme }] : [];
         });
 
         if (entries.length === 0) {

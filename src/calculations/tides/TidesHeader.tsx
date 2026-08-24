@@ -1,7 +1,7 @@
 import { Map, Share2 } from 'lucide-react';
 import { memo } from 'react';
 import { getBasePathname } from '../../appRouting';
-import { DateLocationControls } from '../components/DateLocationControls';
+import { DateLocationInputs } from '../components/DateLocationInputs';
 import type { Coordinates } from '../components/dateLocationUtils';
 import styles from './TidesPage.module.css';
 
@@ -19,7 +19,7 @@ export const TidesHeader = memo(function TidesHeader({ embedded, dateValue, onDa
     return (
         <header className={styles.tidesHeader}>
             <div className={styles.tidesToolbar}>
-                <DateLocationControls dateValue={dateValue} onDateChange={onDateChange} coordinates={coordinates} onCoordinatesChange={onCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={requestLocationOnMount} idPrefix='tides' />
+                <DateLocationInputs dateValue={dateValue} onDateChange={onDateChange} coordinates={coordinates} onCoordinatesChange={onCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={requestLocationOnMount} idPrefix='tides' />
                 {!embedded && (
                     <div className={styles.tidesToolbarActions}>
                         <a className={styles.tidesMapLink} href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>

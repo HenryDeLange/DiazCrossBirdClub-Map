@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { registerSW } from 'virtual:pwa-register'
 import App from './App.tsx'
-import './main.module.css'
+import './main.css'
 import { applyThemePreference, getStoredThemePreference } from './theme/theme'
 
 applyThemePreference(getStoredThemePreference())

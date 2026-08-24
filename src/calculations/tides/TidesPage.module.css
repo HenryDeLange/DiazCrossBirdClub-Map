@@ -155,7 +155,8 @@
 }
 
 .tides-current-row,
-.tides-next-row {
+.tides-next-row,
+.tides-following-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -163,6 +164,11 @@
 }
 
 .tides-next-row {
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--tides-soft-line);
+}
+
+.tides-following-row {
     padding-top: 0.55rem;
     border-top: 1px solid var(--tides-soft-line);
 }

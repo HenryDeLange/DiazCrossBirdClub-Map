@@ -51,7 +51,9 @@ export function getCurrentTideStatus(predictions: TidePrediction[], extremes: We
     }
 
     const currentLevel = getWeightedTideLevel(predictions, now);
-    const nextExtreme = extremes.find((extreme) => extreme.time.getTime() > now.getTime());
+    const futureExtremes = extremes.filter((extreme) => extreme.time.getTime() > now.getTime());
+    const nextExtreme = futureExtremes[0];
+    const followingTide = futureExtremes[1] ?? null;
     if (!currentLevel || !nextExtreme) {
         return null;
     }
@@ -59,7 +61,8 @@ export function getCurrentTideStatus(predictions: TidePrediction[], extremes: We
     return {
         ...currentLevel,
         incoming: nextExtreme.high,
-        nextTide: nextExtreme
+        nextTide: nextExtreme,
+        followingTide
     };
 }
 

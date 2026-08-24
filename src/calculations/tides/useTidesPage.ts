@@ -90,7 +90,8 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
         return getTidePredictions(stationState.stations, selectedDate).sort(sortByStationDistance);
     }, [selectedDate, stationState.status, stationState.stations]);
     const weightedExtremes = useMemo(() => getWeightedTideExtremes(predictions), [predictions]);
-    const currentTide = useMemo(() => getCurrentTideStatus(predictions, weightedExtremes, selectedDate, now), [now, predictions, selectedDate, weightedExtremes]);
+    const statusExtremes = useMemo(() => getWeightedTideExtremes(predictions, 'statusExtremes'), [predictions]);
+    const currentTide = useMemo(() => getCurrentTideStatus(predictions, statusExtremes, selectedDate, now), [now, predictions, selectedDate, statusExtremes]);
     const hasTideData = useMemo(() => predictions.some(({ chartExtremes }) => chartExtremes.length > 0), [predictions]);
     const allPredictionsFailed = useMemo(() => predictions.length > 0 && predictions.every(({ error }) => Boolean(error)), [predictions]);
 

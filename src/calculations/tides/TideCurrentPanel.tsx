@@ -12,9 +12,11 @@ type TideCurrentPanelProps = {
 export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, now }: Readonly<TideCurrentPanelProps>) {
     const DirectionIcon = currentTide.incoming ? WavesArrowUp : WavesArrowDown;
     const NextTideIcon = currentTide.nextTide.high ? WavesArrowUp : WavesArrowDown;
+    const followingTide = currentTide.followingTide;
+    const FollowingTideIcon = followingTide?.high ? WavesArrowUp : WavesArrowDown;
 
     return (
-        <section className={styles.tidesCurrentPanel} aria-label='Current and next tide' aria-live='polite'>
+        <section className={styles.tidesCurrentPanel} aria-label='Current, next, and following tide' aria-live='polite'>
             <div className={styles.tidesCurrentRow}>
                 <div className={styles.tidesCurrentTime}>
                     <Clock3 aria-hidden='true' />
@@ -35,6 +37,18 @@ export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, no
                     <div className={styles.tidesCurrentDetails}><span>{currentTide.nextTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(currentTide.nextTide.level)} m</strong></div>
                 </div>
             </div>
+            {followingTide && (
+                <div className={styles.tidesFollowingRow}>
+                    <div className={styles.tidesCurrentTime}>
+                        <Clock3 aria-hidden='true' />
+                        <div className={styles.tidesCurrentDetails}><span>Following</span><strong>{formatTideTime(followingTide.time, followingTide.timeZone)}</strong></div>
+                    </div>
+                    <div className={`${styles.tidesNextTide} ${followingTide.high ? styles.tidesCurrentDirectionIncoming : styles.tidesCurrentDirectionOutgoing}`}>
+                        <FollowingTideIcon aria-hidden='true' />
+                        <div className={styles.tidesCurrentDetails}><span>{followingTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(followingTide.level)} m</strong></div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 });

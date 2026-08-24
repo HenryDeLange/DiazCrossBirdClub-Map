@@ -14,6 +14,7 @@ export type TideStationState = {
 export type CurrentTideStatus = WeightedTideLevel & {
     incoming: boolean;
     nextTide: WeightedTideExtreme;
+    followingTide: WeightedTideExtreme | null;
 }
 
 export type WaveChartPoint = {
