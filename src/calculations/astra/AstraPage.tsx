@@ -7,7 +7,7 @@ import { defaultCoordinates } from '../../common/defaultLocation';
 import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, isValidDateInput, type Coordinates } from '../components/dateLocationUtils';
-import './astra.css';
+import styles from './AstraPage.module.css';
 import { describeMoonPhase, formatDateInput, formatTime, getAstronomyData, type AstronomyData, type TimelineSegment } from './sunTimes';
 
 type AstraPageProps = {
@@ -28,6 +28,10 @@ type SkyEvent = {
 }
 
 type AstraIcon = ComponentType<SVGProps<SVGSVGElement>>;
+
+function astraClassName(...classNames: Array<string | false | undefined>): string {
+    return classNames.filter((className): className is string => Boolean(className)).map((className) => styles[className as keyof typeof styles]).join(' ');
+}
 
 export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
     const queryCoordinates = embedded ? null : getQueryCoordinates();
@@ -130,32 +134,32 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
     };
 
     return (
-        <main className={`astra-page ${embedded ? 'astra-page-embedded' : ''}`}>
-            <div className='astra-shell'>
-                <header className='astra-header'>
-                    <div className='astra-toolbar'>
-                        <div className='astra-toolbar-controls'>
+        <main className={astraClassName('astra-page', embedded && 'astra-page-embedded')}>
+            <div className={astraClassName('astra-shell')}>
+                <header className={astraClassName('astra-header')}>
+                    <div className={astraClassName('astra-toolbar')}>
+                        <div className={astraClassName('astra-toolbar-controls')}>
                             <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={setCoordinates} coordinatePrecision={4} locationView={locationView} requestLocationOnMount={shouldRequestLocation} onInputValidityChange={setInputFieldsReady} idPrefix='astra' />
                         </div>
                         {!embedded && (
-                            <div className='astra-toolbar-actions'>
-                                <a className='astra-map-link' href={getMapPathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
-                                <button type='button' className='astra-map-link astra-share-link' onClick={handleShare} aria-label='Share this sun and moon guide' title='Share this sun and moon guide'><Share2 size={18} /></button>
+                            <div className={astraClassName('astra-toolbar-actions')}>
+                                <a className={astraClassName('astra-map-link')} href={getMapPathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
+                                <button type='button' className={astraClassName('astra-map-link', 'astra-share-link')} onClick={handleShare} aria-label='Share this sun and moon guide' title='Share this sun and moon guide'><Share2 size={18} /></button>
                             </div>
                         )}
                     </div>
                 </header>
 
-                <section className='astra-dashboard'>
+                <section className={astraClassName('astra-dashboard')}>
                     {!astronomy ? (
-                        <p className='astra-message' role='alert'>Enter a date, latitude, and longitude to view the sun and moon chart.</p>
+                        <p className={astraClassName('astra-message')} role='alert'>Enter a date, latitude, and longitude to view the sun and moon chart.</p>
                     ) : <>
-                    <div className='astra-clock-panel'>
+                    <div className={astraClassName('astra-clock-panel')}>
                         <ClockCornerEvent markerId='moonrise' label='Moonrise' value={formatMoonTime(astronomy.moonTimes.rise, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown)} icon={MoonriseIcon} position='top-left' tone='moon' selected={selectedMarkerId === 'moonrise'} onSelect={selectMarker} />
                         <ClockCornerEvent markerId='moonset' label='Moonset' value={formatMoonTime(astronomy.moonTimes.set, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown)} icon={MoonsetIcon} position='top-right' tone='moon' selected={selectedMarkerId === 'moonset'} onSelect={selectMarker} />
                         <ClockCornerEvent markerId='sunrise' label='Sunrise' value={formatTime(astronomy.sunTimes.sunrise)} icon={Sunrise} position='bottom-left' tone='sun' selected={selectedMarkerId === 'sunrise'} onSelect={selectMarker} />
                         <ClockCornerEvent markerId='sunset' label='Sunset' value={formatTime(astronomy.sunTimes.sunset)} icon={Sunset} position='bottom-right' tone='sun' selected={selectedMarkerId === 'sunset'} onSelect={selectMarker} />
-                        <div className='astra-clock-wrap'>
+                        <div className={astraClassName('astra-clock-wrap')}>
                             <TimelineClock
                                 solarSegments={astronomy.twilightSegments}
                                 birdingSegments={astronomy.birdingSegments}
@@ -179,40 +183,40 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
                         </div>
                     </div>
 
-                    <aside className='astra-details-panel'>
-                        <div className='astra-detail-heading'><span className='astra-detail-swatch' style={{ backgroundColor: isCurrentTimeSelected ? 'var(--astra-current)' : isMoonPhaseSelected ? 'var(--astra-muted)' : isBirdingTimesSelected ? '#347a72' : isSolarNoonSelected ? '#e6a63f' : selectedSegment?.color }} /><div><h2>{isCurrentTimeSelected ? 'Current time' : isMoonPhaseSelected ? 'Moon phase' : isBirdingTimesSelected ? 'Birding times' : isSolarNoonSelected ? 'Solar noon' : selectedSegment?.label ?? 'No selection'}</h2>{isCurrentTimeSelected ? <p className='astra-detail-meta'>Current time marker</p> : isMoonPhaseSelected ? <p className='astra-detail-meta'>{describeMoonPhase(astronomy.moonIllumination.phase)} · {Math.round(astronomy.moonIllumination.fraction * 100)}% illuminated</p> : isBirdingTimesSelected ? <p className='astra-detail-meta'>Prominent birding times</p> : isSolarNoonSelected ? <p className='astra-detail-meta'>Solar noon marker</p> : selectedSegment && <p className='astra-detail-meta'>{isMiddaySelected ? `Solar noon ${formatTime(astronomy.sunTimes.solarNoon)} · ` : isMidnightSelected ? `Solar midnight ${formatTime(astronomy.sunTimes.nadir)} · ` : ''}{formatDuration(selectedSegment.end.getTime() - selectedSegment.start.getTime())} of the day</p>}</div></div>
+                    <aside className={astraClassName('astra-details-panel')}>
+                        <div className={astraClassName('astra-detail-heading')}><span className={astraClassName('astra-detail-swatch')} style={{ backgroundColor: isCurrentTimeSelected ? 'var(--astra-current)' : isMoonPhaseSelected ? 'var(--astra-muted)' : isBirdingTimesSelected ? '#347a72' : isSolarNoonSelected ? '#e6a63f' : selectedSegment?.color }} /><div><h2>{isCurrentTimeSelected ? 'Current time' : isMoonPhaseSelected ? 'Moon phase' : isBirdingTimesSelected ? 'Birding times' : isSolarNoonSelected ? 'Solar noon' : selectedSegment?.label ?? 'No selection'}</h2>{isCurrentTimeSelected ? <p className={astraClassName('astra-detail-meta')}>Current time marker</p> : isMoonPhaseSelected ? <p className={astraClassName('astra-detail-meta')}>{describeMoonPhase(astronomy.moonIllumination.phase)} · {Math.round(astronomy.moonIllumination.fraction * 100)}% illuminated</p> : isBirdingTimesSelected ? <p className={astraClassName('astra-detail-meta')}>Prominent birding times</p> : isSolarNoonSelected ? <p className={astraClassName('astra-detail-meta')}>Solar noon marker</p> : selectedSegment && <p className={astraClassName('astra-detail-meta')}>{isMiddaySelected ? `Solar noon ${formatTime(astronomy.sunTimes.solarNoon)} · ` : isMidnightSelected ? `Solar midnight ${formatTime(astronomy.sunTimes.nadir)} · ` : ''}{formatDuration(selectedSegment.end.getTime() - selectedSegment.start.getTime())} of the day</p>}</div></div>
                         {isCurrentTimeSelected ? (
                             <>
-                                <p className='astra-detail-description'>The clock marker shows the current local time against the solar, moonlight and birding windows.</p>
-                                <div className='astra-time-range'><strong>{formatTime(now)}</strong><span>local time</span></div>
+                                <p className={astraClassName('astra-detail-description')}>The clock marker shows the current local time against the solar, moonlight and birding windows.</p>
+                                <div className={astraClassName('astra-time-range')}><strong>{formatTime(now)}</strong><span>local time</span></div>
                             </>
                         ) : isMoonPhaseSelected ? (
                             <>
-                                <p className='astra-detail-description'>The Moon is in its {describeMoonPhase(astronomy.moonIllumination.phase).toLowerCase()} phase and {Math.round(astronomy.moonIllumination.fraction * 100)}% illuminated.</p>
+                                <p className={astraClassName('astra-detail-description')}>The Moon is in its {describeMoonPhase(astronomy.moonIllumination.phase).toLowerCase()} phase and {Math.round(astronomy.moonIllumination.fraction * 100)}% illuminated.</p>
                                 <MoonIlluminationDetails fraction={astronomy.moonIllumination.fraction} phase={astronomy.moonIllumination.phase} />
                             </>
                         ) : isBirdingTimesSelected ? (
                             <>
-                                <p className='astra-detail-description'>This ring shows prominent birding times, including dawn calls, feeding activity, thermals and evening owl activity.</p>
-                                <div className='astra-time-range'><strong>{astronomy.birdingSegments.length}</strong><span>birding windows</span></div>
+                                <p className={astraClassName('astra-detail-description')}>This ring shows prominent birding times, including dawn calls, feeding activity, thermals and evening owl activity.</p>
+                                <div className={astraClassName('astra-time-range')}><strong>{astronomy.birdingSegments.length}</strong><span>birding windows</span></div>
                             </>
                         ) : isSolarNoonSelected ? (
                             <>
-                                <p className='astra-detail-description'>Solar noon marks the Sun's highest point in the sky at this location.</p>
-                                <div className='astra-time-range'><strong>{formatTime(astronomy.sunTimes.solarNoon)}</strong><span>local solar noon</span></div>
+                                <p className={astraClassName('astra-detail-description')}>Solar noon marks the Sun's highest point in the sky at this location.</p>
+                                <div className={astraClassName('astra-time-range')}><strong>{formatTime(astronomy.sunTimes.solarNoon)}</strong><span>local solar noon</span></div>
                             </>
                         ) : selectedSegment ? (
                             <>
-                                <p className='astra-detail-description'>{selectedSegment.description}</p>
+                                <p className={astraClassName('astra-detail-description')}>{selectedSegment.description}</p>
                                 {isMoonSelected && (
                                     <MoonIlluminationDetails fraction={astronomy.moonIllumination.fraction} phase={astronomy.moonIllumination.phase} />
                                 )}
-                                <div className='astra-time-range'><strong>{formatTime(selectedSegment.start)}</strong><span>to</span><strong>{formatTime(selectedSegment.end)}</strong></div>
+                                <div className={astraClassName('astra-time-range')}><strong>{formatTime(selectedSegment.start)}</strong><span>to</span><strong>{formatTime(selectedSegment.end)}</strong></div>
                             </>
-                        ) : <p className='astra-detail-description'>Select a sky window on the chart or in the event list.</p>}
-                        <div className='astra-event-table-wrap'>
-                            <div className='astra-event-table-heading'><h3>Sky events</h3></div>
-                            <div className='astra-event-table' role='list'>
+                        ) : <p className={astraClassName('astra-detail-description')}>Select a sky window on the chart or in the event list.</p>}
+                        <div className={astraClassName('astra-event-table-wrap')}>
+                            <div className={astraClassName('astra-event-table-heading')}><h3>Sky events</h3></div>
+                            <div className={astraClassName('astra-event-table')} role='list'>
                                 {skyEvents.map((event) => <SkyEventRow key={event.id} event={event} isSelected={(event.segment !== null && selectedSegment !== null && event.segment.id === selectedSegment.id) || event.markerId === selectedMarkerId} onSelect={selectSkyEvent} />)}
                             </div>
                         </div>
@@ -248,19 +252,19 @@ type TimelineClockProps = {
 
 function TimelineClock({ solarSegments, birdingSegments, moonSegment, currentMinutes, selectedSegmentId, sunTimes, moonIlluminationFraction, moonPhaseName, currentDate, currentTime, selectedMarkerId, onSelect, onKeyDown, onSelectCurrentTime, onSelectMarker, onMarkerKeyDown, isCurrentTimeSelected, showCurrentTime }: Readonly<TimelineClockProps>) {
     return (
-        <svg className='astra-clock' viewBox='0 0 320 320' role='img' aria-label='Clickable circular timeline of solar light, moonlight and birding periods'>
-            <circle className='astra-clock-face' cx='160' cy='160' r='148' />
-            <circle className='astra-sun-track' cx='160' cy='160' r='126' />
+        <svg className={astraClassName('astra-clock')} viewBox='0 0 320 320' role='img' aria-label='Clickable circular timeline of solar light, moonlight and birding periods'>
+            <circle className={astraClassName('astra-clock-face')} cx='160' cy='160' r='148' />
+            <circle className={astraClassName('astra-sun-track')} cx='160' cy='160' r='126' />
             {orderSegmentsForSelection(solarSegments, selectedSegmentId).map((segment) => <RingSegment key={segment.id} segment={segment} innerRadius={106} outerRadius={146} selected={segment.id === selectedSegmentId} onSelect={onSelect} onKeyDown={onKeyDown} />)}
             {orderSegmentsForSelection(birdingSegments, selectedSegmentId).map((segment) => <BirdingSegment key={segment.id} segment={segment} innerRadius={74} outerRadius={103} selected={segment.id === selectedSegmentId} onSelect={onSelect} onKeyDown={onKeyDown} />)}
             {birdingSegments[0] && <BirdingStartMarker minutes={birdingSegments[0].startMinutes} selected={selectedMarkerId === 'birding-times'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />}
             <MoonPercentageMarker minutes={getSolarMidnightMinutes(sunTimes.solarNoon)} fraction={moonIlluminationFraction} phaseName={moonPhaseName} selected={selectedMarkerId === 'moon-phase'} onSelect={onSelectMarker} onKeyDown={onMarkerKeyDown} />
             {moonSegment && <MoonRingSegment segment={moonSegment} selected={moonSegment.id === selectedSegmentId} onSelect={onSelect} onKeyDown={onKeyDown} />}
-            <circle className='astra-clock-center' cx='160' cy='160' r='60' />
-            <g className='astra-clock-center-content' transform='translate(160 160)'>
-                <text className='astra-clock-center-date' x='0' y='-32' textAnchor='middle'>{currentDate}</text>
-                <SunMoon className='astra-clock-center-icon' x='-12' y='-12' width='24' height='24' aria-hidden='true' />
-                {showCurrentTime && <text className='astra-clock-center-time' x='0' y='38' textAnchor='middle'>{currentTime}</text>}
+            <circle className={astraClassName('astra-clock-center')} cx='160' cy='160' r='60' />
+            <g className={astraClassName('astra-clock-center-content')} transform='translate(160 160)'>
+                <text className={astraClassName('astra-clock-center-date')} x='0' y='-32' textAnchor='middle'>{currentDate}</text>
+                <SunMoon className={astraClassName('astra-clock-center-icon')} x='-12' y='-12' width='24' height='24' aria-hidden='true' />
+                {showCurrentTime && <text className={astraClassName('astra-clock-center-time')} x='0' y='38' textAnchor='middle'>{currentTime}</text>}
             </g>
             {showCurrentTime && <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={onSelectCurrentTime} onKeyDown={onMarkerKeyDown} />}
         </svg>
@@ -268,22 +272,22 @@ function TimelineClock({ solarSegments, birdingSegments, moonSegment, currentMin
 }
 
 function RingSegment({ segment, innerRadius, outerRadius, selected, onSelect, onKeyDown }: Readonly<{ segment: TimelineSegment; innerRadius: number; outerRadius: number; selected: boolean; onSelect: (segment: TimelineSegment) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, segment: TimelineSegment) => void }>) {
-    return <path className={`astra-clock-solar-segment ${selected ? 'astra-clock-segment-selected' : ''}`} d={annularSectorPath(segment.startMinutes, segment.endMinutes, innerRadius, outerRadius)} fill={segment.color} tabIndex={0} role='button' aria-label={`${segment.label}, ${formatTime(segment.start)} to ${formatTime(segment.end)}`} onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
+    return <path className={astraClassName('astra-clock-solar-segment', selected && 'astra-clock-segment-selected')} d={annularSectorPath(segment.startMinutes, segment.endMinutes, innerRadius, outerRadius)} fill={segment.color} tabIndex={0} role='button' aria-label={`${segment.label}, ${formatTime(segment.start)} to ${formatTime(segment.end)}`} onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
 }
 
 function BirdingSegment({ segment, innerRadius, outerRadius, selected, onSelect, onKeyDown }: Readonly<{ segment: TimelineSegment; innerRadius: number; outerRadius: number; selected: boolean; onSelect: (segment: TimelineSegment) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, segment: TimelineSegment) => void }>) {
-    return <path className={`astra-birding-segment ${selected ? 'astra-clock-segment-selected' : ''}`} d={annularSectorPath(segment.startMinutes, segment.endMinutes, innerRadius, outerRadius)} fill={segment.color} tabIndex={0} role='button' aria-label={`${segment.label}, ${formatTime(segment.start)} to ${formatTime(segment.end)}`} onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
+    return <path className={astraClassName('astra-birding-segment', selected && 'astra-clock-segment-selected')} d={annularSectorPath(segment.startMinutes, segment.endMinutes, innerRadius, outerRadius)} fill={segment.color} tabIndex={0} role='button' aria-label={`${segment.label}, ${formatTime(segment.start)} to ${formatTime(segment.end)}`} onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
 }
 
 function BirdingStartMarker({ minutes, selected, onSelect, onKeyDown }: Readonly<{ minutes: number; selected: boolean; onSelect: (markerId: string) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, onSelect: () => void) => void }>) {
     const point = polarPoint(minutes - 30, 88);
     const select = () => onSelect('birding-times');
-    return <g className={`astra-birding-start-marker ${selected ? 'astra-birding-marker-selected' : ''}`} role='button' tabIndex={0} aria-label='Prominent birding times' onClick={select} onKeyDown={(event) => onKeyDown(event, select)}><circle className='astra-birding-start-marker-pad' cx={point.x} cy={point.y} r='10' /><Bird x={point.x - 7} y={point.y - 7} width='14' height='14' aria-hidden='true' /></g>;
+    return <g className={astraClassName('astra-birding-start-marker', selected && 'astra-birding-marker-selected')} role='button' tabIndex={0} aria-label='Prominent birding times' onClick={select} onKeyDown={(event) => onKeyDown(event, select)}><circle className={astraClassName('astra-birding-start-marker-pad')} cx={point.x} cy={point.y} r='10' /><Bird x={point.x - 7} y={point.y - 7} width='14' height='14' aria-hidden='true' /></g>;
 }
 
 function MoonRingSegment({ segment, selected, onSelect, onKeyDown }: Readonly<{ segment: TimelineSegment; selected: boolean; onSelect: (segment: TimelineSegment) => void; onKeyDown: (event: KeyboardEvent<SVGElement>, segment: TimelineSegment) => void }>) {
     const isFullDay = segment.endMinutes - segment.startMinutes >= 1439;
-    const className = `astra-moon-segment ${selected ? 'astra-clock-segment-selected' : ''}`;
+    const className = astraClassName('astra-moon-segment', selected && 'astra-clock-segment-selected');
 
     if (isFullDay) {
         return <circle className={className} cx='160' cy='160' r='153' tabIndex={0} role='button' aria-label='Moonlight, all day' onClick={() => onSelect(segment)} onKeyDown={(event) => onKeyDown(event, segment)} />;
@@ -294,7 +298,7 @@ function MoonRingSegment({ segment, selected, onSelect, onKeyDown }: Readonly<{ 
 
 function ClockCornerEvent({ markerId, label, value, icon: Icon, position, tone, selected, onSelect }: Readonly<{ markerId: string; label: string; value: string; icon: AstraIcon; position: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'; tone: 'moon' | 'sun'; selected: boolean; onSelect: (markerId: string) => void }>) {
     return (
-        <button type='button' className={`astra-clock-corner astra-clock-corner-${position} astra-clock-corner-${tone} ${selected ? 'astra-clock-corner-selected' : ''}`} aria-label={`${label} ${value}`} aria-pressed={selected} onClick={() => onSelect(markerId)}>
+        <button type='button' className={astraClassName('astra-clock-corner', `astra-clock-corner-${position}`, `astra-clock-corner-${tone}`, selected && 'astra-clock-corner-selected')} aria-label={`${label} ${value}`} aria-pressed={selected} onClick={() => onSelect(markerId)}>
             <Icon aria-hidden='true' />
             <span><small>{label}</small><strong>{value}</strong></span>
         </button>
@@ -308,23 +312,23 @@ function CurrentTimeMarker({ minutes, selected, onSelect, onKeyDown }: Readonly<
     const label = `Current time ${formatMinutes(minutes)}`;
 
     return (
-        <g className={`astra-chart-marker astra-current-time-marker ${selected ? 'astra-chart-marker-selected' : ''}`} role='button' tabIndex={0} aria-label={label} onClick={onSelect} onKeyDown={(event) => onKeyDown(event, onSelect)}>
-            <line className='astra-current-time-line' x1={lineStart.x} y1={lineStart.y} x2={lineEnd.x} y2={lineEnd.y} />
-            <circle className='astra-current-time-hit-area' cx={point.x} cy={point.y} r='10' />
-            <Clock3 className='astra-current-time-icon' x={point.x - 6} y={point.y - 6} width='12' height='12' aria-hidden='true' />
+        <g className={astraClassName('astra-chart-marker', 'astra-current-time-marker', selected && 'astra-chart-marker-selected')} role='button' tabIndex={0} aria-label={label} onClick={onSelect} onKeyDown={(event) => onKeyDown(event, onSelect)}>
+            <line className={astraClassName('astra-current-time-line')} x1={lineStart.x} y1={lineStart.y} x2={lineEnd.x} y2={lineEnd.y} />
+            <circle className={astraClassName('astra-current-time-hit-area')} cx={point.x} cy={point.y} r='10' />
+            <Clock3 className={astraClassName('astra-current-time-icon')} x={point.x - 6} y={point.y - 6} width='12' height='12' aria-hidden='true' />
         </g>
     );
 }
 
 function SkyEventRow({ event, isSelected, onSelect }: Readonly<{ event: SkyEvent; isSelected: boolean; onSelect: (event: SkyEvent) => void }>) {
-    const content = <><span className='astra-event-icon' style={{ color: event.color }}>{event.icon}</span><span className='astra-event-label'>{event.label}</span><strong>{event.value}</strong></>;
+    const content = <><span className={astraClassName('astra-event-icon')} style={{ color: event.color }}>{event.icon}</span><span className={astraClassName('astra-event-label')}>{event.label}</span><strong>{event.value}</strong></>;
     const segment = event.segment;
 
     if (!segment && !event.markerId) {
-        return <div className='astra-event-row astra-event-row-disabled' role='listitem'>{content}</div>;
+        return <div className={astraClassName('astra-event-row', 'astra-event-row-disabled')} role='listitem'>{content}</div>;
     }
 
-    return <button type='button' className={`astra-event-row ${isSelected ? 'astra-event-row-selected' : ''}`} onClick={() => onSelect(event)} aria-pressed={isSelected}>{content}</button>;
+    return <button type='button' className={astraClassName('astra-event-row', isSelected && 'astra-event-row-selected')} onClick={() => onSelect(event)} aria-pressed={isSelected}>{content}</button>;
 }
 
 function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
@@ -434,9 +438,9 @@ function MoonPercentageMarker({ minutes, fraction, phaseName, selected, onSelect
     const select = () => onSelect('moon-phase');
 
     return (
-        <g className={`astra-birding-phase-marker ${selected ? 'astra-birding-marker-selected' : ''}`} role='button' tabIndex={0} aria-label={`${phaseName}, ${Math.round(fraction * 100)} percent illuminated`} onClick={select} onKeyDown={(event) => onKeyDown(event, select)}>
-            <circle className='astra-birding-phase-marker-pad' cx={point.x} cy={point.y} r='17' />
-            <Moon className='astra-birding-phase-icon' x={point.x - 7} y={point.y - 13} width='14' height='14' aria-hidden='true' />
+        <g className={astraClassName('astra-birding-phase-marker', selected && 'astra-birding-marker-selected')} role='button' tabIndex={0} aria-label={`${phaseName}, ${Math.round(fraction * 100)} percent illuminated`} onClick={select} onKeyDown={(event) => onKeyDown(event, select)}>
+            <circle className={astraClassName('astra-birding-phase-marker-pad')} cx={point.x} cy={point.y} r='17' />
+            <Moon className={astraClassName('astra-birding-phase-icon')} x={point.x - 7} y={point.y - 13} width='14' height='14' aria-hidden='true' />
             <text x={point.x} y={point.y + 8} textAnchor='middle' dominantBaseline='middle'>{Math.round(fraction * 100)}%</text>
         </g>
     );
@@ -446,9 +450,9 @@ function MoonIlluminationDetails({ fraction, phase }: Readonly<{ fraction: numbe
     const percentage = Math.round(fraction * 100);
 
     return (
-        <ul className='astra-moon-selected'>
-            <li className='astra-moon-phase-name'><Moon size={18} aria-hidden='true' /><strong>{describeMoonPhase(phase)}</strong></li>
-            <li className='astra-illumination'><span className='astra-moon-pie' style={{ '--moon-illumination': `${percentage}%` } as CSSProperties} aria-label={`${percentage} percent illuminated`} /><strong>{percentage}%</strong><span>illuminated</span></li>
+        <ul className={astraClassName('astra-moon-selected')}>
+            <li className={astraClassName('astra-moon-phase-name')}><Moon size={18} aria-hidden='true' /><strong>{describeMoonPhase(phase)}</strong></li>
+            <li className={astraClassName('astra-illumination')}><span className={astraClassName('astra-moon-pie')} style={{ '--moon-illumination': `${percentage}%` } as CSSProperties} aria-label={`${percentage} percent illuminated`} /><strong>{percentage}%</strong><span>illuminated</span></li>
         </ul>
     );
 }

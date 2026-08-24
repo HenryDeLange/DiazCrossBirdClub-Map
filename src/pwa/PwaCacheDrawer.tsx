@@ -1,7 +1,9 @@
 import { DatabaseZap, HardDrive, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { MapDrawer } from '../map/components/MapDrawer';
+import drawerStyles from '../map/components/MapDrawer.module.css';
 import { clearAppCaches, getAppStorageInfo, type AppStorageInfo } from './clearAppCaches';
+import styles from './PwaCacheDrawer.module.css';
 
 type PwaCacheDrawerProps = {
     isOpen: boolean;
@@ -97,36 +99,36 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
             isOpen={isOpen}
             onClose={resetAndClose}
             label='App storage'
-            title={<span className='drawer-title-with-icon'><DatabaseZap className='drawer-title-icon' aria-hidden='true' /><span>App cache</span></span>}
-            headerAction={(status === 'idle' || status === 'error') && <button type='button' className='drawer-header-action pwa-cache-clear' onClick={() => void handleClear()} aria-label='Clear app cache' title='Clear app cache'><Trash2 aria-hidden='true' /><span>Clear</span></button>}
+            title={<span className={drawerStyles.titleWithIcon}><DatabaseZap className={drawerStyles.titleIcon} aria-hidden='true' /><span>App cache</span></span>}
+            headerAction={(status === 'idle' || status === 'error') && <button type='button' className={`drawer-header-action ${styles.clear}`} onClick={() => void handleClear()} aria-label='Clear app cache' title='Clear app cache'><Trash2 aria-hidden='true' /><span>Clear</span></button>}
             height={height}
             onHeightChange={onHeightChange}
         >
-            <div className='drawer-content pwa-cache-content'>
-                <p className='drawer-panel-subtitle'>This app stores offline files, map tiles, tide data, photos, and API responses. Clearing the app cache also removes saved map settings.</p>
-                <section className='pwa-cache-overview' aria-labelledby='pwa-storage-title'>
-                    <div className='pwa-cache-overview-heading'>
-                        <div className='pwa-cache-overview-title'><HardDrive aria-hidden='true' /><h2 id='pwa-storage-title'>Storage in use</h2></div>
+            <div className={`${drawerStyles.content} ${styles.content}`}>
+                <p className={drawerStyles.panelSubtitle}>This app stores offline files, map tiles, tide data, photos, and API responses. Clearing the app cache also removes saved map settings.</p>
+                <section className={styles.overview} aria-labelledby='pwa-storage-title'>
+                    <div className={styles.overviewHeading}>
+                        <div className={styles.overviewTitle}><HardDrive aria-hidden='true' /><h2 id='pwa-storage-title'>Storage in use</h2></div>
                     </div>
-                    {storageInfo && storageInfo.estimatedUsageBytes !== null && <p className='pwa-cache-info-message'>Browser storage estimate: {formatBytes(storageInfo.estimatedUsageBytes)} total for this site.</p>}
-                    {storageInfoStatus === 'idle' && !storageInfo && <p className='pwa-cache-info-message' role='status'>Reading storage details...</p>}
-                    {storageInfoStatus === 'error' && <p className='pwa-cache-info-message' role='alert'>Storage details are unavailable in this browser.</p>}
+                    {storageInfo && storageInfo.estimatedUsageBytes !== null && <p className={styles.infoMessage}>Browser storage estimate: {formatBytes(storageInfo.estimatedUsageBytes)} total for this site.</p>}
+                    {storageInfoStatus === 'idle' && !storageInfo && <p className={styles.infoMessage} role='status'>Reading storage details...</p>}
+                    {storageInfoStatus === 'error' && <p className={styles.infoMessage} role='alert'>Storage details are unavailable in this browser.</p>}
                     {storageInfo && (
-                        <div className='pwa-cache-info-sections'>
-                            <div className='pwa-cache-info-section'>
+                        <div className={styles.infoSections}>
+                            <div className={styles.infoSection}>
                                 <h3>Web request caches</h3>
                                 {storageInfo.cacheBuckets.length > 0 ? <ul>{storageInfo.cacheBuckets.map((bucket) => <li key={bucket.name}><code>{bucket.name}</code><span>{bucket.entries} entr{bucket.entries === 1 ? 'y' : 'ies'} · {formatCacheSize(bucket)}</span></li>)}</ul> : <p>None found.</p>}
                             </div>
-                            <div className='pwa-cache-info-section'>
+                            <div className={styles.infoSection}>
                                 <h3>Locally stored settings</h3>
                                 <StorageEntryList entries={storageInfo.localStorage.entries} />
                             </div>
                         </div>
                     )}
                 </section>
-                {message && <p className='pwa-cache-message' role={status === 'error' ? 'alert' : 'status'} aria-live='polite'>{message}</p>}
-                {status === 'clearing' && <p className='pwa-cache-message' role='status' aria-live='polite'>Clearing app cache...</p>}
-                {status === 'success' && <p className='pwa-cache-message pwa-cache-message-success' role='status' aria-live='polite'>Reloading the map...</p>}
+                {message && <p className={styles.message} role={status === 'error' ? 'alert' : 'status'} aria-live='polite'>{message}</p>}
+                {status === 'clearing' && <p className={styles.message} role='status' aria-live='polite'>Clearing app cache...</p>}
+                {status === 'success' && <p className={`${styles.message} ${styles.messageSuccess}`} role='status' aria-live='polite'>Reloading the map...</p>}
             </div>
         </MapDrawer>
     );

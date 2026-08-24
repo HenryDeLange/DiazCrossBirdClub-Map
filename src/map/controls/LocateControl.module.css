@@ -1,0 +1,64 @@
+:global(.leaflet-control-locate) {
+    --locate-control-icon-color: var(--control-text);
+    --locate-control-active-color: var(--action-color);
+    border: 2px solid var(--locate-border) !important;
+    border-radius: 50% !important;
+}
+
+:global(.leaflet-control-locate a) {
+    display: grid !important;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: var(--control-bg) !important;
+    color: var(--control-text) !important;
+    border-radius: 50% !important;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+:global(.leaflet-control-locate a:active) {
+    background: var(--control-bg) !important;
+}
+
+:global(.leaflet-control-locate a .leaflet-locate-icon) {
+    display: grid;
+    place-items: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    background: transparent !important;
+    color: var(--locate-control-icon-color) !important;
+}
+
+:global(.leaflet-control-locate a .leaflet-locate-icon svg) {
+    display: block;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0;
+    color: inherit;
+    stroke: currentColor;
+    stroke-width: 2;
+}
+
+:global(.leaflet-control-locate.requesting a .leaflet-locate-icon svg) {
+    animation: locateSpin 900ms linear infinite;
+    transform-origin: center;
+}
+
+:global(.leaflet-control-locate a:hover),
+:global(.leaflet-control-locate a:focus-visible),
+:global(.leaflet-control-locate.active a),
+:global(.leaflet-control-locate.following a) {
+    color: var(--action-color) !important;
+}
+
+:global(.leaflet-control-locate a:hover .leaflet-locate-icon),
+:global(.leaflet-control-locate a:focus-visible .leaflet-locate-icon),
+:global(.leaflet-control-locate.active a .leaflet-locate-icon),
+:global(.leaflet-control-locate.following a .leaflet-locate-icon) {
+    color: var(--action-color) !important;
+}
+
+@keyframes locateSpin {
+    to { transform: rotate(360deg); }
+}

@@ -4,6 +4,7 @@ import AstraPage from '../../calculations/astra/AstraPage';
 import type { Coordinates } from '../../calculations/components/dateLocationUtils';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
+import styles from './AstraControl.module.css';
 
 type AstraControlProps = {
     drawerHeight: number;
@@ -22,12 +23,11 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
     return (
         <>
             <MapControlButton
-                groupClassName='astra-group'
-                buttonClassName='astra-button'
+                groupClassName='astraGroup'
                 onClick={onToggle}
                 title='Open sun and moon guide'
             >
-                <SunMoon className='button-icon' />
+                <SunMoon />
             </MapControlButton>
             <MapDrawer
                 isOpen={isOpen}
@@ -35,7 +35,7 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onBack={onBack}
                 backLabel={locationName}
                 title='SUN & MOON'
-                headerAction={!isLocationView && <a className='drawer-header-action astra-header-action' href={getAstraPathname()} target='_blank' rel='noreferrer' aria-label='Open sun and moon guide in a new tab' title='Open sun and moon guide in a new tab'><ExternalLink size={18} /></a>}
+                headerAction={!isLocationView && <a className={`drawer-header-action ${styles.headerAction}`} href={getAstraPathname()} target='_blank' rel='noreferrer' aria-label='Open sun and moon guide in a new tab' title='Open sun and moon guide in a new tab'><ExternalLink size={18} /></a>}
                 height={drawerHeight}
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'

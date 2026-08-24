@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
+import drawerStyles from '../../components/MapDrawer.module.css';
 import type { LocationTabName } from '../../locationUtils';
 
 type LocationTabsProps = {
@@ -44,13 +45,13 @@ export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab,
 
     return (
         <>
-            <div className='drawer-location-filters'>
-                <div className='drawer-tabs'>
+            <div className={drawerStyles.locationFilters}>
+                <div className={drawerStyles.tabs}>
                     {tabs.map((tab) => (
                         <button
                             key={tab.label}
                             type='button'
-                            className={`drawer-tab ${activeTab === tab.label ? 'drawer-tab-active' : ''}`}
+                            className={`${drawerStyles.tab} ${activeTab === tab.label ? drawerStyles.tabActive : ''}`}
                             aria-pressed={activeTab === tab.label}
                             onClick={() => setActiveTab((current) => current === tab.label ? 'All' : tab.label)}
                         >
@@ -58,10 +59,10 @@ export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab,
                         </button>
                     ))}
                 </div>
-                <div className='drawer-tab-select-row'>
+                <div className={drawerStyles.tabSelectRow}>
                     <select
                         aria-label='Choose location type'
-                        className='drawer-tab-select'
+                        className={drawerStyles.tabSelect}
                         onChange={(event) => setActiveTab(event.target.value as LocationTabSelection)}
                         value={activeTab}
                     >
@@ -78,9 +79,10 @@ export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab,
                     onChange={setSearchQuery}
                     placeholder='Search locations'
                     value={searchQuery}
+                    variant='filters'
                 />
             </div>
-            <div className='drawer-content' ref={contentRef}>
+            <div className={drawerStyles.content} ref={contentRef}>
                 {activeTab === 'All'
                     ? allContent(debouncedSearchQuery)
                     : tabs.map((tab) => activeTab === tab.label && (

@@ -1,6 +1,6 @@
 import { CalendarDays, Locate, LocateFixed, MapPin } from 'lucide-react';
 import { useEffect, useState, type KeyboardEvent } from 'react';
-import './dateLocationControls.css';
+import styles from './DateLocationControls.module.css';
 import { formatCoordinate, isValidDateInput, roundCoordinate, type Coordinates } from './dateLocationUtils';
 
 type DateLocationControlsProps = {
@@ -143,31 +143,31 @@ export function DateLocationControls({ dateValue, onDateChange, coordinates, onC
     };
 
     return (
-        <div className='date-location-controls'>
-            <div className='date-location-field-section date-location-date-block'>
-                <div className='date-location-section-label date-location-date-label' title='Date'>
+        <div className={styles.controls}>
+            <div className={`${styles.fieldSection} ${styles.dateBlock}`}>
+                <div className={`${styles.sectionLabel} ${styles.dateLabel}`} title='Date'>
                     <CalendarDays size={18} aria-hidden='true' />
-                    <span className='date-location-visually-hidden'>Date</span>
+                    <span className={styles.visuallyHidden}>Date</span>
                 </div>
                 <input id={`${idPrefix}-date`} type='date' aria-label='Date' value={dateValue} onChange={(event) => handleDateInput(event.target.value)} />
             </div>
-            <div className='date-location-field-section date-location-location-block'>
-                <div className='date-location-section-label' title='Location'>
+            <div className={`${styles.fieldSection} ${styles.locationBlock}`}>
+                <div className={styles.sectionLabel} title='Location'>
                     <MapPin size={18} aria-hidden='true' />
-                    <span className='date-location-visually-hidden'>Location</span>
+                    <span className={styles.visuallyHidden}>Location</span>
                 </div>
-                <div className={`date-location-coordinate-controls ${locationView ? 'date-location-coordinate-controls-readonly' : ''}`}>
+                <div className={`${styles.coordinateControls} ${locationView ? styles.coordinateControlsReadonly : ''}`}>
                     <label>
-                        <span className='date-location-coordinate-label-full'>Latitude</span>
-                        <span className='date-location-coordinate-label-short'>Lat</span>
-                        <input className='date-location-coordinate-input' aria-label='Latitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={latitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('latitude', event.target.value)} onBlur={() => normalizeCoordinateInput('latitude')} onKeyDown={handleDecimalKeyDown} />
+                        <span className={styles.coordinateLabelFull}>Latitude</span>
+                        <span className={styles.coordinateLabelShort}>Lat</span>
+                        <input className={styles.coordinateInput} aria-label='Latitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={latitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('latitude', event.target.value)} onBlur={() => normalizeCoordinateInput('latitude')} onKeyDown={handleDecimalKeyDown} />
                     </label>
                     <label>
-                        <span className='date-location-coordinate-label-full'>Longitude</span>
-                        <span className='date-location-coordinate-label-short'>Lng</span>
-                        <input className='date-location-coordinate-input' aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onBlur={() => normalizeCoordinateInput('longitude')} onKeyDown={handleDecimalKeyDown} />
+                        <span className={styles.coordinateLabelFull}>Longitude</span>
+                        <span className={styles.coordinateLabelShort}>Lng</span>
+                        <input className={styles.coordinateInput} aria-label='Longitude' inputMode='decimal' pattern='-?[0-9]*[.]?[0-9]*' value={longitudeInput} readOnly={locationView} onChange={(event) => handleCoordinateInput('longitude', event.target.value)} onBlur={() => normalizeCoordinateInput('longitude')} onKeyDown={handleDecimalKeyDown} />
                     </label>
-                    {!locationView && <button type='button' className={`date-location-ghost-button ${locationStatus === 'loading' ? 'date-location-loading' : ''} ${locationStatus === 'success' ? 'date-location-success' : ''} ${locationStatus === 'error' ? 'date-location-error' : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
+                    {!locationView && <button type='button' className={`${styles.ghostButton} ${locationStatus === 'loading' ? styles.loading : ''} ${locationStatus === 'success' ? styles.success : ''} ${locationStatus === 'error' ? styles.error : ''}`} onClick={requestCurrentLocation} title='Use current location' aria-label='Use current location' aria-busy={locationStatus === 'loading'}>{locationStatus === 'success' ? <LocateFixed size={18} /> : <Locate size={18} />}</button>}
                 </div>
             </div>
         </div>

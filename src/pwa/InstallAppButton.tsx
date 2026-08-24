@@ -11,12 +11,11 @@ export function InstallAppButton() {
 
     return (
         <MapControlButton
-            groupClassName='install-group'
-            buttonClassName='install-button'
+            groupClassName='installGroup'
             onClick={() => void install()}
             title='Install DCBC Birding Map'
         >
-            <ArrowBigDownDash className='button-icon' aria-hidden='true' />
+            <ArrowBigDownDash aria-hidden='true' />
         </MapControlButton>
     );
 }

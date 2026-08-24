@@ -5,6 +5,7 @@ import { defaultMapCenter } from '../common/defaultLocation';
 import { InstallAppButton } from '../pwa/InstallAppButton';
 import { PwaCacheDrawer } from '../pwa/PwaCacheDrawer';
 import { useTheme } from '../theme/useTheme';
+import styles from './BirdingMap.module.css';
 import { MapLegendFooter } from './components/MapLegendFooter';
 import { AstraControl } from './controls/AstraControl';
 import { LocateControl } from './controls/LocateControl';
@@ -37,8 +38,8 @@ const locationSources: LocationSource[] = [
 export default function BirdingMap() {
     const initialLocationKeys = getInitialLocationKeys();
     const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
-    const [mapHeight, setMapHeight] = useState(window.innerHeight);
-    const [drawerHeight, setDrawerHeight] = useState(() => getStoredDrawerHeight(window.innerHeight));
+    const [mapHeight, setMapHeight] = useState(getViewportHeight);
+    const [drawerHeight, setDrawerHeight] = useState(() => getStoredDrawerHeight(getViewportHeight()));
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
     const [inatLocationName, setInatLocationName] = useState<string | null>(null);
@@ -55,12 +56,20 @@ export default function BirdingMap() {
     const { isDarkMode } = useTheme();
 
     useEffect(() => {
-        const updateDimensions = () => setMapHeight(window.innerHeight);
+        const updateDimensions = () => setMapHeight(getViewportHeight());
+        const updateAfterLayout = () => window.requestAnimationFrame(updateDimensions);
 
         window.addEventListener('resize', updateDimensions);
+        window.addEventListener('orientationchange', updateDimensions);
+        window.addEventListener('pageshow', updateAfterLayout);
+        window.visualViewport?.addEventListener('resize', updateDimensions);
+        updateAfterLayout();
 
         return () => {
             window.removeEventListener('resize', updateDimensions);
+            window.removeEventListener('orientationchange', updateDimensions);
+            window.removeEventListener('pageshow', updateAfterLayout);
+            window.visualViewport?.removeEventListener('resize', updateDimensions);
         };
     }, []);
 
@@ -255,7 +264,7 @@ export default function BirdingMap() {
             scrollWheelZoom
             attributionControl={false}
             zoomControl={false}
-            style={{ height: mapHeight }}
+            className={styles.map}
         >
             <DrawerInteractionLock isOpen={openDrawer !== null} />
             <Logo />
@@ -416,6 +425,13 @@ function getStoredDrawerHeight(viewportHeight: number): number {
 
 function clampDrawerHeight(height: number, viewportHeight: number): number {
     return Math.min(Math.max(height, drawerMinHeight), Math.max(drawerMinHeight, viewportHeight - 8));
+}
+
+function getViewportHeight(): number {
+    const visualViewportHeight = window.visualViewport?.height;
+    return Math.round(visualViewportHeight && visualViewportHeight > 0
+        ? visualViewportHeight
+        : document.documentElement.clientHeight || window.innerHeight);
 }
 
 function DrawerInteractionLock({ isOpen }: Readonly<{ isOpen: boolean }>) {

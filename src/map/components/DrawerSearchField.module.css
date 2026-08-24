@@ -9,6 +9,9 @@
     background: var(--drawer-card);
 }
 
+.filters { flex: 1 1 auto; min-width: 0; margin: 0; }
+.panel { margin-top: -0.15rem; margin-bottom: 0.6rem; }
+
 .searchIcon {
     width: 1rem;
     height: 1rem;
@@ -18,6 +21,7 @@
 
 .searchInput {
     flex: 1;
+    min-width: 0;
     border: none;
     outline: none;
     background: transparent;
@@ -38,6 +42,8 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
     padding: 0;
     border: none;
     background: transparent;
@@ -54,29 +60,19 @@
     height: 1rem;
 }
 
-:global(.drawer-content) > .searchRow {
-    margin-left: 0;
-    margin-right: 0;
-}
-
-:global(.drawer-location-filters) > .searchRow {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-}
-
-:global(.drawer-panel) > .searchRow {
-    margin-top: -0.15rem;
-    margin-bottom: 0.6rem;
-}
-
 @media (max-width: 820px) {
     .searchRow {
+        height: 3rem;
         margin: 0 0.9rem 0.6rem;
         padding: 0.45rem 0.7rem;
+        box-sizing: border-box;
     }
 
-    :global(.drawer-panel) > .searchRow {
+    .filters {
+        margin: 0;
+    }
+
+    .panel {
         margin-bottom: 0.5rem;
     }
 }

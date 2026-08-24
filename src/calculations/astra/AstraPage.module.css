@@ -222,10 +222,6 @@
     color: var(--astra-ink) !important;
 }
 
-.drawer-header-action.astra-header-action {
-    border: 0;
-}
-
 .astra-ghost-button {
     display: inline-grid;
     place-items: center;

@@ -1,0 +1,96 @@
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+    gap: 1rem;
+}
+
+.linkRow { margin-bottom: 0.9rem; }
+.link { color: var(--action-color) !important; text-decoration: none; font-weight: 700; }
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 0.5rem;
+    border-radius: 0.55rem;
+    background: var(--drawer-card);
+    border: 1px solid var(--button-active-border);
+    text-align: center;
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.cardMedia { position: relative; overflow: hidden; border-radius: 0.5rem; }
+
+.cardImage {
+    width: 100%;
+    min-height: 10rem;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+.cardImageEmpty { display: grid; place-items: center; color: var(--drawer-muted); font-size: 0.8rem; }
+.cardTitle { margin-top: 0.3rem; font-size: 1.1rem; font-weight: 800; color: var(--page-text); }
+.cardTitle a { color: inherit !important; font-style: normal; }
+.cardMeta { display: grid; color: var(--drawer-muted); font-size: 0.85rem; }
+.cardScientific { color: inherit; }
+
+.cardMetaRow {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.cardCount { color: var(--drawer-muted); font-size: 0.75rem; }
+.cardAttribution { position: static; display: inline-flex; align-items: center; }
+
+.cardAttributionTrigger {
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    color: var(--drawer-muted);
+    line-height: 1;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.cardAttributionTrigger:hover .cardAttributionIcon,
+.cardAttributionTrigger[aria-expanded='true'] .cardAttributionIcon { color: var(--action-color); }
+.cardAttributionIcon { width: 0.85rem; height: 0.85rem; }
+
+.cardAttributionTooltip {
+    position: absolute;
+    bottom: calc(100% + 0.35rem);
+    right: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    background: var(--drawer-card);
+    border: 1px solid var(--control-border);
+    border-radius: 0.4rem;
+    padding: 0.35rem 0.5rem;
+    color: var(--drawer-muted);
+    font-size: 0.68rem;
+    line-height: 1.4;
+    text-align: left;
+    width: min(14rem, calc(100% - 0.25rem));
+    max-width: calc(100% - 0.25rem);
+    box-shadow: 0 4px 12px var(--button-shadow);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+}
+
+@media (max-width: 820px) {
+    .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+    .cardTitle { font-size: 0.9rem; }
+}
+
+@media (max-width: 219px) { .grid { grid-template-columns: 1fr; } }

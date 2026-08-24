@@ -57,12 +57,11 @@ export function LocationsControl({
     return (
         <>
             <MapControlButton
-                groupClassName='locations-group'
-                buttonClassName='locations-button'
+                groupClassName='locationsGroup'
                 onClick={onToggle}
                 title='Birding Locations'
             >
-                <Info className='button-icon' />
+                <Info />
             </MapControlButton>
             <MapDrawer
                 isOpen={isOpen}

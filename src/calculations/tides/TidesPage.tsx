@@ -6,7 +6,7 @@ import { getPageShareUrl, shareUrl as shareAppUrl } from '../../share';
 import { DateLocationControls } from '../components/DateLocationControls';
 import { getQueryCoordinates, getQueryDate, type Coordinates } from '../components/dateLocationUtils';
 import { defaultTideStationsData, fetchTideStations, getTidePredictions, getWeightedTideExtremes, getWeightedTideLevel, type TidePrediction, type TideStation, type WeightedTideExtreme, type WeightedTideLevel } from './tideData';
-import './tides.css';
+import styles from './TidesPage.module.css';
 
 type TidesPageProps = {
     embedded?: boolean;
@@ -21,6 +21,10 @@ type StationState = {
 type CurrentTideStatus = WeightedTideLevel & {
     incoming: boolean;
     nextTide: WeightedTideExtreme;
+}
+
+function tidesClassName(...classNames: Array<string | false | undefined>): string {
+    return classNames.filter((className): className is string => Boolean(className)).map((className) => styles[className as keyof typeof styles]).join(' ');
 }
 
 export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>) {
@@ -105,32 +109,32 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
     const allPredictionsFailed = predictions.length > 0 && predictions.every(({ error }) => Boolean(error));
 
     return (
-        <main className={`tides-page ${embedded ? 'tides-page-embedded' : ''}`}>
-            <div className='tides-shell'>
-                <header className='tides-header'>
-                    <div className='tides-toolbar'>
+        <main className={tidesClassName('tides-page', embedded && 'tides-page-embedded')}>
+            <div className={tidesClassName('tides-shell')}>
+                <header className={tidesClassName('tides-header')}>
+                    <div className={tidesClassName('tides-toolbar')}>
                         <DateLocationControls dateValue={dateValue} onDateChange={setDateValue} coordinates={coordinates} onCoordinatesChange={handleCoordinatesChange} coordinatePrecision={1} requestLocationOnMount={shouldRequestLocation} idPrefix='tides' />
                         {!embedded && (
-                            <div className='tides-toolbar-actions'>
-                                <a className='tides-map-link' href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
-                                <button type='button' className='tides-map-link tides-share-link' onClick={handleShare} aria-label='Share these tide predictions' title='Share these tide predictions'><Share2 size={18} /></button>
+                            <div className={tidesClassName('tides-toolbar-actions')}>
+                                <a className={tidesClassName('tides-map-link')} href={getBasePathname()} aria-label='Back to birding map' title='Back to birding map'><Map size={18} /></a>
+                                <button type='button' className={tidesClassName('tides-map-link', 'tides-share-link')} onClick={handleShare} aria-label='Share these tide predictions' title='Share these tide predictions'><Share2 size={18} /></button>
                             </div>
                         )}
                     </div>
                 </header>
 
-                <section className='tides-dashboard'>
-                    {!selectedDate && <p className='tides-message' role='alert'>Select a valid date to view tide predictions.</p>}
-                    {selectedDate && stationState.status === 'loading' && <p className='tides-message' role='status' aria-live='polite'>{stationState.message ?? 'Loading nearby stations...'}</p>}
-                    {selectedDate && stationState.status === 'error' && <p className='tides-message tides-message-error' role='alert'>{stationState.message}</p>}
-                    {selectedDate && stationState.status === 'success' && !hasTideData && <p className='tides-message tides-message-error' role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>}
-                    {selectedDate && stationState.status === 'success' && hasTideData && <div className='tides-results'>
-                        <div className='tides-wave-column'>
+                <section className={tidesClassName('tides-dashboard')}>
+                    {!selectedDate && <p className={tidesClassName('tides-message')} role='alert'>Select a valid date to view tide predictions.</p>}
+                    {selectedDate && stationState.status === 'loading' && <p className={tidesClassName('tides-message')} role='status' aria-live='polite'>{stationState.message ?? 'Loading nearby stations...'}</p>}
+                    {selectedDate && stationState.status === 'error' && <p className={tidesClassName('tides-message', 'tides-message-error')} role='alert'>{stationState.message}</p>}
+                    {selectedDate && stationState.status === 'success' && !hasTideData && <p className={tidesClassName('tides-message', 'tides-message-error')} role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>}
+                    {selectedDate && stationState.status === 'success' && hasTideData && <div className={tidesClassName('tides-results')}>
+                        <div className={tidesClassName('tides-wave-column')}>
                             {currentTide && <TideCurrentPanel currentTide={currentTide} now={now} />}
                             {weightedExtremes.length > 0 && <TideWaveGraphic extremes={weightedExtremes} date={selectedDate} now={now} />}
-                            <p className='tides-disclaimer'>Tide estimates are for planning birdwatching activities, not navigation.</p>
+                            <p className={tidesClassName('tides-disclaimer')}>Tide estimates are for planning birdwatching activities, not navigation.</p>
                         </div>
-                        <div className='tides-station-list'>
+                        <div className={tidesClassName('tides-station-list')}>
                             {predictions.map((prediction) => <TideStationPanel key={prediction.station.id} prediction={prediction} />)}
                         </div>
                     </div>}
@@ -150,11 +154,11 @@ function TideWaveGraphic({ extremes, date, now }: Readonly<{ extremes: WeightedT
     const currentTimePoint = getCurrentTimePoint(chartPoints, date, timeZone, now);
 
     return (
-        <section className='tides-wave-panel' aria-labelledby='tides-wave-title'>
-            <header className='tides-wave-header'>
+        <section className={tidesClassName('tides-wave-panel')} aria-labelledby='tides-wave-title'>
+            <header className={tidesClassName('tides-wave-header')}>
                 <h2 id='tides-wave-title'><WavesHorizontal aria-hidden='true' /><span>Estimated Tides</span><small>distance weighted</small></h2>
             </header>
-            <div className='tides-wave-graphic'>
+            <div className={tidesClassName('tides-wave-graphic')}>
                 <svg viewBox='0 0 1000 286' role='img' aria-label='Distance-weighted average tide heights across 24 hours with 12-hour axis markers'>
                     <defs>
                         <clipPath id='tides-wave-plot-clip'>
@@ -162,23 +166,23 @@ function TideWaveGraphic({ extremes, date, now }: Readonly<{ extremes: WeightedT
                         </clipPath>
                     </defs>
                     <g clipPath='url(#tides-wave-plot-clip)'>
-                        <path className='tides-wave-area' d={areaPath} />
-                        <path className='tides-wave-line' d={wavePath} />
-                        {currentTimePoint && <line className='tides-current-time-line' x1={currentTimePoint.x} y1='24' x2={currentTimePoint.x} y2={chartBottom} />}
+                        <path className={tidesClassName('tides-wave-area')} d={areaPath} />
+                        <path className={tidesClassName('tides-wave-line')} d={wavePath} />
+                        {currentTimePoint && <line className={tidesClassName('tides-current-time-line')} x1={currentTimePoint.x} y1='24' x2={currentTimePoint.x} y2={chartBottom} />}
                     </g>
                     {visibleChartPoints.map(({ x, y, extreme }, index) => (
-                        <g key={`${extreme.time.toISOString()}-${index}`} className={`tides-wave-point-group tides-wave-point-group-${extreme.high ? 'high' : 'low'}`}>
-                            <circle className='tides-wave-point' cx={x} cy={y} r='8' />
-                            <text className='tides-wave-value' x={x} y={Math.max(y - 16, 18)} textAnchor='middle'>{formatLevel(extreme.level)} m</text>
-                            <text className='tides-wave-time' x={x} y='246' textAnchor='middle'>{formatTideTime(extreme.time, extreme.timeZone)}</text>
+                        <g key={`${extreme.time.toISOString()}-${index}`} className={tidesClassName('tides-wave-point-group', `tides-wave-point-group-${extreme.high ? 'high' : 'low'}`)}>
+                            <circle className={tidesClassName('tides-wave-point')} cx={x} cy={y} r='8' />
+                            <text className={tidesClassName('tides-wave-value')} x={x} y={Math.max(y - 16, 18)} textAnchor='middle'>{formatLevel(extreme.level)} m</text>
+                            <text className={tidesClassName('tides-wave-time')} x={x} y='246' textAnchor='middle'>{formatTideTime(extreme.time, extreme.timeZone)}</text>
                         </g>
                     ))}
-                    {currentTimePoint && <g className='tides-current-time-marker' aria-label={`Current time ${formatTideTime(now, timeZone)}`}>
+                    {currentTimePoint && <g className={tidesClassName('tides-current-time-marker')} aria-label={`Current time ${formatTideTime(now, timeZone)}`}>
                         <title>{`Current time ${formatTideTime(now, timeZone)}`}</title>
-                        <Clock3 className='tides-current-time-icon' x={currentTimePoint.x - 14} y={-8} width='28' height='28' aria-hidden='true' />
+                        <Clock3 className={tidesClassName('tides-current-time-icon')} x={currentTimePoint.x - 14} y={-8} width='28' height='28' aria-hidden='true' />
                     </g>}
                     {getWaveChartTicks(date, timeZone).map((tick) => (
-                        <g key={tick.label} className='tides-wave-tick'>
+                        <g key={tick.label} className={tidesClassName('tides-wave-tick')}>
                             <line x1={tick.x} y1='220' x2={tick.x} y2='228' />
                             <text x={tick.x} y='274' textAnchor='middle'>{tick.label}</text>
                         </g>
@@ -194,25 +198,25 @@ function TideCurrentPanel({ currentTide, now }: Readonly<{ currentTide: CurrentT
     const NextTideIcon = currentTide.nextTide.high ? WavesArrowUp : WavesArrowDown;
 
     return (
-        <section className='tides-current-panel' aria-label='Current and next tide' aria-live='polite'>
-            <div className='tides-current-row'>
-                <div className='tides-current-time'>
+        <section className={tidesClassName('tides-current-panel')} aria-label='Current and next tide' aria-live='polite'>
+            <div className={tidesClassName('tides-current-row')}>
+                <div className={tidesClassName('tides-current-time')}>
                     <Clock3 aria-hidden='true' />
-                    <div className='tides-current-details'><span>Now</span><strong>{formatTideTime(now, currentTide.timeZone)}</strong></div>
+                    <div className={tidesClassName('tides-current-details')}><span>Now</span><strong>{formatTideTime(now, currentTide.timeZone)}</strong></div>
                 </div>
-                <div className={`tides-current-direction ${currentTide.incoming ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing'}`}>
+                <div className={tidesClassName('tides-current-direction', currentTide.incoming ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing')}>
                     <DirectionIcon aria-hidden='true' />
-                    <div className='tides-current-details'><span>{currentTide.incoming ? 'Incoming' : 'Outgoing'}</span><strong>{formatLevel(currentTide.level)} m</strong></div>
+                    <div className={tidesClassName('tides-current-details')}><span>{currentTide.incoming ? 'Incoming' : 'Outgoing'}</span><strong>{formatLevel(currentTide.level)} m</strong></div>
                 </div>
             </div>
-            <div className='tides-next-row'>
-                <div className='tides-current-time'>
+            <div className={tidesClassName('tides-next-row')}>
+                <div className={tidesClassName('tides-current-time')}>
                     <Clock3 aria-hidden='true' />
-                    <div className='tides-current-details'><span>Next</span><strong>{formatTideTime(currentTide.nextTide.time, currentTide.nextTide.timeZone)}</strong></div>
+                    <div className={tidesClassName('tides-current-details')}><span>Next</span><strong>{formatTideTime(currentTide.nextTide.time, currentTide.nextTide.timeZone)}</strong></div>
                 </div>
-                <div className={`tides-next-tide ${currentTide.nextTide.high ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing'}`}>
+                <div className={tidesClassName('tides-next-tide', currentTide.nextTide.high ? 'tides-current-direction-incoming' : 'tides-current-direction-outgoing')}>
                     <NextTideIcon aria-hidden='true' />
-                    <div className='tides-current-details'><span>{currentTide.nextTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(currentTide.nextTide.level)} m</strong></div>
+                    <div className={tidesClassName('tides-current-details')}><span>{currentTide.nextTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(currentTide.nextTide.level)} m</strong></div>
                 </div>
             </div>
         </section>
@@ -223,25 +227,25 @@ function TideStationPanel({ prediction }: Readonly<{ prediction: TidePrediction 
     const { station, extremes, error } = prediction;
 
     return (
-        <article className='tides-station-panel'>
-            <header className='tides-station-header'>
+        <article className={tidesClassName('tides-station-panel')}>
+            <header className={tidesClassName('tides-station-header')}>
                 <div>
                     <h2>{station.name}</h2>
                 </div>
-                <p className='tides-station-distance'>{formatDistance(station.distance)}</p>
+                <p className={tidesClassName('tides-station-distance')}>{formatDistance(station.distance)}</p>
             </header>
-            {error ? <p className='tides-message tides-message-error'>{error}</p> : extremes.length > 0 ? (
-                <ol className='tides-extreme-list'>
-                    {extremes.map((extreme) => <li key={`${station.id}-${extreme.time.toISOString()}`} className={`tides-extreme tides-extreme-${extreme.high ? 'high' : 'low'}`}>
+            {error ? <p className={tidesClassName('tides-message', 'tides-message-error')}>{error}</p> : extremes.length > 0 ? (
+                <ol className={tidesClassName('tides-extreme-list')}>
+                    {extremes.map((extreme) => <li key={`${station.id}-${extreme.time.toISOString()}`} className={tidesClassName('tides-extreme', `tides-extreme-${extreme.high ? 'high' : 'low'}`)}>
                         {extreme.high ? <WavesArrowUp aria-hidden='true' /> : <WavesArrowDown aria-hidden='true' />}
-                        <span className='tides-extreme-summary'>
-                            <span className='tides-extreme-label'>{extreme.label}</span>
-                            <span className='tides-extreme-level'>{formatLevel(extreme.level)} m</span>
+                        <span className={tidesClassName('tides-extreme-summary')}>
+                            <span className={tidesClassName('tides-extreme-label')}>{extreme.label}</span>
+                            <span className={tidesClassName('tides-extreme-level')}>{formatLevel(extreme.level)} m</span>
                         </span>
                         <strong>{formatTideTime(extreme.time, station.timezone)}</strong>
                     </li>)}
                 </ol>
-            ) : <p className='tides-message'>No high or low tide was predicted for this date.</p>}
+            ) : <p className={tidesClassName('tides-message')}>No high or low tide was predicted for this date.</p>}
         </article>
     );
 }

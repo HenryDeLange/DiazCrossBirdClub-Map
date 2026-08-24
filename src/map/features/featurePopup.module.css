@@ -1,0 +1,25 @@
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    max-width: 22rem;
+    background: var(--panel-bg);
+}
+
+.title { font-size: 1.05rem; font-weight: 800; color: var(--page-text); }
+
+.description {
+    color: var(--drawer-muted);
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+.link { color: var(--action-color); text-decoration: none; font-weight: 700; }
+.separator { margin: 0 0.3rem; color: var(--drawer-muted); }

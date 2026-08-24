@@ -1,5 +1,6 @@
 import { SunMoon } from 'lucide-react';
 import * as SunCalc from 'suncalc';
+import styles from './LocationFeatureDetails.module.css';
 import type { AstronomyLocation } from './types';
 
 type LocationAstronomySummaryProps = {
@@ -13,12 +14,12 @@ export function LocationAstronomySummary({ location, onOpen }: Readonly<Location
     return (
         <button
             type='button'
-            className='location-card-nav location-card-nav-astronomy'
+            className={styles.cardNav}
             onClick={() => onOpen(location)}
             aria-label={`Open sunrise and sunset guide for ${location.name}`}
             title={`Open sun and moon guide for ${location.name}. Sunrise ${formatAstronomyTime(sunTimes.sunrise)}, sunset ${formatAstronomyTime(sunTimes.sunset)}`}
         >
-            <SunMoon className='location-card-nav-icon' />
+            <SunMoon className={styles.cardNavIcon} />
         </button>
     );
 }

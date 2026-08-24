@@ -1,5 +1,6 @@
 import { Copyright } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import styles from './SpeciesListControl.module.css';
 import type { INatSpeciesCardProps } from './types';
 
 export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>) {
@@ -26,11 +27,11 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
     }, [isAttributionOpen]);
 
     return (
-        <div className='inat-card'>
-            <div className='inat-card-media'>
+        <div className={styles.card}>
+            <div className={styles.cardMedia}>
                 {imageUrl ? (
                     <img
-                        className='inat-card-image'
+                        className={styles.cardImage}
                         alt={speciesCount.taxon.name}
                         src={imageUrl}
                         loading='lazy'
@@ -45,10 +46,10 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
                         }}
                     />
                 ) : (
-                    <div className='inat-card-image inat-card-image-empty'>No image available</div>
+                    <div className={`${styles.cardImage} ${styles.cardImageEmpty}`}>No image available</div>
                 )}
             </div>
-            <div className='inat-card-title'>
+            <div className={styles.cardTitle}>
                 <a
                     href={speciesCount.taxon.id ? `https://www.inaturalist.org/taxa/${speciesCount.taxon.id}` : undefined}
                     target='_blank'
@@ -57,25 +58,25 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
                     {speciesCount.taxon.preferred_common_name || speciesCount.taxon.name}
                 </a>
             </div>
-            <div className='inat-card-meta'>
-                <span className='inat-card-scientific'><i>{speciesCount.taxon.name}</i></span>
-                <div className='inat-card-meta-row'>
+            <div className={styles.cardMeta}>
+                <span className={styles.cardScientific}><i>{speciesCount.taxon.name}</i></span>
+                <div className={styles.cardMetaRow}>
                     {typeof speciesCount.count === 'number' && (
-                        <span className='inat-card-count'>{speciesCount.count.toLocaleString()} observations</span>
+                        <span className={styles.cardCount}>{speciesCount.count.toLocaleString()} observations</span>
                     )}
                     {image?.attribution && (
-                        <div className='inat-card-attribution' ref={attributionRef}>
+                        <div className={styles.cardAttribution} ref={attributionRef}>
                             <button
                                 type='button'
-                                className='inat-card-attribution-trigger'
+                                className={styles.cardAttributionTrigger}
                                 aria-label='Show image attribution'
                                 aria-expanded={isAttributionOpen}
                                 onClick={() => setIsAttributionOpen((current) => !current)}
                             >
-                                <Copyright className='inat-card-attribution-icon' />
+                                <Copyright className={styles.cardAttributionIcon} />
                             </button>
                             {isAttributionOpen && (
-                                <div className='inat-card-attribution-tooltip'>{image.attribution}</div>
+                                <div className={styles.cardAttributionTooltip}>{image.attribution}</div>
                             )}
                         </div>
                     )}

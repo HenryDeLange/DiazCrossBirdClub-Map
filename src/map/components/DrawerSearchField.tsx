@@ -6,11 +6,12 @@ type Props = {
     placeholder: string;
     value: string;
     onChange: (value: string) => void;
+    variant?: 'filters' | 'panel';
 }
 
-export function DrawerSearchField({ ariaLabel, placeholder, value, onChange }: Readonly<Props>) {
+export function DrawerSearchField({ ariaLabel, placeholder, value, onChange, variant }: Readonly<Props>) {
     return (
-        <div className={styles.searchRow}>
+        <div className={`${styles.searchRow} ${variant ? styles[variant] : ''}`}>
             <Search className={styles.searchIcon} />
             <input
                 aria-label={ariaLabel}

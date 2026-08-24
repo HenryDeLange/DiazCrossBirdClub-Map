@@ -17,5 +17,7 @@ export type INatSpeciesCardProps = {
 export type UseSpeciesObservationsResult = {
     data: INatSpeciesCount | null;
     loading: boolean;
+    error: boolean;
+    inatUrl: string;
     reset: () => void;
 }

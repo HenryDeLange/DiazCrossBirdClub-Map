@@ -1,5 +1,6 @@
 import { Binoculars, Footprints, MapPin, Route, Telescope, type LucideIcon } from 'lucide-react';
 import type { LocationTabName } from '../../locationUtils';
+import styles from './LocationFeatureDetails.module.css';
 
 type PrimaryCategoryIconProps = {
     tabLabel: LocationTabName;
@@ -15,5 +16,5 @@ export function PrimaryCategoryIcon({ tabLabel }: Readonly<PrimaryCategoryIconPr
 
     const Icon = iconByTab[tabLabel] ?? MapPin;
 
-    return <Icon className='location-card-nav-icon' aria-hidden='true' />;
+    return <Icon className={styles.cardNavIcon} aria-hidden='true' />;
 }

@@ -1,0 +1,41 @@
+.list { display: grid; gap: 0.85rem; padding-bottom: 1rem; }
+.group { display: grid; gap: 0.6rem; padding: 0.15rem 0 0.25rem; }
+.groupHeader { padding-top: 0.1rem; }
+.groupItems { display: grid; gap: 0.55rem; padding: 0; margin: 0.2rem 0 0 0.15rem; list-style: none; border-left: 1px solid var(--control-border); }
+.groupItem { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; padding: 0.4rem 0 0.4rem 0.75rem; }
+.groupItemMain { display: grid; gap: 0.2rem; flex: 1; }
+.groupItemTitle { font-size: 1.05rem; font-weight: 600; color: var(--page-text); }
+.groupItemDescription,
+.groupDescription { color: var(--drawer-muted); }
+.groupItemDescription { font-size: 0.85rem; }
+.groupHeaderRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
+.groupHeaderMain { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
+.categoryBadge { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2.4rem; height: 2.4rem; border: 1px solid var(--control-border); border-radius: 20%; background: var(--drawer-card); color: var(--drawer-muted); cursor: pointer; transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease; transform: translateZ(0); will-change: transform; }
+.categoryBadge:hover,
+.categoryBadge:focus-visible { border-color: var(--action-color); background: var(--button-hover); color: var(--action-color); outline: none; }
+.groupHeaderActions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
+.groupTitle { font-size: 1.4rem; font-weight: 600; line-height: 1.15; color: var(--page-text); }
+.groupDescription { line-height: 1.6; margin-bottom: 0.75rem; }
+.cardLinks { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.75rem; }
+.cardNav { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; border: 1px solid var(--control-border); border-radius: 50%; background: var(--drawer-card); color: var(--drawer-muted); cursor: pointer; transform: translateZ(0); will-change: transform; }
+.cardNavTitle { width: 2.4rem; height: 2.4rem; }
+.cardNav:hover { background: var(--button-hover); color: var(--action-color); }
+.cardNavIcon,
+.cardNavImage { width: 1rem; height: 1rem; }
+.cardNavImage { object-fit: contain; filter: saturate(0.01) brightness(0.5); transition: filter 160ms ease; }
+.cardNavInat:hover .cardNavImage,
+.cardNavInat:focus-visible .cardNavImage { filter: none; }
+
+@media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .cardNavImage { filter: saturate(0.01) brightness(1.35); }
+}
+
+:global(:root[data-theme='dark']) .cardNavImage { filter: saturate(0.01) brightness(1.35); }
+
+@media (max-width: 480px) {
+    .groupHeaderRow { flex-wrap: wrap; gap: 0.1rem 0.75rem; }
+    .groupHeaderMain,
+    .groupHeaderActions { width: 100%; }
+    .groupHeaderMain { flex: 1 1 100%; }
+    .groupHeaderActions { justify-content: flex-end; }
+}

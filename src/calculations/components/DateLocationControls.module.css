@@ -1,0 +1,60 @@
+.controls,
+.fieldSection,
+.sectionLabel,
+.coordinateControls,
+.coordinateControls label { display: flex; align-items: center; }
+
+.controls { flex-wrap: wrap; gap: 0.5rem 0.9rem; min-width: 0; }
+.fieldSection { gap: 0.25rem; }
+.locationBlock { position: relative; gap: 0.6rem; padding-left: 0.9rem; border-left: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18)); }
+.sectionLabel { color: var(--date-location-muted, #626262); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; line-height: 1; text-transform: uppercase; white-space: nowrap; }
+.dateLabel { cursor: default; }
+
+.dateBlock input,
+.coordinateInput { min-height: 1.7rem; box-sizing: border-box; border: 1px solid var(--date-location-line, rgba(17, 17, 17, 0.18)); border-radius: 0.35rem; outline: none; background: var(--date-location-surface, #f8f8f8); color: var(--date-location-ink, #111111); font: inherit; overflow: hidden; transform: translateZ(0); will-change: transform; }
+.dateBlock input { padding: 0 0.35rem; cursor: pointer; }
+.dateBlock input::-webkit-calendar-picker-indicator { cursor: pointer; }
+.dateBlock input:focus,
+.coordinateInput:focus { border-color: var(--date-location-ink, #111111); box-shadow: 0 0 0 2px var(--date-location-soft-line, rgba(17, 17, 17, 0.09)); }
+.coordinateControls { flex-wrap: wrap; gap: 0.35rem; }
+.coordinateControls label { gap: 0.2rem; color: var(--date-location-muted, #626262); font-size: 0.72rem; font-weight: 800; }
+.coordinateLabelShort { display: none; }
+.coordinateInput { width: 5rem; padding: 0.15rem 0.35rem; font-weight: 400; }
+.coordinateInput:read-only { border-color: transparent; background: transparent; box-shadow: none; cursor: default; }
+
+.ghostButton { display: inline-grid; place-items: center; flex-shrink: 0; width: 2rem; height: 2rem; font-weight: 400; padding: 0; border: 1px solid transparent; border-radius: 0.35rem; background: transparent; color: var(--date-location-muted, #626262); cursor: pointer; font: inherit; transition: background-color 150ms ease, color 150ms ease; transform: translateZ(0); will-change: transform; }
+.ghostButton:hover,
+.ghostButton:focus-visible { border-color: transparent; background: var(--date-location-selected, #e0e0e0); color: var(--date-location-ink, #111111); outline: none; }
+.loading { color: var(--action-color, #111111) !important; animation: pulse 900ms ease-in-out infinite alternate; }
+.loading svg { animation: spin 900ms linear infinite; transform-origin: center; }
+.success { color: var(--action-color, #111111) !important; }
+.success svg { animation: success 1900ms ease-out both; }
+.error { animation: error 2600ms ease-out both; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@keyframes pulse { from { opacity: 0.5; } to { opacity: 1; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes success { 0% { transform: scale(0.7); } 55% { transform: scale(1.1); } 100% { transform: scale(1); } }
+@keyframes error { 0% { color: var(--date-location-muted, #626262); opacity: 0.5; } 30% { color: #b3261e; opacity: 1; } 100% { color: #b3261e; opacity: 0.72; } }
+
+@media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .controls { --date-location-line: rgba(244, 244, 244, 0.2); --date-location-soft-line: rgba(244, 244, 244, 0.1); --date-location-surface: #1c1c1c; --date-location-selected: #353535; --date-location-ink: #f4f4f4; --date-location-muted: #b8b8b8; }
+}
+
+:global(:root[data-theme='dark']) .controls { --date-location-line: rgba(244, 244, 244, 0.2); --date-location-soft-line: rgba(244, 244, 244, 0.1); --date-location-surface: #1c1c1c; --date-location-selected: #353535; --date-location-ink: #f4f4f4; --date-location-muted: #b8b8b8; }
+
+@media (max-width: 720px) {
+    .controls { width: 100%; align-items: flex-end; flex-direction: row; flex-wrap: nowrap; gap: 0.35rem 0.6rem; }
+    .fieldSection { width: auto; min-width: 0; box-sizing: border-box; }
+    .sectionLabel svg { display: none; }
+    .dateBlock { display: flex; flex: 0 0 auto; align-items: flex-end; gap: 0.25rem; }
+    .dateBlock input { width: var(--date-location-date-width, 7.5rem); min-width: var(--date-location-date-width, 7.5rem); flex: 0 0 auto; max-width: 100%; }
+    .locationBlock { display: flex; flex: 1 1 0; align-items: flex-end; gap: 0.4rem; min-width: 0; padding-top: 0; padding-left: 0; border-top: 0; border-left: 0; }
+    .coordinateControls { display: flex; flex: 1 1 auto; align-items: flex-end; flex-wrap: nowrap; min-width: 0; width: auto; gap: 0.25rem; }
+    .coordinateControlsReadonly { flex: 1 1 auto; }
+    .coordinateControls label { display: flex; flex-direction: column; align-items: center; flex: 1 1 var(--date-location-coordinate-width, 5rem); min-width: 0; gap: 0.08rem; }
+    .coordinateLabelFull { display: block; max-width: 100%; overflow: hidden; font-size: 0.58rem; letter-spacing: 0; line-height: 0.72rem; text-overflow: clip; white-space: nowrap; }
+    .coordinateLabelShort { display: none; }
+    .coordinateInput { width: 100%; min-width: 0; max-width: 100%; flex: 1 1 auto; min-height: 1.7rem; padding: 0.08rem 0.25rem; }
+    .ghostButton { align-self: flex-end; width: 2rem; height: 2rem; }
+}

@@ -1,0 +1,31 @@
+.content { display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem; }
+.content > p,
+.message { margin: 0; line-height: 1.55; }
+
+.overview {
+    display: grid;
+    gap: 0.7rem;
+    padding: 0.75rem;
+    border: 1px solid var(--control-border);
+    background: color-mix(in srgb, var(--drawer-card) 82%, transparent);
+}
+
+.overviewHeading,
+.overviewTitle { display: flex; align-items: center; }
+.overviewHeading { justify-content: space-between; gap: 0.75rem; }
+.overviewTitle { min-width: 0; gap: 0.45rem; }
+.overviewTitle svg { flex-shrink: 0; width: 1rem; height: 1rem; color: var(--action-color); }
+.overview h2,
+.infoSection h3 { margin: 0; color: var(--drawer-text); font-size: 0.9rem; line-height: 1.2; }
+.infoMessage,
+.infoSection p { margin: 0; color: var(--drawer-muted); font-size: 0.76rem; line-height: 1.45; }
+.infoSections { display: grid; gap: 0.7rem; }
+.infoSection { display: grid; gap: 0.35rem; }
+.infoSection ul { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
+.infoSection li { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; min-width: 0; padding: 0.3rem 0.4rem; background: color-mix(in srgb, var(--drawer-card) 68%, transparent); }
+.infoSection code { color: var(--drawer-text); font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.7rem; overflow-wrap: anywhere; }
+.infoSection li span { flex-shrink: 0; color: var(--drawer-muted); font-size: 0.68rem; text-align: right; }
+
+.clear { display: inline-flex; align-items: center; justify-content: center; width: auto; min-width: 0; height: 2rem; border: 0; gap: 0.35rem; padding: 0 0.65rem; color: var(--drawer-text); font-size: 0.9rem; white-space: nowrap; }
+.clear svg { color: inherit; opacity: 1; }
+.messageSuccess { color: var(--action-color); font-weight: 700; }
