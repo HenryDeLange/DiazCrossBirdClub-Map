@@ -1,5 +1,5 @@
 import { DatabaseZap, HardDrive, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MapDrawer } from '../map/components/MapDrawer';
 import drawerStyles from '../map/components/MapDrawer.module.css';
 import { clearAppCaches, getAppStorageInfo, type AppStorageInfo } from './clearAppCaches';
@@ -20,9 +20,15 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
     const [message, setMessage] = useState('');
     const [storageInfo, setStorageInfo] = useState<AppStorageInfo | null>(null);
     const [storageInfoStatus, setStorageInfoStatus] = useState<StorageInfoStatus>('idle');
+    const reloadTimeoutRef = useRef<number | null>(null);
+    const isOpenRef = useRef(isOpen);
 
     useEffect(() => {
-        if (!isOpen || status === 'clearing') {
+        isOpenRef.current = isOpen;
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (!isOpen) {
             return;
         }
 
@@ -44,7 +50,13 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
         return () => {
             isCancelled = true;
         };
-    }, [isOpen, status]);
+    }, [isOpen]);
+
+    useEffect(() => () => {
+        if (reloadTimeoutRef.current !== null) {
+            window.clearTimeout(reloadTimeoutRef.current);
+        }
+    }, []);
 
     useEffect(() => {
         if (!isOpen || status === 'clearing') {
@@ -81,14 +93,22 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
 
         try {
             const result = await clearAppCaches();
+            if (!isOpenRef.current) {
+                return;
+            }
+
             setStatus('success');
             const clearedSomething = result.deletedCacheCount > 0 || result.clearedLocalStorageEntries > 0;
             setMessage(clearedSomething
                 ? `${result.deletedCacheCount} web request cache${result.deletedCacheCount === 1 ? '' : 's'} and ${result.clearedLocalStorageEntries} saved setting${result.clearedLocalStorageEntries === 1 ? '' : 's'} cleared. Reloading...`
                 : 'No cached files or saved settings needed clearing. Reloading...');
-            window.setTimeout(() => window.location.reload(), 900);
+            reloadTimeoutRef.current = window.setTimeout(() => window.location.reload(), 900);
         }
         catch (error: unknown) {
+            if (!isOpenRef.current) {
+                return;
+            }
+
             setStatus('error');
             setMessage(error instanceof Error ? error.message : 'Could not clear the app cache.');
         }
@@ -126,9 +146,7 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
                         </div>
                     )}
                 </section>
-                {message && <p className={styles.message} role={status === 'error' ? 'alert' : 'status'} aria-live='polite'>{message}</p>}
-                {status === 'clearing' && <p className={styles.message} role='status' aria-live='polite'>Clearing app cache...</p>}
-                {status === 'success' && <p className={`${styles.message} ${styles.messageSuccess}`} role='status' aria-live='polite'>Reloading the map...</p>}
+                {message && <p className={`${styles.message} ${status === 'success' ? styles.messageSuccess : ''}`} role={status === 'error' ? 'alert' : 'status'} aria-live='polite'>{message}</p>}
             </div>
         </MapDrawer>
     );

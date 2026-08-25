@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useDebounceValue } from 'usehooks-ts';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import drawerStyles from '../../components/MapDrawer.module.css';
@@ -20,7 +20,7 @@ type LocationTabSelection = LocationTabName | 'All';
 
 const locationTabNames: LocationTabName[] = ['Outings', 'Spots', 'Paths', 'Points'];
 
-export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
+export const LocationTabs = memo(function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab, onSearchCleared }: Readonly<LocationTabsProps>) {
     const [activeTab, setActiveTab] = useState<LocationTabSelection>(
         initialTab && locationTabNames.includes(initialTab) ? initialTab : 'All'
     );
@@ -91,4 +91,4 @@ export function LocationTabs({ tabs, allContent, initialSearchQuery, initialTab,
             </div>
         </>
     );
-}
+});

@@ -158,7 +158,7 @@ export default defineConfig({
                         },
                         {
                             name: 'geojson',
-                            test: /src[\\/]map[\\/]geojson[\\/].*\.json$/
+                            test: /src[\\/]assets[\\/]geojson[\\/].*\.json$/
                         },
                         {
                             name: 'tides',

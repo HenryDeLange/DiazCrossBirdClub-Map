@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { applyThemePreference, getNextThemePreference, getStoredThemePreference, getSystemDarkMode, storeThemePreference, type ThemePreference } from './theme';
 import { ThemeContext } from './themeContext';
 
@@ -9,7 +9,9 @@ export function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
     useEffect(() => {
         applyThemePreference(preference);
         storeThemePreference(preference);
+    }, [preference]);
 
+    useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
         const handleColorSchemeChange = (event: MediaQueryListEvent) => setSystemIsDarkMode(event.matches);
 
@@ -20,13 +22,14 @@ export function ThemeProvider({ children }: Readonly<{ children: ReactNode }>) {
 
         mediaQuery.addListener(handleColorSchemeChange);
         return () => mediaQuery.removeListener(handleColorSchemeChange);
-    }, [preference]);
+    }, []);
 
     const isDarkMode = preference === 'dark' || (preference === 'system' && systemIsDarkMode);
-    const cyclePreference = () => setPreference((currentPreference) => getNextThemePreference(currentPreference));
+    const cyclePreference = useCallback(() => setPreference((currentPreference) => getNextThemePreference(currentPreference)), []);
+    const contextValue = useMemo(() => ({ preference, isDarkMode, cyclePreference }), [preference, isDarkMode, cyclePreference]);
 
     return (
-        <ThemeContext.Provider value={{ preference, isDarkMode, cyclePreference }}>
+        <ThemeContext.Provider value={contextValue}>
             {children}
         </ThemeContext.Provider>
     );

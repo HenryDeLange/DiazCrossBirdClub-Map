@@ -1,10 +1,10 @@
 import type { FeatureCollection, Geometry } from 'geojson';
+import boknesBirdHide from '../../../assets/geojson/points/boknesBirdHide.json';
+import bustards from '../../../assets/geojson/points/bustards.json';
+import eagleNest from '../../../assets/geojson/points/eagleNest.json';
+import ecoEstateBirdHide from '../../../assets/geojson/points/ecoEstateBirdHide.json';
+import owlNest from '../../../assets/geojson/points/owlNest.json';
 import type { FeatureProps } from '../types';
-import boknesBirdHide from './boknesBirdHide.json';
-import bustards from './bustards.json';
-import eagleNest from './eagleNest.json';
-import ecoEstateBirdHide from './ecoEstateBirdHide.json';
-import owlNest from './owlNest.json';
 
 type GeoCollection = FeatureCollection<Geometry, FeatureProps>;
 

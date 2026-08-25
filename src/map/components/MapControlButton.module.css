@@ -30,10 +30,36 @@
 }
 
 .controlButton > :global(svg),
-.controlButton > img {
+.controlButton > .inatLogo {
     width: 1.75rem;
     height: 1.75rem;
     display: block;
+}
+
+.inatLogo {
+    position: relative;
+}
+
+.inatLogo::before,
+.inatLogo::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    transition: opacity 160ms ease;
+}
+
+.inatLogo::before {
+    background-color: currentColor;
+    -webkit-mask: url('../../assets/inat/inat-logo.png') center / contain no-repeat;
+    mask: url('../../assets/inat/inat-logo.png') center / contain no-repeat;
+}
+
+.inatLogo::after {
+    background-image: url('../../assets/inat/inat-logo.png');
+    opacity: 0;
 }
 
 @media (hover: hover) {
@@ -41,6 +67,16 @@
         color: var(--action-color);
         background: var(--control-bg);
         border-color: var(--action-color);
+    }
+
+    .controlButton:hover .inatLogo::before,
+    .controlButton:focus-visible .inatLogo::before {
+        opacity: 0;
+    }
+
+    .controlButton:hover .inatLogo::after,
+    .controlButton:focus-visible .inatLogo::after {
+        opacity: 1;
     }
 }
 

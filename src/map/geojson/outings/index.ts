@@ -1,11 +1,11 @@
 import type { FeatureCollection, Geometry } from 'geojson';
+import assegaaiTrails from '../../../assets/geojson/outings/assegaaiTrails.json';
+import diepkloof from '../../../assets/geojson/outings/diepkloof.json';
+import hopeFarm from '../../../assets/geojson/outings/hopeFarm.json';
+import kapRiver from '../../../assets/geojson/outings/kapRiver.json';
+import moneysworth from '../../../assets/geojson/outings/moneysworth.json';
+import wintersettFarm from '../../../assets/geojson/outings/wintersettFarm.json';
 import type { FeatureProps } from '../types';
-import assegaaiTrails from './assegaaiTrails.json';
-import diepkloof from './diepkloof.json';
-import hopeFarm from './hopeFarm.json';
-import kapRiver from './kapRiver.json';
-import moneysworth from './moneysworth.json';
-import wintersettFarm from './wintersettFarm.json';
 
 type GeoCollection = FeatureCollection<Geometry, FeatureProps>;
 

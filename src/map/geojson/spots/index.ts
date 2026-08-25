@@ -1,14 +1,14 @@
 import type { FeatureCollection, Geometry } from 'geojson';
+import boknesLagoon from '../../../assets/geojson/spots/boknesLagoon.json';
+import capePadrone from '../../../assets/geojson/spots/capePadrone.json';
+import diazDam from '../../../assets/geojson/spots/diazDam.json';
+import fishRiverLighthouse from '../../../assets/geojson/spots/fishRiverLighthouse.json';
+import fishRiverMouth from '../../../assets/geojson/spots/fishRiverMouth.json';
+import ghioPans from '../../../assets/geojson/spots/ghioPans.json';
+import kasouga from '../../../assets/geojson/spots/kasouga.json';
+import naturesLandingDam from '../../../assets/geojson/spots/naturesLandingDam.json';
+import ottersVlei from '../../../assets/geojson/spots/ottersVlei.json';
 import type { FeatureProps } from '../types';
-import boknesLagoon from './boknesLagoon.json';
-import capePadrone from './capePadrone.json';
-import diazDam from './diazDam.json';
-import fishRiverLighthouse from './fishRiverLighthouse.json';
-import fishRiverMouth from './fishRiverMouth.json';
-import ghioPans from './ghioPans.json';
-import kasouga from './kasouga.json';
-import naturesLandingDam from './naturesLandingDam.json';
-import ottersVlei from './ottersVlei.json';
 
 type GeoCollection = FeatureCollection<Geometry, FeatureProps>;
 

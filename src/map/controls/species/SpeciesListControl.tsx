@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
-import inatLogo from '../../../assets/inat-logo.png';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import { MapControlButton } from '../../components/MapControlButton';
+import mapControlStyles from '../../components/MapControlButton.module.css';
 import { MapDrawer } from '../../components/MapDrawer';
 import drawerStyles from '../../components/MapDrawer.module.css';
 import { INatSpeciesCard } from './INatSpeciesCard';
@@ -48,7 +48,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 }}
                 title='iNaturalist Species List'
             >
-                <img alt='iNaturalist' src={inatLogo} />
+                <span className={mapControlStyles.inatLogo} aria-hidden='true' />
             </MapControlButton>
             <MapDrawer
                 isOpen={isOpen}

@@ -1,6 +1,6 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { LayerGroup, LayersControl, MapContainer, TileLayer, useMap, ZoomControl } from 'react-leaflet';
+import { MapContainer, useMap, ZoomControl } from 'react-leaflet';
 import { defaultMapCenter } from '../common/defaultLocation';
 import { InstallAppButton } from '../pwa/InstallAppButton';
 import { PwaCacheDrawer } from '../pwa/PwaCacheDrawer';
@@ -14,30 +14,26 @@ import type { AstronomyLocation } from './controls/locations/types';
 import { Logo } from './controls/logo/Logo';
 import { SpeciesListControl } from './controls/species/SpeciesListControl';
 import { TidesControl } from './controls/TidesControl';
-import { outings } from './geojson/outings';
-import { paths } from './geojson/paths';
-import { points } from './geojson/points';
-import { spots } from './geojson/spots';
-import { GenericGeoJSONLayer } from './layers/GenericGeoJSONLayer';
 import { getInitialLayerState, type LayerState } from './layers/layerState';
-import { LayerStateSync } from './layers/LayerStateSync';
-import type { LocationSource, LocationTabName } from './locationUtils';
+import { locationSources } from './locationSources';
+import type { LocationTabName } from './locationUtils';
 import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, setLocationPath } from './locationUtils';
 import './map.css';
 import { MapEvents } from './MapEvents';
+import { MapLayers } from './MapLayers';
 
 type OpenDrawer = 'inat' | 'locations' | 'tides' | 'astra' | 'cache' | null;
 
-const locationSources: LocationSource[] = [
-    { tab: 'Outings', collections: outings },
-    { tab: 'Spots', collections: spots },
-    { tab: 'Paths', collections: paths },
-    { tab: 'Points', collections: points }
-];
-
 export default function BirdingMap() {
-    const initialLocationKeys = getInitialLocationKeys();
-    const initialLocationSelection = resolveLocationSelection(initialLocationKeys, locationSources);
+    const [initialLocation] = useState(() => {
+        const keys = getInitialLocationKeys();
+        return {
+            keys,
+            selection: resolveLocationSelection(keys, locationSources)
+        };
+    });
+    const initialLocationKeys = initialLocation.keys;
+    const initialLocationSelection = initialLocation.selection;
     const [mapHeight, setMapHeight] = useState(getViewportHeight);
     const [drawerHeight, setDrawerHeight] = useState(() => getStoredDrawerHeight(getViewportHeight()));
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
@@ -73,8 +69,7 @@ export default function BirdingMap() {
         };
     }, []);
 
-    const center = JSON.parse(localStorage.getItem('mapCenter') ?? JSON.stringify(defaultMapCenter));
-    const zoom = Number(localStorage.getItem('mapZoom') ?? 11);
+    const [mapView] = useState(getStoredMapView);
     const clampedDrawerHeight = clampDrawerHeight(drawerHeight, mapHeight);
 
     const closeLocationsDrawer = useCallback(() => {
@@ -93,7 +88,7 @@ export default function BirdingMap() {
         setDrawerBackTarget(null);
     }, [closeLocationsDrawer]);
 
-    const openNestedDrawer = (drawer: Exclude<OpenDrawer, null>) => {
+    const openNestedDrawer = useCallback((drawer: Exclude<OpenDrawer, null>) => {
         const current = openDrawerRef.current;
 
         if (current === 'locations') {
@@ -109,9 +104,9 @@ export default function BirdingMap() {
         }
 
         setOpenDrawer(drawer);
-    };
+    }, []);
 
-    const toggleDrawer = (drawer: OpenDrawer) => {
+    const toggleDrawer = useCallback((drawer: OpenDrawer) => {
         const current = openDrawerRef.current;
 
         if (current === drawer) {
@@ -134,7 +129,7 @@ export default function BirdingMap() {
 
         setOpenDrawer(drawer);
         setDrawerBackTarget(null);
-    };
+    }, [closeLocationsDrawer]);
 
     const closeDrawer = useCallback(() => {
         closeOpenDrawerState();
@@ -144,7 +139,7 @@ export default function BirdingMap() {
         }
     }, [closeOpenDrawerState]);
 
-    const handleDrawerBack = () => {
+    const handleDrawerBack = useCallback(() => {
         if (drawerBackTarget === null) {
             closeDrawer();
             return;
@@ -152,20 +147,20 @@ export default function BirdingMap() {
 
         setOpenDrawer(drawerBackTarget);
         setDrawerBackTarget(null);
-    };
+    }, [closeDrawer, drawerBackTarget]);
 
-    const handleLocationSelected = (locationName: string) => {
+    const handleLocationSelected = useCallback((locationName: string) => {
         setLocationSearchQuery(locationName);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
         setLocationPath(locationName);
-    };
+    }, []);
 
-    const handleLocationSearchCleared = () => {
+    const handleLocationSearchCleared = useCallback(() => {
         closeLocationsDrawer();
-    };
+    }, [closeLocationsDrawer]);
 
-    const handleOpenAstronomy = (location: AstronomyLocation, tab: LocationTabName) => {
+    const handleOpenAstronomy = useCallback((location: AstronomyLocation, tab: LocationTabName) => {
         setInatLocationName(null);
         setSelectedLocationsTab(tab);
         setLocationSearchQuery(location.name);
@@ -174,16 +169,16 @@ export default function BirdingMap() {
         setLocationPath(location.name);
         setAstronomyLocation(location);
         openNestedDrawer('astra');
-    };
+    }, [openNestedDrawer]);
 
-    const handleOpenInat = (locationName: string, tab: LocationTabName) => {
+    const handleOpenInat = useCallback((locationName: string, tab: LocationTabName) => {
         setAstronomyLocation(null);
         setInatLocationName(locationName);
         setSelectedLocationsTab(tab);
         openNestedDrawer('inat');
-    };
+    }, [openNestedDrawer]);
 
-    const handleTextMarkerClick = (searchText: string, tab: LocationTabName) => {
+    const handleTextMarkerClick = useCallback((searchText: string, tab: LocationTabName) => {
         setLocationSearchQuery(searchText);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
@@ -194,7 +189,24 @@ export default function BirdingMap() {
         }
         setOpenDrawer('locations');
         setSelectedLocationsTab(tab);
-    };
+    }, []);
+    const handleToggleInat = useCallback(() => {
+        setInatLocationName(null);
+        setAstronomyLocation(null);
+        toggleDrawer('inat');
+    }, [toggleDrawer]);
+    const handleToggleLocations = useCallback(() => toggleDrawer('locations'), [toggleDrawer]);
+    const handleToggleTides = useCallback(() => {
+        setAstronomyLocation(null);
+        setInatLocationName(null);
+        toggleDrawer('tides');
+    }, [toggleDrawer]);
+    const handleToggleAstra = useCallback(() => {
+        setAstronomyLocation(null);
+        setInatLocationName(null);
+        toggleDrawer('astra');
+    }, [toggleDrawer]);
+    const handleOpenCache = useCallback(() => toggleDrawer('cache'), [toggleDrawer]);
 
     useEffect(() => {
         openDrawerRef.current = openDrawer;
@@ -259,12 +271,13 @@ export default function BirdingMap() {
 
     return (
         <MapContainer
-            center={center}
-            zoom={zoom}
+            center={mapView.center}
+            zoom={mapView.zoom}
             scrollWheelZoom
             attributionControl={false}
             zoomControl={false}
             className={styles.map}
+            style={{ height: mapHeight }}
         >
             <DrawerInteractionLock isOpen={openDrawer !== null} />
             <Logo />
@@ -275,17 +288,13 @@ export default function BirdingMap() {
                 onClose={closeDrawer}
                 onBack={openDrawer === 'inat' && drawerBackTarget !== null ? handleDrawerBack : undefined}
                 locationName={inatLocationName ?? undefined}
-                onToggle={() => {
-                    setInatLocationName(null);
-                    setAstronomyLocation(null);
-                    toggleDrawer('inat');
-                }}
+                onToggle={handleToggleInat}
             />
             <LocationsControl
                 drawerHeight={clampedDrawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
                 isOpen={openDrawer === 'locations'}
-                onToggle={() => toggleDrawer('locations')}
+                onToggle={handleToggleLocations}
                 onClose={closeDrawer}
                 onOpenInat={handleOpenInat}
                 onOpenAstronomy={handleOpenAstronomy}
@@ -302,11 +311,7 @@ export default function BirdingMap() {
                 isOpen={openDrawer === 'tides'}
                 onClose={closeDrawer}
                 onBack={openDrawer === 'tides' && drawerBackTarget !== null ? handleDrawerBack : undefined}
-                onToggle={() => {
-                    setAstronomyLocation(null);
-                    setInatLocationName(null);
-                    toggleDrawer('tides');
-                }}
+                onToggle={handleToggleTides}
             />
             <AstraControl
                 drawerHeight={clampedDrawerHeight}
@@ -316,14 +321,10 @@ export default function BirdingMap() {
                 onBack={openDrawer === 'astra' && drawerBackTarget !== null ? handleDrawerBack : undefined}
                 coordinates={astronomyLocation}
                 locationName={astronomyLocation?.name}
-                onToggle={() => {
-                    setAstronomyLocation(null);
-                    setInatLocationName(null);
-                    toggleDrawer('astra');
-                }}
+                onToggle={handleToggleAstra}
             />
             <InstallAppButton />
-            <MapLegendFooter onOpenCache={() => toggleDrawer('cache')} />
+            <MapLegendFooter onOpenCache={handleOpenCache} />
             <PwaCacheDrawer
                 isOpen={openDrawer === 'cache'}
                 onClose={closeDrawer}
@@ -332,86 +333,65 @@ export default function BirdingMap() {
             />
             <ZoomControl position='bottomright' />
             <LocateControl />
-            <LayersControl position='topright'>
-                <LayersControl.BaseLayer name='Google Maps - Street' checked={layerState.baseLayer === 'Google Maps - Street'}>
-                    <TileLayer
-                        url={isDarkMode
-                            ? 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}' // TODO: Need to use Google Maps API key for dark layer
-                            : 'https://{s}.google.com/vt?lyrs=m&x={x}&y={y}&z={z}'}
-                        maxZoom={maxZoom}
-                        subdomains={subdomains}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name='Google Maps - Hybrid' checked={layerState.baseLayer === 'Google Maps - Hybrid'}>
-                    <TileLayer
-                        url='https://{s}.google.com/vt?lyrs=s,h&x={x}&y={y}&z={z}'
-                        maxZoom={maxZoom}
-                        subdomains={subdomains}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.BaseLayer name='Google Maps - Satellite' checked={layerState.baseLayer === 'Google Maps - Satellite'}>
-                    <TileLayer
-                        url='https://{s}.google.com/vt?lyrs=s&x={x}&y={y}&z={z}'
-                        maxZoom={maxZoom}
-                        subdomains={subdomains}
-                    />
-                </LayersControl.BaseLayer>
-                <LayersControl.Overlay name='Birding Loops' checked={layerState.overlays['Birding Loops']}>
-                    <LayerGroup>
-                        {paths.map((layer, index) => (
-                            <GenericGeoJSONLayer
-                                key={index}
-                                layer={layer}
-                                onTextMarkerClick={(searchText) => handleTextMarkerClick(searchText, 'Paths')}
-                            />
-                        ))}
-                    </LayerGroup>
-                </LayersControl.Overlay>
-                <LayersControl.Overlay name='Birding Points of Interest' checked={layerState.overlays['Birding Points of Interest']}>
-                    <LayerGroup>
-                        {points.map((layer, index) => (
-                            <GenericGeoJSONLayer
-                                key={index}
-                                layer={layer}
-                                onTextMarkerClick={(searchText) => handleTextMarkerClick(searchText, 'Points')}
-                            />
-                        ))}
-                    </LayerGroup>
-                </LayersControl.Overlay>
-                <LayersControl.Overlay name='Birding Spots' checked={layerState.overlays['Birding Spots']}>
-                    <LayerGroup>
-                        {spots.map((layer, index) => (
-                            <GenericGeoJSONLayer
-                                key={index}
-                                layer={layer}
-                                onTextMarkerClick={(searchText) => handleTextMarkerClick(searchText, 'Spots')}
-                            />
-                        ))}
-                    </LayerGroup>
-                </LayersControl.Overlay>
-                <LayersControl.Overlay name='Birding Outings' checked={layerState.overlays['Birding Outings']}>
-                    <LayerGroup>
-                        {outings.map((layer, index) => (
-                            <GenericGeoJSONLayer
-                                key={index}
-                                layer={layer}
-                                onTextMarkerClick={(searchText) => handleTextMarkerClick(searchText, 'Outings')}
-                            />
-                        ))}
-                    </LayerGroup>
-                </LayersControl.Overlay>
-            </LayersControl>
-            <LayerStateSync onLayerStateChange={setLayerState} />
+            <MapLayers
+                isDarkMode={isDarkMode}
+                layerState={layerState}
+                onLayerStateChange={setLayerState}
+                onTextMarkerClick={handleTextMarkerClick}
+            />
             <MapEvents />
         </MapContainer>
     );
 }
 
-const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
-
-const maxZoom = 20;
-
 const drawerMinHeight = 180;
+const defaultMapZoom = 11;
+const maxMapZoom = 20;
+
+type MapView = {
+    center: typeof defaultMapCenter;
+    zoom: number;
+}
+
+function getStoredMapView(): MapView {
+    const center = getStoredMapCenter();
+    const storedZoomValue = localStorage.getItem('mapZoom');
+    const storedZoom = storedZoomValue === null ? Number.NaN : Number(storedZoomValue);
+    const zoom = Number.isFinite(storedZoom) ? Math.min(Math.max(storedZoom, 0), maxMapZoom) : defaultMapZoom;
+
+    return { center, zoom };
+}
+
+function getStoredMapCenter(): typeof defaultMapCenter {
+    const storedCenter = localStorage.getItem('mapCenter');
+    if (!storedCenter) {
+        return defaultMapCenter;
+    }
+
+    try {
+        const parsedCenter: unknown = JSON.parse(storedCenter);
+        if (isMapCenter(parsedCenter)) {
+            return parsedCenter;
+        }
+    }
+    catch {
+        return defaultMapCenter;
+    }
+
+    return defaultMapCenter;
+}
+
+function isMapCenter(value: unknown): value is typeof defaultMapCenter {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    const center = value as { lat?: unknown; lng?: unknown };
+    return typeof center.lat === 'number'
+        && Number.isFinite(center.lat)
+        && typeof center.lng === 'number'
+        && Number.isFinite(center.lng);
+}
 
 function getDefaultDrawerHeight(viewportHeight: number): number {
     return clampDrawerHeight(Math.min(viewportHeight * (2 / 3), 780), viewportHeight);

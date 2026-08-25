@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { memo, useEffect } from 'react';
 import { useMap, useMapEvents } from 'react-leaflet';
 
 const SPOT_MARKER_MIN_ZOOM = 15;
 
-export function MapEvents() {
+export const MapEvents = memo(function MapEvents() {
     const map = useMap();
 
     useEffect(() => {
@@ -21,4 +21,4 @@ export function MapEvents() {
         },
     });
     return null;
-}
+});

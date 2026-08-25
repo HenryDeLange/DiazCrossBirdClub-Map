@@ -2,6 +2,7 @@ import * as geojson from 'geojson';
 import { DivIcon, LatLng, Layer, Marker } from 'leaflet';
 import type { FeatureProps } from '../geojson/types';
 import { onEachFeatureShowPopup } from './featurePopup';
+import { escapeHtml } from './htmlUtils';
 
 type TextMarkerClickPayload = {
     searchText: string;
@@ -16,9 +17,12 @@ export function pointToLayerShowText(
     latlng: LatLng,
     options: PointToLayerOptions = {}
 ): Layer {
+    const name = feature.properties.name ?? '';
+    const markerName = escapeHtml(name);
+
     if (feature.properties.category === 'spot') {
         const divIcon = new DivIcon({
-            html: feature.properties.name,
+            html: markerName,
             className: 'spot-marker',
             iconSize: [350, 8]
         });
@@ -28,14 +32,14 @@ export function pointToLayerShowText(
     }
     else {
         const divIcon = new DivIcon({
-            html: feature.properties.name,
+            html: markerName,
             className: 'text-marker',
             iconSize: [350, 8]
         });
         const marker = new Marker(latlng, { icon: divIcon, zIndexOffset: 99999 });
         marker.addEventListener('click', () => {
-            if (feature.properties.name) {
-                options.onTextMarkerClick?.({ searchText: feature.properties.name });
+            if (name) {
+                options.onTextMarkerClick?.({ searchText: name });
             }
         });
         return marker;

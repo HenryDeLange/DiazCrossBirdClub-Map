@@ -1,11 +1,8 @@
 import { Info } from 'lucide-react';
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { MapControlButton } from '../../components/MapControlButton';
 import { MapDrawer } from '../../components/MapDrawer';
-import { outings } from '../../geojson/outings';
-import { paths } from '../../geojson/paths';
-import { points } from '../../geojson/points';
-import { spots } from '../../geojson/spots';
+import { locationSources } from '../../locationSources';
 import type { LocationTabName } from '../../locationUtils';
 import { LocationFeatureDetails } from './LocationFeatureDetails';
 import { LocationTabs } from './LocationTabs';
@@ -16,12 +13,10 @@ type LocationTab = {
     content: (searchQuery: string) => ReactElement;
 }
 
-const locationSources: LocationCollectionSource[] = [
-    { tab: 'Outings', geojson: outings },
-    { tab: 'Spots', geojson: spots },
-    { tab: 'Paths', geojson: paths },
-    { tab: 'Points', geojson: points }
-];
+const locationCollectionSources: LocationCollectionSource[] = locationSources.map(({ tab, collections }) => ({
+    tab,
+    geojson: collections
+}));
 
 export function LocationsControl({
     drawerHeight,
@@ -38,9 +33,23 @@ export function LocationsControl({
     initialFocusQuery,
     searchVersion
 }: Readonly<LocationsControlProps>) {
-    const renderLocationDetails = (sources: LocationCollectionSource[]) => (searchQuery: string) => (
+    const tabs = useMemo<LocationTab[]>(() => locationCollectionSources.map((source) => ({
+        label: source.tab,
+        content: (searchQuery) => (
+            <LocationFeatureDetails
+                sources={[source]}
+                searchQuery={searchQuery}
+                onClose={onClose}
+                onOpenInat={onOpenInat}
+                onLocationSelected={onLocationSelected}
+                initialFocusQuery={initialFocusQuery}
+                onOpenAstronomy={onOpenAstronomy}
+            />
+        )
+    })), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat]);
+    const allContent = useMemo(() => (searchQuery: string) => (
         <LocationFeatureDetails
-            sources={sources}
+            sources={locationCollectionSources}
             searchQuery={searchQuery}
             onClose={onClose}
             onOpenInat={onOpenInat}
@@ -48,11 +57,7 @@ export function LocationsControl({
             initialFocusQuery={initialFocusQuery}
             onOpenAstronomy={onOpenAstronomy}
         />
-    );
-    const tabs: LocationTab[] = locationSources.map((source) => ({
-        label: source.tab,
-        content: renderLocationDetails([source])
-    }));
+    ), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat]);
 
     return (
         <>
@@ -74,7 +79,7 @@ export function LocationsControl({
                 <LocationTabs
                     key={`locations-tabs-${searchVersion ?? 0}-${initialTab ?? ''}`}
                     tabs={tabs}
-                    allContent={renderLocationDetails(locationSources)}
+                    allContent={allContent}
                     initialSearchQuery={initialSearchQuery}
                     initialTab={initialTab}
                     onSearchCleared={onSearchCleared}

@@ -3,19 +3,21 @@ import type { FeatureProps } from '../../geojson/types';
 import type { FeatureGroup } from './types';
 
 export function buildFeatureGroups(features: Feature<Geometry, FeatureProps>[]): FeatureGroup[] {
-    const namedFeatures = features.filter((feature) => feature.properties?.name);
-    const headingIndex = namedFeatures.findIndex((feature) => feature.geometry.type === 'Point');
+    const namedFeatures = features
+        .map((feature, featureIndex) => ({ feature, featureIndex }))
+        .filter(({ feature }) => feature.properties?.name);
+    const headingIndex = namedFeatures.findIndex(({ feature }) => feature.geometry.type === 'Point');
 
     if (headingIndex >= 0) {
-        const heading = namedFeatures[headingIndex];
+        const heading = namedFeatures[headingIndex].feature;
         const items = namedFeatures
             .filter((_, index) => index !== headingIndex)
-            .map((feature) => ({ feature, featureIndex: features.indexOf(feature) }));
+            .map(({ feature, featureIndex }) => ({ feature, featureIndex }));
         return [{ heading, items }];
     }
 
     const groups: FeatureGroup[] = [];
-    namedFeatures.forEach((feature) => {
+    namedFeatures.forEach(({ feature, featureIndex }) => {
         if (feature.geometry.type === 'Point') {
             groups.push({ heading: feature, items: [] });
             return;
@@ -23,11 +25,11 @@ export function buildFeatureGroups(features: Feature<Geometry, FeatureProps>[]):
 
         const currentGroup = groups[groups.length - 1];
         if (currentGroup) {
-            currentGroup.items.push({ feature, featureIndex: features.indexOf(feature) });
+            currentGroup.items.push({ feature, featureIndex });
             return;
         }
 
-        groups.push({ heading: null, items: [{ feature, featureIndex: features.indexOf(feature) }] });
+        groups.push({ heading: null, items: [{ feature, featureIndex }] });
     });
 
     return groups;

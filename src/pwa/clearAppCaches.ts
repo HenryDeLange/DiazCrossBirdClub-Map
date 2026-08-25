@@ -26,13 +26,15 @@ export type AppStorageClearResult = {
     clearedLocalStorageEntries: number;
 }
 
+const cacheEntryInspectionConcurrency = 8;
+
 export async function getAppStorageInfo(): Promise<AppStorageInfo> {
     if (typeof window === 'undefined') {
         throw new Error('App storage is not available outside a browser.');
     }
 
     const [cacheBuckets, estimatedUsageBytes] = await Promise.all([
-        'caches' in window ? Promise.all((await window.caches.keys()).map(getCacheBucketInfo)) : Promise.resolve([]),
+        getCacheBuckets(),
         getEstimatedUsageBytes()
     ]);
 
@@ -61,10 +63,7 @@ export async function clearAppCaches(): Promise<AppStorageClearResult> {
 async function getCacheBucketInfo(name: string): Promise<CacheBucketInfo> {
     const cache = await window.caches.open(name);
     const requests = await cache.keys();
-    const entryBytes = await Promise.all(requests.map(async (request) => {
-        const response = await cache.match(request);
-        return response ? getResponseBytes(response) : null;
-    }));
+    const entryBytes = await mapWithConcurrency(requests, (request) => getCacheEntryBytes(cache, request), cacheEntryInspectionConcurrency);
     const bytes = entryBytes.reduce<number>((total, entryBytes) => total + (entryBytes ?? 0), 0);
 
     return {
@@ -73,6 +72,42 @@ async function getCacheBucketInfo(name: string): Promise<CacheBucketInfo> {
         bytes,
         unknownEntries: entryBytes.filter((value) => value === null).length
     };
+}
+
+async function getCacheBuckets(): Promise<CacheBucketInfo[]> {
+    if (!('caches' in window)) {
+        return [];
+    }
+
+    const cacheNames = (await window.caches.keys()).sort();
+    return Promise.all(cacheNames.map(getCacheBucketInfo));
+}
+
+async function getCacheEntryBytes(cache: Cache, request: Request): Promise<number | null> {
+    try {
+        const response = await cache.match(request);
+        return response ? getResponseBytes(response) : null;
+    }
+    catch {
+        return null;
+    }
+}
+
+async function mapWithConcurrency<T, R>(items: readonly T[], mapper: (item: T) => Promise<R>, concurrency: number): Promise<R[]> {
+    const results = new Array<R>(items.length);
+    let nextIndex = 0;
+
+    async function processItems() {
+        while (nextIndex < items.length) {
+            const currentIndex = nextIndex;
+            nextIndex += 1;
+            results[currentIndex] = await mapper(items[currentIndex]);
+        }
+    }
+
+    const workerCount = Math.min(concurrency, items.length);
+    await Promise.all(Array.from({ length: workerCount }, processItems));
+    return results;
 }
 
 async function getResponseBytes(response: Response): Promise<number | null> {

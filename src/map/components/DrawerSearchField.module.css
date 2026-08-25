@@ -1,15 +1,18 @@
 .searchRow {
     display: flex;
     align-items: center;
+    box-sizing: border-box;
     gap: 0.65rem;
+    height: 2.5rem;
+    min-height: 2.5rem;
     margin: 0 1rem 0.9rem;
-    padding: 0.3rem 0.6rem;
+    padding: 0.25rem 0.6rem;
     border-radius: 0.4rem;
     border: 1px solid var(--control-border);
     background: var(--drawer-card);
 }
 
-.filters { flex: 1 1 auto; min-width: 0; margin: 0; }
+.filters { flex: 0 1 18rem; width: 18rem; min-width: 12rem; margin: 0; }
 .panel { margin-top: 0; margin-bottom: 0.6rem; }
 
 .searchIcon {
@@ -22,11 +25,15 @@
 .searchInput {
     flex: 1;
     min-width: 0;
+    min-height: 0;
+    height: 1.5rem;
+    padding: 0;
     border: none;
     outline: none;
     background: transparent;
     color: var(--page-text);
     font-size: 1rem;
+    line-height: 1.2;
 }
 
 .searchInput::placeholder {
@@ -55,6 +62,8 @@
     color: var(--page-text);
 }
 
+.searchClearHidden { visibility: hidden; }
+
 .searchClearIcon {
     width: 1rem;
     height: 1rem;
@@ -62,13 +71,17 @@
 
 @media (max-width: 820px) {
     .searchRow {
-        height: 3rem;
         margin: 0 0.9rem 0.6rem;
-        padding: 0.45rem 0.7rem;
+        height: 3rem;
+        min-height: 3rem;
+        padding: 0.35rem 0.7rem;
         box-sizing: border-box;
     }
 
     .filters {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
         margin: 0;
     }
 

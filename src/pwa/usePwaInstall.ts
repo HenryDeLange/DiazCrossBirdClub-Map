@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type BeforeInstallPromptEvent = Event & {
     prompt: () => Promise<void>;
@@ -16,16 +16,22 @@ let deferredInstallPrompt: BeforeInstallPromptEvent | null = null;
 export function usePwaInstall(): PwaInstallState {
     const [canInstall, setCanInstall] = useState(false);
     const [isInstalled, setIsInstalled] = useState(false);
+    const isMountedRef = useRef(false);
+    const isPromptingRef = useRef(false);
 
     useEffect(() => {
+        isMountedRef.current = true;
         const updateInstalledState = () => {
             setIsInstalled(isAppInstalled());
         };
 
         const handleBeforeInstallPrompt = (event: Event) => {
+            event.preventDefault();
             const installEvent = event as BeforeInstallPromptEvent;
             deferredInstallPrompt = installEvent;
-            setCanInstall(!isAppInstalled());
+            if (!isAppInstalled()) {
+                setCanInstall(true);
+            }
         };
         const handleAppInstalled = () => {
             deferredInstallPrompt = null;
@@ -38,23 +44,39 @@ export function usePwaInstall(): PwaInstallState {
         window.addEventListener('appinstalled', handleAppInstalled);
 
         return () => {
+            isMountedRef.current = false;
             window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
             window.removeEventListener('appinstalled', handleAppInstalled);
         };
     }, []);
 
-    const install = async (): Promise<boolean> => {
-        if (!deferredInstallPrompt || isInstalled) {
+    const install = useCallback(async (): Promise<boolean> => {
+        if (!deferredInstallPrompt || isInstalled || isPromptingRef.current) {
             return false;
         }
 
         const installEvent = deferredInstallPrompt;
-        await installEvent.prompt();
-        const choice = await installEvent.userChoice;
-        deferredInstallPrompt = null;
-        setCanInstall(false);
-        return choice.outcome === 'accepted';
-    };
+        isPromptingRef.current = true;
+
+        try {
+            await installEvent.prompt();
+            const choice = await installEvent.userChoice;
+            if (choice.outcome === 'accepted' && isMountedRef.current) {
+                setIsInstalled(true);
+            }
+            return choice.outcome === 'accepted';
+        }
+        catch {
+            return false;
+        }
+        finally {
+            deferredInstallPrompt = null;
+            isPromptingRef.current = false;
+            if (isMountedRef.current) {
+                setCanInstall(false);
+            }
+        }
+    }, [isInstalled]);
 
     return { canInstall: canInstall && !isInstalled, isInstalled, install };
 }
@@ -64,7 +86,7 @@ function isAppInstalled(): boolean {
         return false;
     }
 
-    const standaloneNavigator = navigator as Navigator & { standalone?: boolean };
+    const standaloneNavigator = window.navigator as Navigator & { standalone?: boolean };
     return window.matchMedia('(display-mode: standalone)').matches
         || standaloneNavigator.standalone === true
         || document.referrer.startsWith('android-app://');

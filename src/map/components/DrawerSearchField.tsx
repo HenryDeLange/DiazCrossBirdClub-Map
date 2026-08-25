@@ -21,17 +21,18 @@ export function DrawerSearchField({ ariaLabel, placeholder, value, onChange, var
                 type='search'
                 value={value}
             />
-            {value && (
-                <button
-                    aria-label='Clear search'
-                    className={styles.searchClear}
-                    onClick={() => onChange('')}
-                    title='Clear search'
-                    type='button'
-                >
-                    <X className={styles.searchClearIcon} />
-                </button>
-            )}
+            <button
+                aria-hidden={!value}
+                aria-label='Clear search'
+                className={`${styles.searchClear} ${!value ? styles.searchClearHidden : ''}`}
+                disabled={!value}
+                onClick={() => onChange('')}
+                tabIndex={value ? 0 : -1}
+                title='Clear search'
+                type='button'
+            >
+                <X className={styles.searchClearIcon} />
+            </button>
         </div>
     );
 }
