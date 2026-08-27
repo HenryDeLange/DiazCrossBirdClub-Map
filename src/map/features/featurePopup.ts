@@ -4,8 +4,8 @@ import type { FeatureProps } from '../geojson/types';
 import styles from './featurePopup.module.css';
 import { escapeHtml, getSafeExternalUrl } from './htmlUtils';
 
-export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer) {
-    if (feature.geometry.type === 'Point' && feature.properties.category !== 'spot') {
+export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer, allowPointPopup = false) {
+    if (feature.geometry.type === 'Point' && feature.properties.category !== 'spot' && !allowPointPopup) {
         return;
     }
 

@@ -1,0 +1,166 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Natures View"
+      },
+      "geometry": {
+        "coordinates": [
+          27.0862653,
+          -33.4839835
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Natures View",
+        "description": "Natures View has a lovely view from high up a cliff down to the Kap River.",
+        "linkMap": "https://maps.app.goo.gl/58gHnEgSQqSpchrj7",
+        "linkDocument": "",
+        "linkWeb": ""
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.086158,
+              -33.4863886
+            ],
+            [
+              27.0874896,
+              -33.4854963
+            ],
+            [
+              27.0878019,
+              -33.484862
+            ],
+            [
+              27.0875721,
+              -33.4842415
+            ],
+            [
+              27.0870578,
+              -33.4845153
+            ],
+            [
+              27.0864779,
+              -33.484497
+            ],
+            [
+              27.0857667,
+              -33.4841502
+            ],
+            [
+              27.0847491,
+              -33.4840772
+            ],
+            [
+              27.0838299,
+              -33.4842141
+            ],
+            [
+              27.0823636,
+              -33.4838834
+            ],
+            [
+              27.0828061,
+              -33.485155
+            ],
+            [
+              27.0838517,
+              -33.4862498
+            ],
+            [
+              27.086158,
+              -33.4863886
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kap River - Access Road",
+        "description": "From Port Alfred, follow the R72 and then turn left at the Natures View farm stall. Continue down the road to the house.",
+        "road": "access"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            27.084644586114138,
+            -33.493940596164265
+          ],
+          [
+            27.087372483234162,
+            -33.492174526535486
+          ],
+          [
+            27.0897814,
+            -33.490902
+          ],
+          [
+            27.0888777,
+            -33.4894869
+          ],
+          [
+            27.0876559,
+            -33.4887829
+          ],
+          [
+            27.085854,
+            -33.4883242
+          ],
+          [
+            27.0856479,
+            -33.4875991
+          ],
+          [
+            27.0853627,
+            -33.4871373
+          ],
+          [
+            27.0857157,
+            -33.485973
+          ]
+        ],
+        "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Natures View - Farm Stall",
+        "description": "The Natures View farm stall on the main road (R72).",
+        "category": "spot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.0900295,
+          -33.4903709
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Natures View - Farm House",
+        "description": "Picnic at the farm house.",
+        "category": "spot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.0860167,
+          -33.4852195
+        ]
+      }
+    }
+  ]
+}

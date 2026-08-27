@@ -8,6 +8,7 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 - `src/map/BirdingMap.tsx` owns the Leaflet map, responsive drawer state/height, nested drawer back navigation, Escape/popstate handling, location deep links, astronomy context, map center/zoom persistence, and layer state.
 - `src/map/components/MapDrawer.tsx` is the shared animated, resizable drawer with close/back controls and optional header actions. Embedded pages own their internal scrolling.
 - `src/map/controls/` contains the Locations, iNaturalist species, Astra, Tides, locate, and logo controls. Location controls preserve the selected tab and can open nested Astra or iNaturalist views.
+- `src/pwa/` contains the custom install prompt flow and the app-cache inspection/clear drawer. `src/theme/` provides the system/light/dark preference context used by the map and applied before the app renders.
 
 ## Source Layout
 
@@ -22,7 +23,8 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 
 - Tide stations come only from `https://api.openwaters.io/tides/stations`; `@neaps/tide-predictor` calculates predictions from returned harmonic records. Do not add the full `@neaps/tide-database` or `neaps` wrapper to the browser bundle.
 - iNaturalist observations/photos and Google map tiles are external runtime data. `vite.config.ts` defines PWA runtime caches for tide station harmonics, map tiles, iNaturalist species counts, and iNaturalist photos.
-- Map center/zoom use `mapCenter` and `mapZoom` in local storage; layer selections use `mapLayerState`.
+- The VitePWA service worker is enabled in development, uses `generateSW` with automatic updates, and the install UI defers `beforeinstallprompt` until the user activates the install control.
+- Map center/zoom use `mapCenter` and `mapZoom` in local storage; layer selections use `mapLayerState`, drawer height uses `drawerHeight`, and the theme preference uses `themePreference`.
 
 ## Agent Guidance
 

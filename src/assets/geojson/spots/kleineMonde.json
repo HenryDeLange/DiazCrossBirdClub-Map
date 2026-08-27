@@ -1,0 +1,130 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kleinemonde"
+      },
+      "geometry": {
+        "coordinates": [
+          27.028877,
+          -33.5282039
+        ],
+        "type": "Point"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kleinemonde",
+        "description": "There is some good birding spots at Kleinemonde town.",
+        "linkMap": "https://maps.app.goo.gl/YzuL2kAAHes29LpQ9",
+        "linkDocument": "",
+        "linkWeb": ""
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              27.0449274,
+              -33.5485404
+            ],
+            [
+              27.0512483,
+              -33.5425741
+            ],
+            [
+              27.0581022,
+              -33.5392734
+            ],
+            [
+              27.0489712,
+              -33.5292689
+            ],
+            [
+              27.0377002,
+              -33.5264756
+            ],
+            [
+              27.025584,
+              -33.5369883
+            ],
+            [
+              27.0384542,
+              -33.5418759
+            ],
+            [
+              27.0449274,
+              -33.5485404
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kleinemonde - Access Road",
+        "description": "From Port Alfred, follow the R72 and then turn left into Kleine Monde. (Press the button at the boom to open it.)",
+        "road": "access"
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            27.0316791,
+            -33.5428263
+          ],
+          [
+            27.0364027,
+            -33.5415514
+          ],
+          [
+            27.0381245,
+            -33.5407997
+          ],
+          [
+            27.0402334,
+            -33.5386742
+          ],
+          [
+            27.0398517,
+            -33.5380685
+          ]
+        ],
+        "type": "LineString"
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kleinemonde - Birding Spot (West)",
+        "description": "A birding spot overlooking West Kleinemonde River.",
+        "category": "spot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.0395679,
+          -33.537947
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Kleinemonde - Birding Spot (East)",
+        "description": "A good view over the East Kleinemonde River",
+        "category": "spot"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          27.0393981,
+          -33.5325002
+        ]
+      }
+    }
+  ]
+}

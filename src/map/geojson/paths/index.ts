@@ -1,13 +1,13 @@
 import type { FeatureCollection, Geometry } from 'geojson';
-import alexandria from '../../../assets/geojson/paths/alexandria.json';
-import goldenMile from '../../../assets/geojson/paths/goldenMile.json';
-import middleBeach from '../../../assets/geojson/paths/middleBeach.json';
 import type { FeatureProps } from '../types';
 
 type GeoCollection = FeatureCollection<Geometry, FeatureProps>;
 
-export const paths: GeoCollection[] = [
-	alexandria as GeoCollection,
-	goldenMile as GeoCollection,
-	middleBeach as GeoCollection
-];
+const geojsonModules = import.meta.glob<GeoCollection>('../../../assets/geojson/paths/*.json', {
+	eager: true,
+	import: 'default'
+});
+
+export const paths: GeoCollection[] = Object.entries(geojsonModules)
+	.sort(([left], [right]) => left.localeCompare(right))
+	.map(([, collection]) => collection);
