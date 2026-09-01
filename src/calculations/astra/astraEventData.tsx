@@ -1,4 +1,6 @@
-import { Moon, MoonStar, Sun } from 'lucide-react';
+import { MoonStar, Sun, Sunrise, Sunset } from 'lucide-react';
+import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
+import MoonsetIcon from '../../assets/astra/moonset.svg?react';
 import type { SkyEvent } from './astraTypes';
 import { formatMoonTime, isValidDate, minutesOnTimeline, minutesSinceMidnight } from './astraUtils';
 import { formatTime, type AstronomyData } from './sunTimes';
@@ -14,9 +16,9 @@ export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
         minutes: segment.startMinutes
     }));
     const sunEvents: SkyEvent[] = [
-        { id: 'sunrise', label: 'Sunrise', value: formatTime(astronomy.sunTimes.sunrise), time: astronomy.sunTimes.sunrise, icon: <Sun size={15} aria-hidden='true' /> },
+        { id: 'sunrise', label: 'Sunrise', value: formatTime(astronomy.sunTimes.sunrise), time: astronomy.sunTimes.sunrise, icon: <Sunrise size={15} aria-hidden='true' /> },
         { id: 'solar-noon', label: 'Solar noon', value: formatTime(astronomy.sunTimes.solarNoon), time: astronomy.sunTimes.solarNoon, icon: <Sun size={15} aria-hidden='true' /> },
-        { id: 'sunset', label: 'Sunset', value: formatTime(astronomy.sunTimes.sunset), time: astronomy.sunTimes.sunset, icon: <Sun size={15} aria-hidden='true' /> }
+        { id: 'sunset', label: 'Sunset', value: formatTime(astronomy.sunTimes.sunset), time: astronomy.sunTimes.sunset, icon: <Sunset size={15} aria-hidden='true' /> }
     ].map((event) => ({
         ...event,
         color: '#e6a63f',
@@ -30,7 +32,7 @@ export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
             label: 'Moonrise',
             value: formatMoonTime(astronomy.moonTimes.rise, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown),
             time: astronomy.moonTimes.rise,
-            icon: <Moon size={15} aria-hidden='true' />,
+            icon: <MoonriseIcon width={15} height={15} aria-hidden='true' />,
             segment: null,
             markerId: 'moonrise'
         },
@@ -39,7 +41,7 @@ export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
             label: 'Moonset',
             value: formatMoonTime(astronomy.moonTimes.set, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown),
             time: astronomy.moonTimes.set,
-            icon: <Moon size={15} aria-hidden='true' />,
+            icon: <MoonsetIcon width={15} height={15} aria-hidden='true' />,
             segment: null,
             markerId: 'moonset'
         }

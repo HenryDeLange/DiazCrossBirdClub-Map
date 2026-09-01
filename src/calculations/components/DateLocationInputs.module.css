@@ -17,9 +17,10 @@
 .dateBlock input:focus,
 .coordinateInput:focus { border-color: var(--date-location-ink, #111111); box-shadow: 0 0 0 2px var(--date-location-soft-line, rgba(17, 17, 17, 0.09)); }
 .coordinateControls { flex-wrap: wrap; gap: 0.35rem; }
-.coordinateControls label { gap: 0.2rem; color: var(--date-location-muted, #626262); font-size: 0.72rem; font-weight: 800; }
-.coordinateLabelShort { display: none; }
-.coordinateInput { width: 5rem; padding: 0.15rem 0.35rem; font-weight: 400; }
+.coordinateControls label { color: var(--date-location-muted, #626262); font-size: 0.72rem; font-weight: 800; }
+.coordinateInputWrap { position: relative; display: block; width: 5rem; min-width: 0; }
+.hemisphereIndicator { position: absolute; top: 50%; left: 0.4rem; z-index: 1; color: var(--date-location-muted, #626262); font-size: 0.72rem; font-weight: 800; line-height: 1; pointer-events: none; transform: translateY(-50%); }
+.coordinateInput { width: 100%; padding: 0.15rem 0.35rem 0.15rem 1.15rem; font-weight: 400; }
 .coordinateInput:read-only { border-color: transparent; background: transparent; box-shadow: none; cursor: default; }
 
 .ghostButton { display: inline-grid; place-items: center; flex-shrink: 0; width: 2rem; height: 2rem; font-weight: 400; padding: 0; border: 1px solid transparent; border-radius: 0.35rem; background: transparent; color: var(--date-location-muted, #626262); cursor: pointer; font: inherit; transition: background-color 150ms ease, color 150ms ease; transform: translateZ(0); will-change: transform; }
@@ -47,14 +48,13 @@
     .inputs { width: 100%; align-items: flex-end; flex-direction: row; flex-wrap: nowrap; gap: 0.35rem 0.6rem; }
     .fieldSection { width: auto; min-width: 0; box-sizing: border-box; }
     .sectionLabel svg { display: none; }
-    .dateBlock { display: flex; flex: 0 0 auto; align-items: flex-end; gap: 0.25rem; }
+    .dateBlock { display: flex; flex: 0 0 auto; align-items: flex-end; gap: 0; }
     .dateBlock input { width: var(--date-location-date-width, 7.5rem); min-width: var(--date-location-date-width, 7.5rem); flex: 0 0 auto; max-width: 100%; }
-    .locationBlock { display: flex; flex: 1 1 0; align-items: flex-end; gap: 0.4rem; min-width: 0; padding-top: 0; padding-left: 0; border-top: 0; border-left: 0; }
+    .locationBlock { display: flex; flex: 1 1 0; align-items: flex-end; gap: 0; min-width: 0; padding-top: 0; padding-left: 0; border-top: 0; border-left: 0; }
     .coordinateControls { display: flex; flex: 1 1 auto; align-items: flex-end; flex-wrap: nowrap; min-width: 0; width: auto; gap: 0.25rem; }
     .coordinateControlsReadonly { flex: 1 1 auto; }
-    .coordinateControls label { display: flex; flex-direction: column; align-items: center; flex: 1 1 var(--date-location-coordinate-width, 5rem); min-width: 0; gap: 0.08rem; }
-    .coordinateLabelFull { display: block; max-width: 100%; overflow: hidden; font-size: 0.58rem; letter-spacing: 0; line-height: 0.72rem; text-overflow: clip; white-space: nowrap; }
-    .coordinateLabelShort { display: none; }
-    .coordinateInput { width: 100%; min-width: 0; max-width: 100%; flex: 1 1 auto; min-height: 1.7rem; padding: 0.08rem 0.25rem; }
+    .coordinateControls label { display: flex; flex: 1 1 var(--date-location-coordinate-width, 5rem); min-width: 0; }
+    .coordinateInputWrap { width: auto; flex: 1 1 auto; }
+    .coordinateInput { min-width: 0; max-width: 100%; min-height: 1.7rem; padding: 0.08rem 0.25rem 0.08rem 1.05rem; }
     .ghostButton { align-self: flex-end; width: 2rem; height: 2rem; }
 }

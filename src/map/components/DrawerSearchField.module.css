@@ -12,8 +12,10 @@
     background: var(--drawer-card);
 }
 
+.searchRow:focus-within { border-color: var(--action-color); }
+
 .filters { flex: 0 1 18rem; width: 18rem; min-width: 12rem; margin: 0; }
-.panel { margin-top: 0; margin-bottom: 0.6rem; }
+.panel { margin: 0; }
 
 .searchIcon {
     width: 1rem;
@@ -86,6 +88,7 @@
     }
 
     .panel {
-        margin-bottom: 0.5rem;
+        width: 100%;
+        margin: 0;
     }
 }

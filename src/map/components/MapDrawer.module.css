@@ -38,7 +38,7 @@
 .tabSelectRow { display: none; }
 .tabSelect { display: none; width: auto; min-width: 0; box-sizing: border-box; appearance: auto; -webkit-appearance: auto; padding: 0.45rem 0.55rem; border-radius: 0.4rem; border: 1px solid var(--control-border); background-color: var(--drawer-card); color: var(--drawer-text); font: inherit; font-size: 0.95rem; font-weight: 800; line-height: 1.2; cursor: pointer; white-space: nowrap; }
 .tabSelect option { color: var(--drawer-text); background-color: var(--drawer-card); padding: 0.6rem 0.75rem; }
-.tabSelect:focus { outline: none; border-color: var(--action-color); box-shadow: 0 0 0 2px var(--button-shadow); }
+.tabSelect:focus { outline: none; border-color: var(--action-color); box-shadow: none; }
 .tab { flex: 1 1 0; min-width: 6rem; box-sizing: border-box; padding: 0.6rem 0.9rem; border-radius: 0.4rem; border: 1px solid var(--control-border); background: var(--drawer-card); color: var(--drawer-muted); font-weight: 700; cursor: pointer; text-align: center; white-space: nowrap; }
 .tabActive { background: color-mix(in srgb, var(--drawer-text) 34%, var(--drawer-card)); border-color: color-mix(in srgb, var(--drawer-text) 44%, var(--drawer-card)); color: var(--drawer-text); }
 .tab:focus-visible { outline: 2px solid var(--action-color); outline-offset: 2px; }

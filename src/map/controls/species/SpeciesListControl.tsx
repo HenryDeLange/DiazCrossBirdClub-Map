@@ -6,6 +6,7 @@ import { MapControlButton } from '../../components/MapControlButton';
 import mapControlStyles from '../../components/MapControlButton.module.css';
 import { MapDrawer } from '../../components/MapDrawer';
 import drawerStyles from '../../components/MapDrawer.module.css';
+import { getINatTaxonObservationsUrl } from './iNatObservationUrl';
 import { INatSpeciesCard } from './INatSpeciesCard';
 import styles from './SpeciesListControl.module.css';
 import type { SpeciesListControlProps } from './types';
@@ -59,29 +60,33 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 height={drawerHeight}
                 onHeightChange={onDrawerHeightChange}
             >
-                <DrawerSearchField
-                    ariaLabel='Search species by common or scientific name'
-                    onChange={setSearchInput}
-                    placeholder='Search common or scientific name'
-                    value={searchInput}
-                    variant='panel'
-                />
+                <div className={styles.toolbar}>
+                    <div className={styles.summaryRow}>
+                        <div className={`${drawerStyles.panelSubtitle} ${styles.summary}`}>
+                            {data
+                                ? `Found ${data.results.length.toLocaleString()} bird species.`
+                                : 'Finding bird species.'}
+                        </div>
+                        <div className={styles.linkRow}>
+                            <a
+                                className={styles.link}
+                                href={inatUrl}
+                                target='_blank'
+                                rel='noreferrer'
+                            >
+                                View on iNaturalist
+                            </a>
+                        </div>
+                    </div>
+                    <DrawerSearchField
+                        ariaLabel='Search species by common or scientific name'
+                        onChange={setSearchInput}
+                        placeholder='common/scientific name'
+                        value={searchInput}
+                        variant='panel'
+                    />
+                </div>
                 <div className={drawerStyles.content}>
-                    <div className={drawerStyles.panelSubtitle}>
-                        {data
-                            ? `Found ${data.results.length.toLocaleString()} bird species in the visible map area.`
-                            : 'Finding bird species in the visible map area.'}
-                    </div>
-                    <div className={styles.linkRow}>
-                        <a
-                            className={styles.link}
-                            href={inatUrl}
-                            target='_blank'
-                            rel='noreferrer'
-                        >
-                            View on iNaturalist
-                        </a>
-                    </div>
                     {loading && !error && (
                         <div className={drawerStyles.empty}>Loading species...</div>
                     )}
@@ -94,7 +99,11 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                     {!loading && data && filteredResults.length > 0 && (
                         <div className={styles.grid}>
                             {filteredResults.map((speciesCount, index) => (
-                                <INatSpeciesCard key={`${index}_${speciesCount.taxon.name}`} speciesCount={speciesCount} />
+                                <INatSpeciesCard
+                                    key={`${index}_${speciesCount.taxon.name}`}
+                                    speciesCount={speciesCount}
+                                    observationsUrl={getINatTaxonObservationsUrl(inatUrl, speciesCount.taxon.id)}
+                                />
                             ))}
                         </div>
                     )}

@@ -21,6 +21,7 @@ export function getINatObservationRequest(map: LeafletMap): INatObservationReque
     const webQuery = new URLSearchParams({
         captive: 'false',
         subview: 'map',
+        verifiable: 'true',
         view: 'species',
         iconic_taxa: 'Aves',
         ...Object.fromEntries(boundsQuery)
@@ -30,6 +31,17 @@ export function getINatObservationRequest(map: LeafletMap): INatObservationReque
         apiUrl: `https://api.inaturalist.org/v1/observations/species_counts?${apiQuery.toString()}`,
         webUrl: `https://www.inaturalist.org/observations?${webQuery.toString()}`
     };
+}
+
+export function getINatTaxonObservationsUrl(webUrl: string, taxonId: number | undefined): string | undefined {
+    if (taxonId === undefined) {
+        return undefined;
+    }
+
+    const url = new URL(webUrl);
+    url.searchParams.delete('view');
+    url.searchParams.set('taxon_id', String(taxonId));
+    return url.toString();
 }
 
 function createBoundsQuery(bounds: LatLngBounds): URLSearchParams {

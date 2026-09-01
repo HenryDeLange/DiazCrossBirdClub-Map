@@ -12,6 +12,7 @@ export type SpeciesListControlProps = {
 
 export type INatSpeciesCardProps = {
     speciesCount: INatCount;
+    observationsUrl?: string;
 }
 
 export type UseSpeciesObservationsResult = {

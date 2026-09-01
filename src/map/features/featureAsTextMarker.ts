@@ -33,10 +33,26 @@ export function pointToLayerShowText(
     else {
         const divIcon = new DivIcon({
             html: markerName,
-            className: 'text-marker',
-            iconSize: [350, 8]
+            className: 'text-marker'
         });
         const marker = new Marker(latlng, { icon: divIcon, zIndexOffset: 99999 });
+        marker.once('add', () => {
+            requestAnimationFrame(() => {
+                const element = marker.getElement();
+                if (!element) {
+                    return;
+                }
+
+                const width = Math.ceil(element.getBoundingClientRect().width);
+                const height = Math.ceil(element.getBoundingClientRect().height);
+                marker.setIcon(new DivIcon({
+                    html: markerName,
+                    className: 'text-marker',
+                    iconSize: [width, height],
+                    iconAnchor: [width / 2, 0]
+                }));
+            });
+        });
         marker.addEventListener('click', () => {
             if (name) {
                 options.onTextMarkerClick?.({ searchText: name });

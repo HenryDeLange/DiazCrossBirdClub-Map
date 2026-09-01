@@ -31,6 +31,15 @@
     overflow-y: auto;
 }
 
+.astra-page-embedded .astra-shell {
+    width: 100%;
+    padding-inline: 1rem;
+}
+
+@media (max-width: 820px) {
+    .astra-page-embedded .astra-shell { padding-inline: 0.85rem; }
+}
+
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme='light']) .astra-page {
         --astra-bg: var(--drawer-bg, #161616);

@@ -130,7 +130,6 @@ export function PwaCacheDrawer({ isOpen, onClose, height, onHeightChange }: Read
                     <div className={styles.overviewHeading}>
                         <div className={styles.overviewTitle}><HardDrive aria-hidden='true' /><h2 id='pwa-storage-title'>Storage in use</h2></div>
                     </div>
-                    {storageInfo && storageInfo.estimatedUsageBytes !== null && <p className={styles.infoMessage}>Browser storage estimate: {formatBytes(storageInfo.estimatedUsageBytes)} total for this site.</p>}
                     {storageInfoStatus === 'idle' && !storageInfo && <p className={styles.infoMessage} role='status'>Reading storage details...</p>}
                     {storageInfoStatus === 'error' && <p className={styles.infoMessage} role='alert'>Storage details are unavailable in this browser.</p>}
                     {storageInfo && (
@@ -161,15 +160,15 @@ function StorageEntryList({ entries }: Readonly<{ entries: AppStorageInfo['local
 }
 
 function formatCacheSize(bucket: AppStorageInfo['cacheBuckets'][number]): string {
-    if (bucket.unknownEntries === 0) {
-        return formatBytes(bucket.bytes);
+    if (bucket.unknownEntries > 0) {
+        return `At least ${formatMegabytes(bucket.bytes)}`;
     }
 
-    if (bucket.bytes === 0) {
-        return 'Size unavailable';
-    }
+    return formatMegabytes(bucket.bytes);
+}
 
-    return `${formatBytes(bucket.bytes)} + ${bucket.unknownEntries} unavailable`;
+function formatMegabytes(bytes: number): string {
+    return `${(bytes / 1_000_000).toFixed(1)} MB`;
 }
 
 function formatBytes(bytes: number): string {
@@ -179,8 +178,8 @@ function formatBytes(bytes: number): string {
     }
 
     if (bytes < 1024 * 1024) {
-        return `${(bytes / 1024).toFixed(1)} KB`;
+        return `${(bytes / 1024).toFixed(1)} KiB`;
     }
 
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MiB`;
 }

@@ -18,7 +18,6 @@ export type CacheBucketInfo = {
 export type AppStorageInfo = {
     cacheBuckets: CacheBucketInfo[];
     localStorage: StorageInfo;
-    estimatedUsageBytes: number | null;
 }
 
 export type AppStorageClearResult = {
@@ -33,15 +32,11 @@ export async function getAppStorageInfo(): Promise<AppStorageInfo> {
         throw new Error('App storage is not available outside a browser.');
     }
 
-    const [cacheBuckets, estimatedUsageBytes] = await Promise.all([
-        getCacheBuckets(),
-        getEstimatedUsageBytes()
-    ]);
+    const cacheBuckets = await getCacheBuckets();
 
     return {
         cacheBuckets,
-        localStorage: getStorageInfo(window.localStorage),
-        estimatedUsageBytes
+        localStorage: getStorageInfo(window.localStorage)
     };
 }
 
@@ -125,21 +120,6 @@ async function getResponseBytes(response: Response): Promise<number | null> {
 
     try {
         return (await response.clone().arrayBuffer()).byteLength;
-    }
-    catch {
-        return null;
-    }
-}
-
-async function getEstimatedUsageBytes(): Promise<number | null> {
-    const storageManager = window.navigator.storage;
-    if (typeof storageManager?.estimate !== 'function') {
-        return null;
-    }
-
-    try {
-        const estimate = await storageManager.estimate();
-        return typeof estimate.usage === 'number' && Number.isFinite(estimate.usage) ? estimate.usage : null;
     }
     catch {
         return null;

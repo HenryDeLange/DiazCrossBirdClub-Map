@@ -4,7 +4,10 @@
     gap: 1rem;
 }
 
-.linkRow { margin-bottom: 0.9rem; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(14rem, 24rem); align-items: center; gap: 0.75rem; margin: 0 1rem 0.75rem; }
+.summaryRow { display: flex; align-items: baseline; min-width: 0; gap: 0.75rem; }
+.summary { min-width: 0; margin-bottom: 0; }
+.linkRow { flex-shrink: 0; white-space: nowrap; }
 .link { color: var(--action-color) !important; text-decoration: none; font-weight: 700; }
 
 .card {
@@ -34,9 +37,9 @@
 }
 
 .cardImageEmpty { display: grid; place-items: center; color: var(--drawer-muted); font-size: 0.8rem; }
-.cardTitle { margin-top: 0.3rem; font-size: 1.1rem; font-weight: 800; color: var(--page-text); }
+.cardTitle { margin-top: 0.3rem; font-size: 1.1rem; font-weight: 800; line-height: 1.1; color: var(--page-text); }
 .cardTitle a { color: inherit !important; font-style: normal; }
-.cardMeta { display: grid; color: var(--drawer-muted); font-size: 0.85rem; }
+.cardMeta { display: grid; gap: 0.1rem; margin-top: -0.15rem; color: var(--drawer-muted); font-size: 0.85rem; }
 .cardScientific { color: inherit; }
 
 .cardMetaRow {
@@ -48,7 +51,9 @@
     flex-wrap: wrap;
 }
 
-.cardCount { color: var(--drawer-muted); font-size: 0.75rem; }
+.cardCount { color: inherit !important; font-size: 0.75rem; text-decoration: none; }
+.cardCount:hover,
+.cardCount:focus-visible { text-decoration: underline; }
 .cardAttribution { position: static; display: inline-flex; align-items: center; }
 
 .cardAttributionTrigger {
@@ -89,6 +94,8 @@
 }
 
 @media (max-width: 820px) {
+    .toolbar { display: flex; flex-direction: column; align-items: stretch; gap: 0.4rem; margin: 0 0.85rem 0.6rem; }
+    .summaryRow { gap: 0.65rem; }
     .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
     .cardTitle { font-size: 0.9rem; }
 }

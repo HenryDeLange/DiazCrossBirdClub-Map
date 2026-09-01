@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './SpeciesListControl.module.css';
 import type { INatSpeciesCardProps } from './types';
 
-export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>) {
+export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INatSpeciesCardProps>) {
     const [isAttributionOpen, setIsAttributionOpen] = useState(false);
     const attributionRef = useRef<HTMLDivElement | null>(null);
     const image = speciesCount.taxon.default_photo ?? null;
@@ -62,7 +62,13 @@ export function INatSpeciesCard({ speciesCount }: Readonly<INatSpeciesCardProps>
                 <span className={styles.cardScientific}><i>{speciesCount.taxon.name}</i></span>
                 <div className={styles.cardMetaRow}>
                     {typeof speciesCount.count === 'number' && (
-                        <span className={styles.cardCount}>{speciesCount.count.toLocaleString()} observations</span>
+                        observationsUrl ? (
+                            <a className={styles.cardCount} href={observationsUrl} target='_blank' rel='noreferrer'>
+                                {speciesCount.count.toLocaleString()} observations
+                            </a>
+                        ) : (
+                            <span className={styles.cardCount}>{speciesCount.count.toLocaleString()} observations</span>
+                        )
                     )}
                     {image?.attribution && (
                         <div className={styles.cardAttribution} ref={attributionRef}>

@@ -3,7 +3,7 @@ import { memo, type CSSProperties } from 'react';
 import styles from './AstraPage.module.css';
 import { SkyEventList } from './astraEvents';
 import type { SkyEvent } from './astraTypes';
-import { formatDuration } from './astraUtils';
+import { formatDuration, formatMoonTime } from './astraUtils';
 import { describeMoonPhase, formatTime, type AstronomyData, type TimelineSegment } from './sunTimes';
 
 type AstraDetailsPanelProps = {
@@ -20,6 +20,14 @@ type DetailHeadingData = {
     title: string;
     meta?: string;
     color?: string;
+}
+
+type SkyMarkerDetails = {
+    title: string;
+    value: string;
+    valueLabel: string;
+    description: string;
+    color: string;
 }
 
 export const AstraDetailsPanel = memo(function AstraDetailsPanel({ astronomy, now, selectedSegment, selectedMarkerId, isTodaySelected, skyEvents, onSelectEvent }: Readonly<AstraDetailsPanelProps>) {
@@ -62,6 +70,11 @@ function getDetailHeading(astronomy: AstronomyData, selectedSegment: TimelineSeg
 
     if (selectedMarkerId === 'solar-noon') {
         return { title: 'Solar noon', meta: 'Solar noon marker', color: '#e6a63f' };
+    }
+
+    const skyMarker = getSkyMarkerDetails(astronomy, selectedMarkerId);
+    if (skyMarker) {
+        return { title: skyMarker.title, meta: `${skyMarker.value} \u00b7 ${skyMarker.title} marker`, color: skyMarker.color };
     }
 
     if (selectedSegment) {
@@ -117,6 +130,16 @@ function DetailContent({ astronomy, now, selectedSegment, selectedMarkerId, isCu
         );
     }
 
+    const skyMarker = getSkyMarkerDetails(astronomy, selectedMarkerId);
+    if (skyMarker) {
+        return (
+            <>
+                <p className={styles.astraDetailDescription}>{skyMarker.description}</p>
+                <div className={styles.astraTimeRange}><strong>{skyMarker.value}</strong><span>{skyMarker.valueLabel}</span></div>
+            </>
+        );
+    }
+
     if (selectedSegment) {
         const isMoonSelected = selectedSegment.id === astronomy.moonSegment?.id;
         return (
@@ -129,6 +152,21 @@ function DetailContent({ astronomy, now, selectedSegment, selectedMarkerId, isCu
     }
 
     return <p className={styles.astraDetailDescription}>Select a sky window on the chart or in the event list.</p>;
+}
+
+function getSkyMarkerDetails(astronomy: AstronomyData, markerId: string | null): SkyMarkerDetails | null {
+    switch (markerId) {
+        case 'sunrise':
+            return { title: 'Sunrise', value: formatTime(astronomy.sunTimes.sunrise), valueLabel: 'local sunrise', description: "Sunrise marks the beginning of the day's direct sunlight at this location.", color: '#e6a63f' };
+        case 'sunset':
+            return { title: 'Sunset', value: formatTime(astronomy.sunTimes.sunset), valueLabel: 'local sunset', description: "Sunset marks the end of the day's direct sunlight at this location.", color: '#e6a63f' };
+        case 'moonrise':
+            return { title: 'Moonrise', value: formatMoonTime(astronomy.moonTimes.rise, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown), valueLabel: 'moonrise', description: 'Moonrise is when the Moon appears above the horizon at this location.', color: 'var(--astra-moon)' };
+        case 'moonset':
+            return { title: 'Moonset', value: formatMoonTime(astronomy.moonTimes.set, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown), valueLabel: 'moonset', description: 'Moonset is when the Moon falls below the horizon at this location.', color: 'var(--astra-moon)' };
+        default:
+            return null;
+    }
 }
 
 function MoonIlluminationDetails({ fraction, phase }: Readonly<{ fraction: number; phase: number }>) {
