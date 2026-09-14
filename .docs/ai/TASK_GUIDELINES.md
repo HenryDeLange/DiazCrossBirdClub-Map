@@ -1,5 +1,13 @@
 # Task Guidelines
 
-## Builds, Linting, and Tests
+## Validation
 
-Code should be written in a way that it passes the build, linting and tests, but don't run them until I say so. If you are unsure about whether the code will pass linting or tests, ask me before running them.
+- After an edit, run the narrowest available validation for the touched behavior.
+- For build or deployment changes, run `npm run build` and inspect the generated artifact.
+- Run `npm run lint` when the change affects TypeScript, React, or configuration code.
+- Report unavailable or failing validation clearly; do not hide unrelated pre-existing failures.
+
+## Scope
+
+- Keep changes focused and preserve existing public APIs unless the task requires otherwise.
+- Do not hand-edit generated output in `dist/` or `dev-dist/`.

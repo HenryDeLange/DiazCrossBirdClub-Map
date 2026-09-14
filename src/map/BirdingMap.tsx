@@ -266,6 +266,7 @@ export default function BirdingMap() {
         }
 
         warnedInitialLocationKeyRef.current = initialLocationKey;
+        clearLocationPath();
         console.warn(`No location matched path: ${initialLocationKey}`);
     }, [initialLocationKeys, initialLocationSelection]);
 

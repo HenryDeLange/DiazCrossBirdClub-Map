@@ -1,5 +1,7 @@
 import babel from '@rolldown/plugin-babel';
 import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import { copyFile } from 'node:fs/promises';
+import { resolve } from 'node:path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, type PluginOption } from 'vite';
 import compressionPlugin from 'vite-plugin-compression';
@@ -11,6 +13,22 @@ const { version } = packageJson;
 const compression = compressionPlugin as unknown as (options?: Record<string, unknown>) => PluginOption;
 const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
 
+// GitHub Pages serves 404.html for unknown paths; copying the app shell there lets client-side deep links load.
+function githubPagesSpaFallback(): PluginOption {
+    let outputDirectory = '';
+
+    return {
+        name: 'github-pages-spa-fallback',
+        apply: 'build',
+        configResolved(config) {
+            outputDirectory = resolve(config.root, config.build.outDir);
+        },
+        async closeBundle() {
+            await copyFile(resolve(outputDirectory, 'index.html'), resolve(outputDirectory, '404.html'));
+        }
+    };
+}
+
 export default defineConfig({
     define: {
         VITE_APP_VERSION: JSON.stringify(version)
@@ -21,6 +39,7 @@ export default defineConfig({
         }
     },
     plugins: [
+        githubPagesSpaFallback(),
         react(),
         babel({ presets: [reactCompilerPreset()] }),
         svgr(),

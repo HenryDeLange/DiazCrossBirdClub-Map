@@ -31,7 +31,7 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 - Follow existing React Leaflet, Leaflet, Lucide, SunCalc, tide predictor, and local helper patterns. Keep changes focused and preserve drawer flex/overflow constraints.
 - Use `getBasePathname()`, `getAstraPathname()`, `getTidesPathname()`, and location helpers instead of hard-coded application paths.
 - Do not hand-edit generated output (`dist/`, `dev-dist/`) or static GeoJSON unless the task requires it.
-- Follow `.docs/ai/TASK_GUIDELINES.md`; builds and linting are run only when requested.
+- Follow `.docs/ai/TASK_GUIDELINES.md` for focused validation and scope rules.
 
 ## Commands
 
@@ -39,3 +39,7 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 - `npm run build` runs the TypeScript and production Vite builds.
 - `npm run lint` runs ESLint.
 - `npm run preview` serves the production build.
+
+## Deployment
+
+The app uses client-side paths for location links, such as `/cape-padrone`. The production build creates `dist/404.html` as a copy of the generated `index.html`, which lets GitHub Pages serve the app shell for a direct deep-link request. The browser keeps the original path, so the app can open the shared location after loading.
