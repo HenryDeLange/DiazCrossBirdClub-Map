@@ -56,6 +56,7 @@ export default defineConfig({
             strategies: 'generateSW',
             workbox: {
                 cleanupOutdatedCaches: true,
+                globPatterns: ['**/*.{js,css,html,ico,jpg,jpeg,png,svg,txt,webp,woff,woff2}'],
                 runtimeCaching: [
                     {
                         // Tide station harmonic constituents (used for tide predictions)
@@ -63,6 +64,11 @@ export default defineConfig({
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'tide-station-harmonics',
+                            networkTimeoutSeconds: 4,
+                            expiration: {
+                                maxEntries: 300,
+                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90
+                            },
                             cacheableResponse: {
                                 statuses: [0, 200]
                             }

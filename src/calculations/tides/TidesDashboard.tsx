@@ -24,10 +24,15 @@ export const TidesDashboard = memo(function TidesDashboard({ selectedDate, stati
                 <p className={styles.tidesMessage} role='status' aria-live='polite'>{stationState.message ?? 'Loading nearby stations...'}</p>
             ) : stationState.status === 'error' ? (
                 <p className={`${styles.tidesMessage} ${styles.tidesMessageError}`} role='alert'>{stationState.message}</p>
-            ) : !hasTideData ? (
-                <p className={`${styles.tidesMessage} ${styles.tidesMessageError}`} role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>
             ) : (
-                <TidesResults currentTide={currentTide} now={now} predictions={predictions} weightedExtremes={weightedExtremes} selectedDate={selectedDate} />
+                <>
+                    {stationState.message && <p className={styles.tidesMessage} role='status'>{stationState.message}</p>}
+                    {hasTideData ? (
+                        <TidesResults currentTide={currentTide} now={now} predictions={predictions} weightedExtremes={weightedExtremes} selectedDate={selectedDate} />
+                    ) : (
+                        <p className={`${styles.tidesMessage} ${styles.tidesMessageError}`} role='alert'>{allPredictionsFailed ? 'Tide harmonic data is unavailable for these stations.' : 'No tide predictions are available for this date.'}</p>
+                    )}
+                </>
             )}
         </section>
     );

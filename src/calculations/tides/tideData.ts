@@ -1,5 +1,4 @@
 import { useStation, type Extreme, type Station } from '@neaps/tide-predictor';
-import { defaultTideCoordinates } from '../../common/defaultLocation';
 import { roundCoordinate, type Coordinates } from '../components/dateLocationUtils';
 import defaultTideStations from './defaultTideStations.json';
 
@@ -10,6 +9,7 @@ export type TideStation = Station & {
 export type TideStationResult = {
     stations: TideStation[];
     coordinates: Coordinates;
+    usedFallback: boolean;
 }
 
 export type TidePrediction = {
@@ -30,13 +30,10 @@ export type WeightedTideLevel = {
 }
 
 const stationApiUrl = 'https://api.openwaters.io/tides/stations';
+const stationRequestTimeoutMilliseconds = 5000;
+const extremeMatchWindowMilliseconds = 4 * 60 * 60 * 1000;
 
 export const defaultTideStationsData = defaultTideStations as unknown as TideStation[];
-
-const defaultRoundedCoordinates = {
-    latitude: roundCoordinate(defaultTideCoordinates.latitude, 1),
-    longitude: roundCoordinate(defaultTideCoordinates.longitude, 1)
-};
 
 export async function fetchTideStations(coordinates: Coordinates, signal?: AbortSignal): Promise<TideStationResult> {
     const roundedCoordinates = {
@@ -50,7 +47,10 @@ export async function fetchTideStations(coordinates: Coordinates, signal?: Abort
     });
 
     try {
-        const response = await fetch(`${stationApiUrl}?${params.toString()}`, { signal });
+        const requestSignal = signal
+            ? AbortSignal.any([signal, AbortSignal.timeout(stationRequestTimeoutMilliseconds)])
+            : AbortSignal.timeout(stationRequestTimeoutMilliseconds);
+        const response = await fetch(`${stationApiUrl}?${params.toString()}`, { signal: requestSignal });
         if (!response.ok) {
             throw new Error(`Station request failed (${response.status})`);
         }
@@ -60,21 +60,18 @@ export async function fetchTideStations(coordinates: Coordinates, signal?: Abort
             throw new Error('No tide stations with harmonic data found for this location');
         }
 
-        return { stations, coordinates: roundedCoordinates };
+        return { stations, coordinates: roundedCoordinates, usedFallback: false };
     }
     catch (error) {
         if (signal?.aborted) {
             throw error;
         }
 
-        if (roundedCoordinates.latitude === defaultRoundedCoordinates.latitude && roundedCoordinates.longitude === defaultRoundedCoordinates.longitude) {
-            return {
-                stations: defaultTideStationsData,
-                coordinates: roundedCoordinates
-            };
-        }
-
-        throw error instanceof Error ? error : new Error('Could not load tide stations');
+        return {
+            stations: getDefaultTideStations(roundedCoordinates),
+            coordinates: roundedCoordinates,
+            usedFallback: true
+        };
     }
 }
 
@@ -114,20 +111,32 @@ export function getTidePredictions(stations: TideStation[], date: Date): TidePre
 type TideExtremeCollection = 'chartExtremes' | 'statusExtremes';
 
 export function getWeightedTideExtremes(predictions: TidePrediction[], collection: TideExtremeCollection = 'chartExtremes'): WeightedTideExtreme[] {
-    const availablePredictions = predictions.filter((prediction) => prediction[collection].length > 0);
-    const eventCount = Math.max(0, ...availablePredictions.map((prediction) => prediction[collection].length));
+    const entries = predictions.flatMap((prediction) => prediction[collection].map((extreme) => ({ station: prediction.station, extreme })))
+        .sort((left, right) => left.extreme.time.getTime() - right.extreme.time.getTime());
+    const groups: Array<Array<{ station: TideStation; extreme: Extreme }>> = [];
 
-    return Array.from({ length: eventCount }, (_, eventIndex) => {
-        const entries = availablePredictions.flatMap((prediction) => {
-            const extreme = prediction[collection][eventIndex];
-            return extreme ? [{ station: prediction.station, extreme }] : [];
-        });
+    for (const entry of entries) {
+        const closestGroup = groups
+            .map((group) => ({
+                group,
+                timeDifference: Math.abs(group[0].extreme.time.getTime() - entry.extreme.time.getTime())
+            }))
+            .filter(({ group, timeDifference }) => timeDifference <= extremeMatchWindowMilliseconds
+                && group[0].extreme.high === entry.extreme.high
+                && !group.some((groupEntry) => groupEntry.station.id === entry.station.id))
+            .sort((left, right) => left.timeDifference - right.timeDifference)[0]?.group;
 
-        if (entries.length === 0) {
-            return null;
+        if (closestGroup) {
+            closestGroup.push(entry);
         }
+        else {
+            groups.push([entry]);
+        }
+    }
 
-        const weightedValues = entries.reduce((result, entry) => {
+    return groups.map((group) => {
+        const groupEntries = group;
+        const weightedValues = groupEntries.reduce((result, entry) => {
             const weight = getDistanceWeight(entry.station.distance);
             return {
                 weight: result.weight + weight,
@@ -135,16 +144,16 @@ export function getWeightedTideExtremes(predictions: TidePrediction[], collectio
                 level: result.level + entry.extreme.level * weight
             };
         }, { weight: 0, time: 0, level: 0 });
-        const sourceExtreme = entries[0].extreme;
+        const sourceExtreme = groupEntries[0].extreme;
 
         return {
             high: sourceExtreme.high,
             label: sourceExtreme.label,
             time: new Date(weightedValues.time / weightedValues.weight),
             level: weightedValues.level / weightedValues.weight,
-            timeZone: entries[0].station.timezone
+            timeZone: groupEntries[0].station.timezone
         };
-    }).filter((extreme): extreme is WeightedTideExtreme => extreme !== null);
+    });
 }
 
 export function getWeightedTideLevel(predictions: TidePrediction[], time: Date): WeightedTideLevel | null {
@@ -223,4 +232,21 @@ function addDays(date: Date, days: number): Date {
     const result = new Date(date);
     result.setDate(result.getDate() + days);
     return result;
+}
+
+function getDefaultTideStations(coordinates: Coordinates): TideStation[] {
+    return defaultTideStationsData.map((station) => ({
+        ...station,
+        distance: getDistanceInKilometers(coordinates, station)
+    }));
+}
+
+function getDistanceInKilometers(coordinates: Coordinates, station: TideStation): number {
+    const radians = (degrees: number) => degrees * Math.PI / 180;
+    const latitudeDelta = radians(station.latitude - coordinates.latitude);
+    const longitudeDelta = radians(station.longitude - coordinates.longitude);
+    const haversine = Math.sin(latitudeDelta / 2) ** 2
+        + Math.cos(radians(coordinates.latitude)) * Math.cos(radians(station.latitude)) * Math.sin(longitudeDelta / 2) ** 2;
+
+    return 6371 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }

@@ -35,7 +35,8 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
         fetchTideStations(coordinates, controller.signal)
             .then((result) => setStationState({
                 status: 'success',
-                stations: result.stations
+                stations: result.stations,
+                message: result.usedFallback ? 'Nearby tide data is unavailable; showing bundled Port Elizabeth and East London reference stations.' : undefined
             }))
             .catch((error: unknown) => {
                 if (!controller.signal.aborted) {
