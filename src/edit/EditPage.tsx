@@ -364,7 +364,8 @@ export default function EditPage() {
             return;
         }
 
-        const githubTab = window.open('about:blank', '_blank');
+        const mobileDevice = window.matchMedia('(pointer: coarse)').matches;
+        const githubTab = mobileDevice ? null : window.open('about:blank', '_blank');
         setBusy('handoff');
         setError('');
         try {
@@ -498,8 +499,8 @@ export default function EditPage() {
                             title={editorMode === 'fields' ? 'Show JSON' : 'Show Fields'}
                         >{editorMode === 'fields' ? 'Show JSON' : 'Show Fields'}</button>}
                     </div>
-                    <div className={styles.panelBody}>
-                        {!isCreating && <section className={styles.panelSection}>
+                    <div className={`${styles.panelBody} ${editorMode === 'raw' ? styles.rawPanelBody : ''}`}>
+                        {!isCreating && (!activeDocument || editorMode === 'fields') && <section className={styles.panelSection}>
                             <div className={styles.locationSectionHeading}>
                                 <h3 className={styles.sectionTitle}>{activeDocument ? 'Birding location' : 'Existing locations'}</h3>
                                 {activeDocument && <div className={styles.locationTypeBadge}>
@@ -569,7 +570,7 @@ export default function EditPage() {
                             </div>
                         </section>}
 
-                        {feature && <section className={styles.panelSection}>
+                        {feature && <section className={`${styles.panelSection} ${editorMode === 'raw' ? styles.rawEditorSection : ''}`}>
                             <h3 className={styles.sectionTitle}>{editorMode === 'fields' ? `${geometryLabel(feature.geometry.type)} properties` : 'GeoJSON'}</h3>
                             {editorMode === 'fields'
                                 ? <FeaturePropertiesEditor canDemoteTitleToSpot={canDemoteTitleToSpot} feature={feature} onChange={updateProperties} disabled={isBusy} />
