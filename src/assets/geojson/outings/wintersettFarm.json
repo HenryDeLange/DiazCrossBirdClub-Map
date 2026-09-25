@@ -4,7 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Wintersett Farm"
+                "name": "Wintersett Farm",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

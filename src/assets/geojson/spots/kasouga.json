@@ -6,8 +6,8 @@
             "properties": {
                 "name": "Kasouga",
                 "description": "Birding along the Kasouga lagoon and town.",
-                "document": "https://drive.google.com/file/d/1rEjYUwFipM1nVYSLVRgowVy_ngrt_Z_9/view",
-                "pin": "https://maps.app.goo.gl/u4Ch4BqXh1Cxok7w6"
+                "linkMap": "https://maps.app.goo.gl/u4Ch4BqXh1Cxok7w6",
+                "linkDocument": "https://drive.google.com/file/d/1rEjYUwFipM1nVYSLVRgowVy_ngrt_Z_9/view"
             },
             "geometry": {
                 "coordinates": [
@@ -279,7 +279,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Kasouga"
+                "name": "Kasouga",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

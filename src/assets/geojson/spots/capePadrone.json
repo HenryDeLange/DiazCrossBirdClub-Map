@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Cape Padrone"
+        "name": "Cape Padrone",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [

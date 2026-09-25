@@ -4,7 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Diepkloof"
+                "name": "Diepkloof",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

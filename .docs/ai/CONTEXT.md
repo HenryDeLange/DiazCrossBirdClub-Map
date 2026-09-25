@@ -17,6 +17,7 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 - `src/calculations/components/`: shared `DateLocationInputs`, its date/coordinate subcomponents, and coordinate/date utilities used by both calculation pages. Astra uses five-decimal coordinates; Tides rounds coordinates to one decimal for station lookup.
 - `src/calculations/astra/`: `AstraPage.tsx`, focused page components, `sunTimes.ts`, and `AstraPage.module.css`. The page works standalone or embedded and renders the SVG solar, birding, moonlight, current-time, and outer event-time rings. Event indicators are grouped upright icon/time units placed by minute-of-day angle.
 - `src/calculations/tides/`: `TidesPage.tsx`, `TidesHeader.tsx`, `TidesDashboard.tsx`, `TidesResults.tsx`, the tide visual components, `useTidesPage.ts`, `tidesTypes.ts`, `tidesUtils.ts`, `tideData.ts`, and `TidesPage.module.css`. The hook owns station loading and derived predictions; the components render a weighted chart plus station panels. It fetches up to two nearby harmonic stations and calculates high/low tides in-browser.
+- `src/edit/`: standalone `/edit` GeoJSON editor. `geojsonValidation.ts` requires every Point to use category `spot` or `title`; single-feature collections may use either category, while collections with multiple features require exactly one title Point as the first feature. All geometries may use `linkMap`, `linkDocument`, and `linkWeb`. Canonical property definitions are in `src/map/geojson/types.ts`.
 - `src/assets/astra/` contains custom moonrise/moonset SVG icons. `src/LoadingOrError.tsx`, `src/main.module.css`, and `src/map/map.css` provide shared fallback and application styling.
 
 ## Data, Persistence, and PWA
@@ -31,6 +32,7 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 - Follow existing React Leaflet, Leaflet, Lucide, SunCalc, tide predictor, and local helper patterns. Keep changes focused and preserve drawer flex/overflow constraints.
 - Use `getBasePathname()`, `getAstraPathname()`, `getTidesPathname()`, and location helpers instead of hard-coded application paths.
 - Do not hand-edit generated output (`dist/`, `dev-dist/`) or static GeoJSON unless the task requires it.
+- `/edit` lists GeoJSON paths bundled with the app, fetches the selected public file from the repository's `main` branch, and validates locally. It copies the collection and opens the GitHub file editor; GitHub handles sign-in, branch selection, commits, and deletions. Do not put file contents or credentials in URLs or browser storage.
 - Follow `.docs/ai/TASK_GUIDELINES.md` for focused validation and scope rules.
 
 ## Commands

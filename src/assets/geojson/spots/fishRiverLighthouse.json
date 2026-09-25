@@ -353,7 +353,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Fish River Lighthouse"
+                "name": "Fish River Lighthouse",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

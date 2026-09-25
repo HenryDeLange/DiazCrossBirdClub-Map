@@ -6,7 +6,8 @@
       "properties": {
         "name": "Krog's Kloof",
         "description": "",
-        "linkMap": ""
+        "linkMap": "",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [

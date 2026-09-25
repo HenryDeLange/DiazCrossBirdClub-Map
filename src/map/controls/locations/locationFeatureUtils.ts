@@ -6,7 +6,7 @@ export function buildFeatureGroups(features: Feature<Geometry, FeatureProps>[]):
     const namedFeatures = features
         .map((feature, featureIndex) => ({ feature, featureIndex }))
         .filter(({ feature }) => feature.properties?.name);
-    const headingIndex = namedFeatures.findIndex(({ feature }) => feature.geometry.type === 'Point');
+    const headingIndex = namedFeatures.findIndex(({ feature }) => feature.geometry.type === 'Point' && feature.properties.category === 'title');
 
     if (headingIndex >= 0) {
         const heading = namedFeatures[headingIndex].feature;
@@ -68,8 +68,6 @@ function matchesQuery(feature: Feature<Geometry, FeatureProps> | null, query: st
         feature.properties.linkMap,
         feature.properties.linkDocument,
         feature.properties.linkWeb,
-        feature.properties.document,
-        feature.properties.pin,
     ]
         .filter((value): value is string => Boolean(value))
         .join(' ')
@@ -80,11 +78,11 @@ function matchesQuery(feature: Feature<Geometry, FeatureProps> | null, query: st
 
 export function getFeatureLink(feature: Feature<Geometry, FeatureProps>, kind: 'map' | 'document' | 'web') {
     if (kind === 'map') {
-        return feature.properties.linkMap ?? feature.properties.pin;
+        return feature.properties.linkMap;
     }
 
     if (kind === 'document') {
-        return feature.properties.linkDocument ?? feature.properties.document;
+        return feature.properties.linkDocument;
     }
 
     return feature.properties.linkWeb;

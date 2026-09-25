@@ -1,5 +1,6 @@
 export const ASTRA_PATH = 'astra';
 export const TIDES_PATH = 'tides';
+export const EDIT_PATH = 'edit';
 
 export function isAstraPath(pathname: string): boolean {
     return getAppPathSlug(pathname) === ASTRA_PATH;
@@ -7,6 +8,10 @@ export function isAstraPath(pathname: string): boolean {
 
 export function isTidesPath(pathname: string): boolean {
     return getAppPathSlug(pathname) === TIDES_PATH;
+}
+
+export function isEditPath(pathname: string): boolean {
+    return getAppPathSlug(pathname) === EDIT_PATH;
 }
 
 function getAppPathSlug(pathname: string): string {
@@ -36,6 +41,10 @@ export function getAstraPathname(): string {
 
 export function getTidesPathname(): string {
     return joinPath(getBasePathname(), TIDES_PATH);
+}
+
+export function getEditPathname(): string {
+    return joinPath(getBasePathname(), EDIT_PATH);
 }
 
 export function joinPath(basePath: string, segment: string): string {

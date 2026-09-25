@@ -42,6 +42,13 @@
     cursor: pointer;
 }
 
+.footerActions a.action,
+.footerActions a.action:visited {
+    color: inherit !important;
+    font-style: normal;
+    text-decoration: none;
+}
+
 .action:hover,
 .action:focus-visible,
 .footerLinks a:hover,

@@ -6,8 +6,8 @@
             "properties": {
                 "name": "Ghio Wetland",
                 "description": "Ngciyo Pans are seasonal pans situated in the Kariega Game Reserve.",
-                "document": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view",
-                "pin": "https://maps.app.goo.gl/14mPHyLFVa1dEfZv6"
+                "linkMap": "https://maps.app.goo.gl/14mPHyLFVa1dEfZv6",
+                "linkDocument": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view"
             },
             "geometry": {
                 "coordinates": [
@@ -86,8 +86,8 @@
             "properties": {
                 "name": "Bushman's Bridge",
                 "description": "Single lane bridge over the Bushman's River.",
-                "document": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view",
-                "pin": "https://maps.app.goo.gl/xCRRNKFtNn1SL7sG7"
+                "linkMap": "https://maps.app.goo.gl/xCRRNKFtNn1SL7sG7",
+                "linkDocument": "https://drive.google.com/file/d/1a_gEKPqEualQCadqcrohlAl1-Ajy0oAE/view"
             },
             "geometry": {
                 "coordinates": [
@@ -128,7 +128,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Ghio Pans"
+                "name": "Ghio Pans",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

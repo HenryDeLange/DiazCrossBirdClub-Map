@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Assegaai Trails"
+        "name": "Assegaai Trails",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [

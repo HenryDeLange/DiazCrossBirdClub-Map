@@ -4,7 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Otters' Vlei"
+                "name": "Otters' Vlei",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [
@@ -19,8 +20,8 @@
             "properties": {
                 "name": "Otters' Vlei",
                 "description": "Seasonal pans and vlei area situated between Klipfontein and Boesmandriviermond.",
-                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
-                "pin": "https://maps.app.goo.gl/bXYagdukqUTpEMyG6"
+                "linkMap": "https://maps.app.goo.gl/bXYagdukqUTpEMyG6",
+                "linkDocument": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view"
             },
             "geometry": {
                 "coordinates": [

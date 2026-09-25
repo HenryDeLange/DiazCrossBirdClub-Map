@@ -12,28 +12,22 @@ type PolyStyle = LineStyle & {
 type BaseInfo = {
     name: string;
     description?: string;
+    linkDocument?: string;
+    linkMap?: string;
+    linkWeb?: string;
 }
 
 type LineInfo = {
     road?: 'access' | 'birding' | 'drive';
 }
 
-type PolyInfo = {
-    linkDocument?: string;
-    linkMap?: string;
-    linkWeb?: string;
-    document?: string;
-    pin?: string;
-}
-
 type PointInfo = {
-    category?: 'spot';
+    category?: 'spot' | 'title';
 }
 
 export type FeatureProps =
     BaseInfo &
     LineInfo &
-    PolyInfo &
     PointInfo &
     LineStyle &
     PolyStyle;

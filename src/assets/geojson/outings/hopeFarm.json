@@ -4,7 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Hope Farm"
+                "name": "Hope Farm",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

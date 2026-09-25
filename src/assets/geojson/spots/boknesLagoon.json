@@ -6,8 +6,8 @@
             "properties": {
                 "name": "Boknes Lagoon - Bakanas Bridge",
                 "description": "Easy to stop on the bridge and look for birds sitting in the reeds or under the bridge.",
-                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
-                "pin": "https://maps.app.goo.gl/f8TLLWtsVws2gXfq8"
+                "linkMap": "https://maps.app.goo.gl/f8TLLWtsVws2gXfq8",
+                "linkDocument": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view"
             },
             "geometry": {
                 "coordinates": [
@@ -50,8 +50,8 @@
             "properties": {
                 "name": "Boknes Lagoon",
                 "description": "Lagoon of the Bakanas river that sometimes open into the sea at Boknes.",
-                "document": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view",
-                "pin": "https://maps.app.goo.gl/5BmJuvz26HBUBLLS6"
+                "linkMap": "https://maps.app.goo.gl/5BmJuvz26HBUBLLS6",
+                "linkDocument": "https://drive.google.com/file/d/18GcjFP_eTZPE3NIcZ6nm4WLc49x5jh5f/view"
             },
             "geometry": {
                 "coordinates": [
@@ -116,7 +116,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Boknes Lagoon"
+                "name": "Boknes Lagoon",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

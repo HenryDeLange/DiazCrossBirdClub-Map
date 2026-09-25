@@ -4,7 +4,8 @@
         {
             "type": "Feature",
             "properties": {
-                "name": "Moneysworth"
+                "name": "Moneysworth",
+                "category": "title"
             },
             "geometry": {
                 "coordinates": [

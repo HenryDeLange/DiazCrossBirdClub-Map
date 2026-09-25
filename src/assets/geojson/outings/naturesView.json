@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Natures View"
+        "name": "Natures View",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [

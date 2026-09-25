@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Kleinemonde"
+        "name": "Kleinemonde",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [

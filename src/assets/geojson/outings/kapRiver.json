@@ -4,7 +4,8 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Kap River"
+        "name": "Kap River",
+        "category": "title"
       },
       "geometry": {
         "coordinates": [
