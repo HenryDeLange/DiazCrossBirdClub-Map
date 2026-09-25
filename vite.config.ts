@@ -64,10 +64,9 @@ export default defineConfig({
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'tide-station-harmonics',
-                            networkTimeoutSeconds: 4,
                             expiration: {
                                 maxEntries: 300,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90
+                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 180 // ~6 months
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
