@@ -14,7 +14,8 @@ export function LocationFeatureDetails({
     onOpenInat,
     onLocationSelected,
     initialFocusQuery,
-    onOpenAstronomy
+    onOpenAstronomy,
+    onOpenTides
 }: Readonly<FeatureDetailsProps>) {
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
@@ -73,6 +74,7 @@ export function LocationFeatureDetails({
                         onOpenInat={onOpenInat}
                         onLocationSelected={onLocationSelected}
                         onOpenAstronomy={onOpenAstronomy}
+                        onOpenTides={onOpenTides}
                     />
                 );
             })}

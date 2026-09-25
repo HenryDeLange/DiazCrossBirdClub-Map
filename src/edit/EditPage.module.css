@@ -140,6 +140,7 @@
 .panelSection { padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--control-border); }
 .createSection { border-bottom: 0; }
 .locationSectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
+.locationSearch { margin-bottom: 0.35rem; }
 .sectionTitle { margin: 0; color: var(--drawer-muted); font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
 .sectionCollapseButton { display: inline-grid; place-items: center; width: 1.75rem; height: 1.75rem; flex: 0 0 auto; padding: 0; border: 0; border-radius: 0.25rem; background: transparent; color: var(--drawer-muted); cursor: pointer; }
 .sectionCollapseButton svg { width: 1rem; height: 1rem; }
@@ -225,8 +226,13 @@
 .propertyFields { display: grid; gap: 0.6rem; min-width: 0; margin: 0; padding: 0; border: 0; }
 .propertyFields:disabled { opacity: 0.62; }
 .field b { color: #c94c4c; }
-.checkboxField { display: flex; align-items: center; gap: 0.4rem; color: var(--drawer-text); font-size: 0.75rem; }
-.checkboxField input { width: 1rem; height: 1rem; accent-color: var(--action-color); }
+.checkboxField { box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; min-height: 1.85rem; padding: 0.38rem 0.5rem; border: 1px solid var(--control-border); border-radius: 0.3rem; background: var(--control-bg); color: var(--control-text); cursor: pointer; font-size: 0.78rem; }
+.checkboxField:focus-within { border-color: var(--action-color); box-shadow: 0 0 0 2px color-mix(in srgb, var(--action-color) 22%, transparent); }
+.checkboxField input { appearance: none; position: relative; box-sizing: border-box; width: 2.3rem; height: 1.3rem; flex: 0 0 auto; margin: 0; border: 1px solid color-mix(in srgb, var(--control-text) 36%, var(--control-bg)); border-radius: 999px; background: color-mix(in srgb, var(--control-text) 24%, var(--control-bg)); cursor: pointer; transition: border-color 140ms ease, background-color 140ms ease; }
+.checkboxField input::before { content: ''; position: absolute; top: 50%; left: 2px; width: 0.9rem; height: 0.9rem; transform: translateY(-50%); border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); transition: transform 140ms ease; }
+.checkboxField input:checked { border-color: var(--action-color); background: var(--action-color); }
+.checkboxField input:checked::before { transform: translate(1rem, -50%); }
+.checkboxField input:disabled { opacity: 0.55; cursor: not-allowed; }
 .modeHeaderButton { flex-shrink: 0; min-height: 1.85rem; padding: 0.25rem 0.45rem; border: 1px solid var(--control-border); border-radius: 0.3rem; background: var(--control-bg); color: var(--control-text); cursor: pointer; font-size: 0.7rem; font-weight: 600; }
 .modeHeaderButton:hover { border-color: var(--action-color); color: var(--action-color); }
 .modeHeaderButton:focus-visible { outline: 2px solid var(--action-color); outline-offset: 2px; }

@@ -15,9 +15,11 @@ type AstraControlProps = {
     onBack?: () => void;
     coordinates: Coordinates | null;
     locationName?: string;
+    mapCenter: { lat: number; lng: number };
 }
 
-export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName }: Readonly<AstraControlProps>) {
+export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName, mapCenter }: Readonly<AstraControlProps>) {
+    const initialCoordinates = coordinates ?? { latitude: mapCenter.lat, longitude: mapCenter.lng };
     const isLocationView = coordinates !== null;
 
     return (
@@ -40,7 +42,7 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'
             >
-                <AstraPage key={coordinates ? `${coordinates.latitude}:${coordinates.longitude}` : 'default'} embedded initialCoordinates={coordinates ?? undefined} locationView={isLocationView} />
+                <AstraPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} locationView={isLocationView} />
             </MapDrawer>
         </>
     );

@@ -23,6 +23,7 @@ type LineInfo = {
 
 type PointInfo = {
     category?: 'spot' | 'title';
+    isCoastal?: boolean;
 }
 
 export type FeatureProps =

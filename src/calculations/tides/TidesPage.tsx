@@ -4,8 +4,8 @@ import styles from './TidesPage.module.css';
 import type { TidesPageProps } from './tidesTypes';
 import { useTidesPage } from './useTidesPage';
 
-export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>) {
-    const page = useTidesPage({ embedded });
+export default function TidesPage({ embedded = false, initialCoordinates }: Readonly<TidesPageProps>) {
+    const page = useTidesPage({ embedded, initialCoordinates });
 
     return (
         <main className={`${styles.tidesPage}${page.embedded ? ` ${styles.tidesPageEmbedded}` : ''}`}>
@@ -21,8 +21,13 @@ export default function TidesPage({ embedded = false }: Readonly<TidesPageProps>
                 />
                 <TidesDashboard
                     selectedDate={page.selectedDate}
+                    coordinates={page.coordinates}
                     stationState={page.stationState}
                     now={page.now}
+                    nowAdjusted={page.nowAdjusted}
+                    onTimeChange={page.onTimeChange}
+                    onResetTime={page.onResetTime}
+                    onDateChange={page.onDateChange}
                     predictions={page.predictions}
                     weightedExtremes={page.weightedExtremes}
                     currentTide={page.currentTide}

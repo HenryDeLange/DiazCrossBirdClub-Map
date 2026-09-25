@@ -13,7 +13,10 @@ export type GitHubGeoJsonFile = {
     type: LocationType;
 }
 
-const geoJsonModules = import.meta.glob('../assets/geojson/**/*.json');
+const geoJsonModules = import.meta.glob<GeoCollection>('../assets/geojson/**/*.json', {
+    eager: true,
+    import: 'default'
+});
 
 const bundledFiles: GitHubGeoJsonFile[] = Object.keys(geoJsonModules).map((modulePath) => {
     const path = modulePath.replace('../assets/geojson/', 'src/assets/geojson/');
@@ -26,16 +29,12 @@ export function getGeoJsonFiles(): GitHubGeoJsonFile[] {
 }
 
 export async function getGeoJsonFile(path: string): Promise<GeoCollection> {
-    if (!bundledFiles.some((candidate) => candidate.path === path)) {
+    const modulePath = path.replace('src/assets/geojson/', '../assets/geojson/');
+    const collection = geoJsonModules[modulePath];
+    if (!collection || !bundledFiles.some((candidate) => candidate.path === path)) {
         throw new Error(`GeoJSON file is not available in this editor: ${path}`);
     }
-    const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-    const url = `https://raw.githubusercontent.com/${repositoryOwner}/${repositoryName}/${defaultBranch}/${encodedPath}`;
-    const response = await fetch(url);
-    if (!response.ok) {
-        throw new Error(`Could not load ${path} from the public ${defaultBranch} branch (HTTP ${response.status}).`);
-    }
-    return await response.json() as GeoCollection;
+    return structuredClone(collection);
 }
 
 export function getGitHubFileUrl(path: string, action: 'edit' | 'new' | 'delete', branch = defaultBranch): string {

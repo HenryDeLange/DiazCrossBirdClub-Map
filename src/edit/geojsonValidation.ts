@@ -9,7 +9,7 @@ export type ValidationResult = {
 }
 
 const allowedProperties = new Set([
-    'name', 'description', 'road', 'linkDocument', 'linkMap', 'linkWeb', 'category',
+    'name', 'description', 'road', 'linkDocument', 'linkMap', 'linkWeb', 'category', 'isCoastal',
     'stroke', 'stroke-width', 'stroke-opacity', 'fill', 'fill-opacity', 'visibility'
 ]);
 
@@ -63,6 +63,11 @@ export function validateFeatureCollection(value: unknown): ValidationResult {
         if (featureProperties.category !== undefined
             && (geometry.type !== 'Point' || !['spot', 'title'].includes(String(featureProperties.category)))) {
             errors.push(`${label}: category is only valid on a point and must be spot or title.`);
+        }
+
+        if (featureProperties.isCoastal !== undefined
+            && (geometry.type !== 'Point' || featureProperties.category !== 'title' || typeof featureProperties.isCoastal !== 'boolean')) {
+            errors.push(`${label}: isCoastal must be a boolean on a title point.`);
         }
 
         if (geometry.type === 'Point') {

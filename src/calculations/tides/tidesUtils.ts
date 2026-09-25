@@ -4,8 +4,8 @@ import type { CurrentTideStatus, WaveChartPoint, WaveChartTick } from './tidesTy
 
 const CHART_LEFT = 20;
 const CHART_WIDTH = 960;
-const CHART_HEIGHT = 194;
-const CHART_TOP = 24;
+const CHART_HEIGHT = 150;
+const CHART_TOP = 48;
 const MINUTES_PER_DAY = 24 * 60;
 
 export function formatDateInput(date: Date): string {
@@ -46,12 +46,14 @@ export function formatLevel(level: number): string {
 
 export function getCurrentTideStatus(predictions: TidePrediction[], extremes: WeightedTideExtreme[], selectedDate: Date | null, now: Date): CurrentTideStatus | null {
     const timeZone = extremes[0]?.timeZone ?? predictions[0]?.station.timezone;
-    if (!selectedDate || !timeZone || formatDateInput(selectedDate) !== formatDateInTimeZone(now, timeZone)) {
+    if (!selectedDate || !timeZone) {
         return null;
     }
 
-    const currentLevel = getWeightedTideLevel(predictions, now);
-    const futureExtremes = extremes.filter((extreme) => extreme.time.getTime() > now.getTime());
+    const minutesOfDay = getMinutesOfDayInTimeZone(now, timeZone);
+    const statusTime = getDateAtTimeInTimeZone(selectedDate, timeZone, Math.floor(minutesOfDay / 60), minutesOfDay % 60);
+    const currentLevel = getWeightedTideLevel(predictions, statusTime);
+    const futureExtremes = extremes.filter((extreme) => extreme.time.getTime() > statusTime.getTime());
     const nextExtreme = futureExtremes[0];
     const followingTide = futureExtremes[1] ?? null;
     if (!currentLevel || !nextExtreme) {
@@ -102,14 +104,10 @@ export function getWaveChartTicks(date: Date, timeZone: string): WaveChartTick[]
     });
 }
 
-export function getCurrentTimePoint(points: WaveChartPoint[], selectedDate: Date, timeZone: string, now: Date): { x: number; y: number } | null {
-    if (formatDateInput(selectedDate) !== formatDateInTimeZone(now, timeZone)) {
-        return null;
-    }
-
-    const timeParts = new Intl.DateTimeFormat('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(now);
-    const hours = Number(timeParts.find((part) => part.type === 'hour')?.value ?? 0);
-    const minutes = Number(timeParts.find((part) => part.type === 'minute')?.value ?? 0);
+export function getCurrentTimePoint(points: WaveChartPoint[], timeZone: string, now: Date): { x: number; y: number } | null {
+    const minutesOfDay = getMinutesOfDayInTimeZone(now, timeZone);
+    const hours = Math.floor(minutesOfDay / 60);
+    const minutes = minutesOfDay % 60;
     const x = CHART_LEFT + ((hours * 60 + minutes) / MINUTES_PER_DAY) * CHART_WIDTH;
     const nextIndex = points.findIndex((point) => point.x >= x);
     const previous = points[Math.max(nextIndex - 1, 0)];
@@ -121,6 +119,43 @@ export function getCurrentTimePoint(points: WaveChartPoint[], selectedDate: Date
 
     const progress = (x - previous.x) / (next.x - previous.x);
     return { x, y: previous.y + (next.y - previous.y) * progress };
+}
+
+export function getMinutesOfDayInTimeZone(value: Date, timeZone: string): number {
+    const timeParts = new Intl.DateTimeFormat('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(value);
+    const hours = Number(timeParts.find((part) => part.type === 'hour')?.value ?? 0);
+    const minutes = Number(timeParts.find((part) => part.type === 'minute')?.value ?? 0);
+    return hours * 60 + minutes;
+}
+
+export function getDateAtTimeInTimeZone(date: Date, timeZone: string, hours: number, minutes: number): Date {
+    const [year, month, day] = formatDateInput(date).split('-').map(Number);
+    const targetTime = Date.UTC(year, month - 1, day, hours, minutes);
+    let timestamp = targetTime;
+
+    for (let iteration = 0; iteration < 4; iteration += 1) {
+        const parts = new Intl.DateTimeFormat('en-US', {
+            timeZone,
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hourCycle: 'h23'
+        }).formatToParts(new Date(timestamp));
+        const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((item) => item.type === type)?.value ?? 0);
+        const representedTime = Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'));
+        const adjustment = targetTime - representedTime;
+
+        if (adjustment === 0) {
+            break;
+        }
+
+        timestamp += adjustment;
+    }
+
+    return new Date(timestamp);
 }
 
 export function createSmoothPath(points: WaveChartPoint[]): string {
@@ -141,12 +176,4 @@ function getDistanceSortValue(distance: number | undefined): number {
 
 function formatAxisTime(value: Date, timeZone: string): string {
     return new Intl.DateTimeFormat(undefined, { timeZone, hour: '2-digit', minute: '2-digit', hour12: false }).format(value);
-}
-
-function formatDateInTimeZone(date: Date, timeZone: string): string {
-    const parts = new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(date);
-    const year = parts.find((part) => part.type === 'year')?.value ?? '';
-    const month = parts.find((part) => part.type === 'month')?.value ?? '';
-    const day = parts.find((part) => part.type === 'day')?.value ?? '';
-    return `${year}-${month}-${day}`;
 }

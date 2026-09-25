@@ -3,7 +3,11 @@ import { useMap, useMapEvents } from 'react-leaflet';
 
 const SPOT_MARKER_MIN_ZOOM = 15;
 
-export const MapEvents = memo(function MapEvents() {
+type MapEventsProps = {
+    onMapCenterChange: (center: { lat: number; lng: number }) => void;
+}
+
+export const MapEvents = memo(function MapEvents({ onMapCenterChange }: Readonly<MapEventsProps>) {
     const map = useMap();
 
     useEffect(() => {
@@ -13,7 +17,9 @@ export const MapEvents = memo(function MapEvents() {
 
     useMapEvents({
         moveend: (e) => {
-            localStorage.setItem('mapCenter', JSON.stringify(e.target.getCenter()));
+            const center = e.target.getCenter();
+            localStorage.setItem('mapCenter', JSON.stringify(center));
+            onMapCenterChange({ lat: center.lat, lng: center.lng });
         },
         zoomend: (e) => {
             localStorage.setItem('mapZoom', JSON.stringify(e.target.getZoom()));

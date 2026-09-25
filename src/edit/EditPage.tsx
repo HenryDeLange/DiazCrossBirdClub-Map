@@ -3,10 +3,11 @@ import {
     ArrowLeft, Check, ChevronDown, ChevronUp, Clipboard, ClipboardPaste, Layers,
     LoaderCircle, MapPin, Plus, Route, Trash2, VectorPolygon, X
 } from 'lucide-react';
-import { useCallback, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { MapContainer } from 'react-leaflet';
 import { getBasePathname } from '../appRouting';
 import { defaultMapCenter } from '../common/defaultLocation';
+import { DrawerSearchField } from '../map/components/DrawerSearchField';
 import { PrimaryCategoryIcon } from '../map/controls/locations/PrimaryCategoryIcon';
 import type { FeatureProps } from '../map/geojson/types';
 import type { LocationTabName } from '../map/locationUtils';
@@ -48,6 +49,8 @@ export default function EditPage() {
     const [rawErrors, setRawErrors] = useState<string[]>([]);
     const [clipboardFeedback, setClipboardFeedback] = useState('');
     const [files] = useState(() => getGeoJsonFiles());
+    const [locationSearch, setLocationSearch] = useState('');
+    const [debouncedLocationSearch, setDebouncedLocationSearch] = useState('');
     const [activeDocument, setActiveDocument] = useState<ActiveDocument | null>(null);
     const [locationSectionCollapsed, setLocationSectionCollapsed] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
@@ -63,6 +66,15 @@ export default function EditPage() {
     const validation = activeDocument
         ? validateFeatureCollection({ type: 'FeatureCollection', features: activeDocument.features })
         : { valid: false, errors: [] as string[] };
+    useEffect(() => {
+        const timeout = window.setTimeout(() => setDebouncedLocationSearch(locationSearch.trim().toLowerCase()), 250);
+        return () => window.clearTimeout(timeout);
+    }, [locationSearch]);
+
+    const visibleFiles = files
+        .filter((file) => !debouncedLocationSearch || `${file.name} ${file.path}`.toLowerCase().includes(debouncedLocationSearch))
+        .sort((left, right) => left.name.replace(/\.json$/i, '').localeCompare(right.name.replace(/\.json$/i, ''), undefined, { sensitivity: 'base' })
+            || left.path.localeCompare(right.path));
     const isBusy = busy !== null;
     const pointCount = activeDocument?.features.filter((item) => item.geometry.type === 'Point').length ?? 0;
     const workspaceStyle: CSSProperties & { '--editor-panel-width'?: string; '--editor-panel-height'?: string } = {
@@ -205,24 +217,49 @@ export default function EditPage() {
             }
             const features = [...current.features];
             const selected = features[selectedFeature];
+            let selectedProperties = properties;
             if (selected.geometry.type === 'Point' && properties.category !== selected.properties.category) {
                 if (properties.category === 'title') {
+                    let isCoastal = properties.isCoastal;
                     features.forEach((item, index) => {
                         if (index !== selectedFeature && item.geometry.type === 'Point' && item.properties.category === 'title') {
-                            features[index] = { ...item, properties: { ...item.properties, category: 'spot' } };
+                            if (item.properties.isCoastal !== undefined) {
+                                isCoastal = item.properties.isCoastal;
+                            }
+                            const demotedProperties: FeatureProps = { ...item.properties, category: 'spot' };
+                            delete demotedProperties.isCoastal;
+                            features[index] = { ...item, properties: demotedProperties };
                         }
                     });
+                    selectedProperties = { ...properties };
+                    if (isCoastal !== undefined) {
+                        selectedProperties.isCoastal = isCoastal;
+                    }
                 }
                 else if (selected.properties.category === 'title') {
                     const replacementIndex = features.findIndex((item, index) => index !== selectedFeature && item.geometry.type === 'Point');
                     if (replacementIndex < 0) {
-                        return current;
+                        if (features.length > 1) {
+                            return current;
+                        }
                     }
-                    const replacement = features[replacementIndex];
-                    features[replacementIndex] = { ...replacement, properties: { ...replacement.properties, category: 'title' } };
+                    else {
+                        const replacement = features[replacementIndex];
+                        const replacementProperties: FeatureProps = { ...replacement.properties, category: 'title' };
+                        const isCoastal = selected.properties.isCoastal ?? properties.isCoastal ?? replacement.properties.isCoastal;
+                        if (isCoastal !== undefined) {
+                            replacementProperties.isCoastal = isCoastal;
+                        }
+                        else {
+                            delete replacementProperties.isCoastal;
+                        }
+                        features[replacementIndex] = { ...replacement, properties: replacementProperties };
+                    }
+                    selectedProperties = { ...properties };
+                    delete selectedProperties.isCoastal;
                 }
             }
-            features[selectedFeature] = { ...selected, properties };
+            features[selectedFeature] = { ...selected, properties: selectedProperties };
             return { ...current, dirty: true, features };
         });
     }, [selectedFeature]);
@@ -365,6 +402,9 @@ export default function EditPage() {
     };
 
     const feature = activeDocument?.features[selectedFeature];
+    const canDemoteTitleToSpot = activeDocument !== null
+        && (activeDocument.features.length === 1
+            || activeDocument.features.some((item, index) => index !== selectedFeature && item.geometry.type === 'Point'));
     const typeLabel = activeDocument ? capitalize(activeDocument.type) : '';
     const editorErrors = editorMode === 'raw' ? rawErrors : validation.errors;
 
@@ -475,14 +515,26 @@ export default function EditPage() {
                                     onClick={() => setLocationSectionCollapsed((collapsed) => !collapsed)}
                                 >{locationSectionCollapsed ? <ChevronDown /> : <ChevronUp />}</button>}
                             </div>
-                            {!activeDocument && <div className={styles.fileList}>
-                                {files.map((file) => <div className={styles.fileRow} key={file.path}>
+                            {!activeDocument && <>
+                                <div className={styles.locationSearch}>
+                                    <DrawerSearchField
+                                        ariaLabel='Search locations'
+                                        onChange={setLocationSearch}
+                                        placeholder='Search locations'
+                                        value={locationSearch}
+                                        variant='panel'
+                                    />
+                                </div>
+                                <div className={styles.fileList}>
+                                {visibleFiles.map((file) => <div className={styles.fileRow} key={file.path}>
                                     <button type='button' className={styles.fileButton} aria-current={false} onClick={() => handleOpenFile(file)} disabled={isBusy} title={file.path}>
                                         <PrimaryCategoryIcon tabLabel={locationTabByType[file.type]} /><span>{file.name.replace(/\.json$/i, '')}</span>
                                     </button>
                                 </div>)}
                                 {files.length === 0 && <div className={styles.noData}>No bundled GeoJSON files found.</div>}
-                            </div>}
+                                {files.length > 0 && visibleFiles.length === 0 && <div className={styles.noData}>No locations match your search.</div>}
+                                </div>
+                            </>}
                             {activeDocument && !locationSectionCollapsed && editorMode === 'fields' && <div className={styles.featureList}>
                                 {activeDocument.features.map((item, index) => (
                                     <div className={styles.featureRow} key={`${index}-${item.id ?? item.properties.name}`}>
@@ -520,7 +572,7 @@ export default function EditPage() {
                         {feature && <section className={styles.panelSection}>
                             <h3 className={styles.sectionTitle}>{editorMode === 'fields' ? `${geometryLabel(feature.geometry.type)} properties` : 'GeoJSON'}</h3>
                             {editorMode === 'fields'
-                                ? <FeaturePropertiesEditor feature={feature} onChange={updateProperties} disabled={isBusy} />
+                                ? <FeaturePropertiesEditor canDemoteTitleToSpot={canDemoteTitleToSpot} feature={feature} onChange={updateProperties} disabled={isBusy} />
                                 : <div className={styles.rawEditorPanel}>
                                     <div className={styles.rawEditorActions}>
                                         <button type='button' className={styles.iconButton} onClick={() => void handleCopyRawGeoJson()} title='Copy raw GeoJSON' aria-label='Copy raw GeoJSON'><Clipboard /></button>

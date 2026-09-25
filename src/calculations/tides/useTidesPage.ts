@@ -7,11 +7,11 @@ import { defaultTideStationsData, fetchTideStations, getTidePredictions, getWeig
 import type { TidesPageProps, TidesPageState, TideStationState } from './tidesTypes';
 import { formatDateInput, getCurrentTideStatus, getTideSelectedDate, sortByStationDistance } from './tidesUtils';
 
-export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): TidesPageState {
+export function useTidesPage({ embedded = false, initialCoordinates }: Readonly<TidesPageProps>): TidesPageState {
     const queryCoordinates = useMemo(() => embedded ? null : getQueryCoordinates(), [embedded]);
     const queryDate = useMemo(() => embedded ? null : getQueryDate(), [embedded]);
-    const hasExplicitCoordinates = queryCoordinates !== null;
-    const startingCoordinates = queryCoordinates ?? defaultTideCoordinates;
+    const hasExplicitCoordinates = initialCoordinates !== undefined || queryCoordinates !== null;
+    const startingCoordinates = initialCoordinates ?? queryCoordinates ?? defaultTideCoordinates;
     const shouldRequestLocation = !hasExplicitCoordinates && typeof navigator !== 'undefined' && Boolean(navigator.geolocation);
     const [coordinates, setCoordinates] = useState<Coordinates>(() => startingCoordinates);
     const [dateValue, setDateValue] = useState(() => queryDate ?? formatDateInput(new Date()));
@@ -24,6 +24,7 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
         return { status: 'success', stations: defaultTideStationsData };
     });
     const [now, setNow] = useState(() => new Date());
+    const [nowAdjusted, setNowAdjusted] = useState(false);
 
     useEffect(() => {
         if (!locationLocked) {
@@ -48,9 +49,13 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
     }, [coordinates, locationLocked]);
 
     useEffect(() => {
+        if (nowAdjusted) {
+            return;
+        }
+
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
         return () => window.clearInterval(intervalId);
-    }, []);
+    }, [nowAdjusted]);
 
     useEffect(() => {
         if (embedded) {
@@ -69,6 +74,14 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
     const onCoordinatesChange = useCallback((nextCoordinates: Coordinates) => {
         setLocationLocked(true);
         setCoordinates(nextCoordinates);
+    }, []);
+    const onTimeChange = useCallback((nextTime: Date) => {
+        setNow(nextTime);
+        setNowAdjusted(true);
+    }, []);
+    const onResetTime = useCallback(() => {
+        setNow(new Date());
+        setNowAdjusted(false);
     }, []);
     const onShare = useCallback(() => {
         const url = getPageShareUrl(getTidesPathname(), {
@@ -100,6 +113,7 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
         coordinates,
         dateValue,
         now,
+        nowAdjusted,
         shouldRequestLocation,
         selectedDate,
         stationState,
@@ -110,6 +124,8 @@ export function useTidesPage({ embedded = false }: Readonly<TidesPageProps>): Ti
         allPredictionsFailed,
         onDateChange,
         onCoordinatesChange,
+        onTimeChange,
+        onResetTime,
         onShare
     };
 }

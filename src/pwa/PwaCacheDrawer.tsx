@@ -161,6 +161,10 @@ function StorageEntryList({ entries }: Readonly<{ entries: AppStorageInfo['local
 
 function formatCacheSize(bucket: AppStorageInfo['cacheBuckets'][number]): string {
     if (bucket.unknownEntries > 0) {
+        if (bucket.bytes === 0) {
+            return 'Unknown';
+        }
+
         return `At least ${formatMegabytes(bucket.bytes)}`;
     }
 

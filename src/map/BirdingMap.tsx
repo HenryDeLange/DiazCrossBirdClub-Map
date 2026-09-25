@@ -38,6 +38,7 @@ export default function BirdingMap() {
     const [drawerHeight, setDrawerHeight] = useState(() => getStoredDrawerHeight(getViewportHeight()));
     const [openDrawer, setOpenDrawer] = useState<OpenDrawer>(initialLocationSelection ? 'locations' : null);
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
+    const [tidesLocation, setTidesLocation] = useState<AstronomyLocation | null>(null);
     const [inatLocationName, setInatLocationName] = useState<string | null>(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
@@ -70,6 +71,7 @@ export default function BirdingMap() {
     }, []);
 
     const [mapView] = useState(getStoredMapView);
+    const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(mapView.center);
     const clampedDrawerHeight = clampDrawerHeight(drawerHeight, mapHeight);
 
     const closeLocationsDrawer = useCallback(() => {
@@ -162,6 +164,7 @@ export default function BirdingMap() {
 
     const handleOpenAstronomy = useCallback((location: AstronomyLocation, tab: LocationTabName) => {
         setInatLocationName(null);
+        setTidesLocation(null);
         setSelectedLocationsTab(tab);
         setLocationSearchQuery(location.name);
         setLocationSearchVersion((current) => current + 1);
@@ -171,8 +174,21 @@ export default function BirdingMap() {
         openNestedDrawer('astra');
     }, [openNestedDrawer]);
 
+    const handleOpenTides = useCallback((location: AstronomyLocation, tab: LocationTabName) => {
+        setAstronomyLocation(null);
+        setInatLocationName(null);
+        setSelectedLocationsTab(tab);
+        setLocationSearchQuery(location.name);
+        setLocationSearchVersion((current) => current + 1);
+        setInitialFocusQuery('');
+        setLocationPath(location.name);
+        setTidesLocation(location);
+        openNestedDrawer('tides');
+    }, [openNestedDrawer]);
+
     const handleOpenInat = useCallback((locationName: string, tab: LocationTabName) => {
         setAstronomyLocation(null);
+        setTidesLocation(null);
         setInatLocationName(locationName);
         setSelectedLocationsTab(tab);
         openNestedDrawer('inat');
@@ -193,17 +209,20 @@ export default function BirdingMap() {
     const handleToggleInat = useCallback(() => {
         setInatLocationName(null);
         setAstronomyLocation(null);
+        setTidesLocation(null);
         toggleDrawer('inat');
     }, [toggleDrawer]);
     const handleToggleLocations = useCallback(() => toggleDrawer('locations'), [toggleDrawer]);
     const handleToggleTides = useCallback(() => {
         setAstronomyLocation(null);
         setInatLocationName(null);
+        setTidesLocation(null);
         toggleDrawer('tides');
     }, [toggleDrawer]);
     const handleToggleAstra = useCallback(() => {
         setAstronomyLocation(null);
         setInatLocationName(null);
+        setTidesLocation(null);
         toggleDrawer('astra');
     }, [toggleDrawer]);
     const handleOpenCache = useCallback(() => toggleDrawer('cache'), [toggleDrawer]);
@@ -299,6 +318,7 @@ export default function BirdingMap() {
                 onClose={closeDrawer}
                 onOpenInat={handleOpenInat}
                 onOpenAstronomy={handleOpenAstronomy}
+                onOpenTides={handleOpenTides}
                 onLocationSelected={handleLocationSelected}
                 onSearchCleared={handleLocationSearchCleared}
                 initialSearchQuery={locationSearchQuery}
@@ -313,6 +333,9 @@ export default function BirdingMap() {
                 onClose={closeDrawer}
                 onBack={openDrawer === 'tides' && drawerBackTarget !== null ? handleDrawerBack : undefined}
                 onToggle={handleToggleTides}
+                coordinates={tidesLocation}
+                locationName={tidesLocation?.name}
+                mapCenter={mapCenter}
             />
             <AstraControl
                 drawerHeight={clampedDrawerHeight}
@@ -323,6 +346,7 @@ export default function BirdingMap() {
                 coordinates={astronomyLocation}
                 locationName={astronomyLocation?.name}
                 onToggle={handleToggleAstra}
+                mapCenter={mapCenter}
             />
             <InstallAppButton />
             <MapLegendFooter onOpenCache={handleOpenCache} />
@@ -340,7 +364,7 @@ export default function BirdingMap() {
                 onLayerStateChange={setLayerState}
                 onTextMarkerClick={handleTextMarkerClick}
             />
-            <MapEvents />
+            <MapEvents onMapCenterChange={setMapCenter} />
         </MapContainer>
     );
 }

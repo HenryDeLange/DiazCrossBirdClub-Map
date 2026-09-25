@@ -1,4 +1,4 @@
-import { MapPinSearch, Share2 } from 'lucide-react';
+import { MapPinSearch, Share2, WavesHorizontal } from 'lucide-react';
 import { memo } from 'react';
 import { useMap } from 'react-leaflet';
 import { focusLocationGroup, type LocationTabName } from '../../locationUtils';
@@ -20,6 +20,7 @@ type LocationFeatureGroupProps = {
     onOpenInat: (locationName: string, tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
+    onOpenTides: (location: AstronomyLocation, tab: LocationTabName) => void;
 }
 
 export const LocationFeatureGroup = memo(function LocationFeatureGroup({
@@ -31,11 +32,13 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
     onClose,
     onOpenInat,
     onLocationSelected,
-    onOpenAstronomy
+    onOpenAstronomy,
+    onOpenTides
 }: Readonly<LocationFeatureGroupProps>) {
     const map = useMap();
     const heading = group.heading;
     const headingName = heading?.properties.name;
+    const headingCoordinates = heading?.geometry.type === 'Point' ? heading.geometry.coordinates : null;
     const itemsId = `location-group-items-${groupKey}`;
 
     return (
@@ -94,6 +97,21 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
                                     }}
                                     onOpen={(location) => onOpenAstronomy(location, tab)}
                                 />
+                            )}
+                            {headingCoordinates && heading.properties.category === 'title' && heading.properties.isCoastal && (
+                                <button
+                                    type='button'
+                                    className={styles.cardNav}
+                                    onClick={() => onOpenTides({
+                                        name: headingName,
+                                        latitude: headingCoordinates[1],
+                                        longitude: headingCoordinates[0]
+                                    }, tab)}
+                                    aria-label={`Open tide guide for ${headingName}`}
+                                    title={`Open tide guide for ${headingName}`}
+                                >
+                                    <WavesHorizontal className={styles.cardNavIcon} />
+                                </button>
                             )}
                             <button
                                 type='button'

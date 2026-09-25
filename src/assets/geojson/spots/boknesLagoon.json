@@ -117,7 +117,8 @@
             "type": "Feature",
             "properties": {
                 "name": "Boknes Lagoon",
-                "category": "title"
+                "category": "title",
+                "isCoastal": true
             },
             "geometry": {
                 "coordinates": [

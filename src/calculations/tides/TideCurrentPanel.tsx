@@ -20,11 +20,14 @@ export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, no
             <div className={styles.tidesCurrentRow}>
                 <div className={styles.tidesCurrentTime}>
                     <Clock3 aria-hidden='true' />
-                    <div className={styles.tidesCurrentDetails}><span>Now</span><strong>{formatTideTime(now, currentTide.timeZone)}</strong></div>
+                    <div className={styles.tidesCurrentDetails}>
+                        <span>Now</span>
+                        <strong>{formatTideTime(now, currentTide.timeZone)}</strong>
+                    </div>
                 </div>
                 <div className={`${styles.tidesCurrentDirection} ${currentTide.incoming ? styles.tidesCurrentDirectionIncoming : styles.tidesCurrentDirectionOutgoing}`}>
-                    <DirectionIcon aria-hidden='true' />
                     <div className={styles.tidesCurrentDetails}><span>{currentTide.incoming ? 'Incoming' : 'Outgoing'}</span><strong>{formatLevel(currentTide.level)} m</strong></div>
+                    <DirectionIcon aria-hidden='true' />
                 </div>
             </div>
             <div className={styles.tidesNextRow}>
@@ -33,8 +36,8 @@ export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, no
                     <div className={styles.tidesCurrentDetails}><span>Next</span><strong>{formatTideTime(currentTide.nextTide.time, currentTide.nextTide.timeZone)}</strong></div>
                 </div>
                 <div className={`${styles.tidesNextTide} ${currentTide.nextTide.high ? styles.tidesCurrentDirectionIncoming : styles.tidesCurrentDirectionOutgoing}`}>
-                    <NextTideIcon aria-hidden='true' />
                     <div className={styles.tidesCurrentDetails}><span>{currentTide.nextTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(currentTide.nextTide.level)} m</strong></div>
+                    <NextTideIcon aria-hidden='true' />
                 </div>
             </div>
             {followingTide && (
@@ -44,8 +47,8 @@ export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, no
                         <div className={styles.tidesCurrentDetails}><span>Following</span><strong>{formatTideTime(followingTide.time, followingTide.timeZone)}</strong></div>
                     </div>
                     <div className={`${styles.tidesNextTide} ${followingTide.high ? styles.tidesCurrentDirectionIncoming : styles.tidesCurrentDirectionOutgoing}`}>
-                        <FollowingTideIcon aria-hidden='true' />
                         <div className={styles.tidesCurrentDetails}><span>{followingTide.high ? 'High' : 'Low'}</span><strong>{formatLevel(followingTide.level)} m</strong></div>
+                        <FollowingTideIcon aria-hidden='true' />
                     </div>
                 </div>
             )}

@@ -3,6 +3,7 @@ import type { TidePrediction, TideStation, WeightedTideExtreme, WeightedTideLeve
 
 export type TidesPageProps = {
     embedded?: boolean;
+    initialCoordinates?: Coordinates;
 }
 
 export type TideStationState = {
@@ -33,6 +34,7 @@ export type TidesPageState = {
     coordinates: Coordinates;
     dateValue: string;
     now: Date;
+    nowAdjusted: boolean;
     shouldRequestLocation: boolean;
     selectedDate: Date | null;
     stationState: TideStationState;
@@ -43,5 +45,7 @@ export type TidesPageState = {
     allPredictionsFailed: boolean;
     onDateChange: (value: string) => void;
     onCoordinatesChange: (value: Coordinates) => void;
+    onTimeChange: (value: Date) => void;
+    onResetTime: () => void;
     onShare: () => void;
 }

@@ -81,7 +81,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                     <DrawerSearchField
                         ariaLabel='Search species by common or scientific name'
                         onChange={setSearchInput}
-                        placeholder='common/scientific name'
+                        placeholder='common / scientific name'
                         value={searchInput}
                         variant='panel'
                     />

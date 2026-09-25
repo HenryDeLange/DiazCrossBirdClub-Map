@@ -26,6 +26,7 @@ export function LocationsControl({
     onClose,
     onOpenInat,
     onOpenAstronomy,
+    onOpenTides,
     onLocationSelected,
     onSearchCleared,
     initialSearchQuery,
@@ -44,9 +45,10 @@ export function LocationsControl({
                 onLocationSelected={onLocationSelected}
                 initialFocusQuery={initialFocusQuery}
                 onOpenAstronomy={onOpenAstronomy}
+                onOpenTides={onOpenTides}
             />
         )
-    })), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat]);
+    })), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
     const allContent = useMemo(() => (searchQuery: string) => (
         <LocationFeatureDetails
             sources={locationCollectionSources}
@@ -56,8 +58,9 @@ export function LocationsControl({
             onLocationSelected={onLocationSelected}
             initialFocusQuery={initialFocusQuery}
             onOpenAstronomy={onOpenAstronomy}
+            onOpenTides={onOpenTides}
         />
-    ), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat]);
+    ), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
 
     return (
         <>

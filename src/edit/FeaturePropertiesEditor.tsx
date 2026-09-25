@@ -4,6 +4,7 @@ import styles from './EditPage.module.css';
 import type { EditorFeature } from './geojsonValidation';
 
 type FeaturePropertiesEditorProps = {
+    canDemoteTitleToSpot: boolean;
     disabled: boolean;
     feature: EditorFeature;
     onChange: (properties: FeatureProps) => void;
@@ -11,7 +12,7 @@ type FeaturePropertiesEditorProps = {
 
 const lineTypes = new Set<Geometry['type']>(['LineString', 'MultiLineString']);
 
-export function FeaturePropertiesEditor({ disabled, feature, onChange }: Readonly<FeaturePropertiesEditorProps>) {
+export function FeaturePropertiesEditor({ canDemoteTitleToSpot, disabled, feature, onChange }: Readonly<FeaturePropertiesEditorProps>) {
     const geometryType = feature.geometry.type;
     const properties = feature.properties;
     const isLine = lineTypes.has(geometryType);
@@ -44,9 +45,16 @@ export function FeaturePropertiesEditor({ disabled, feature, onChange }: Readonl
                     <span>Category <b aria-hidden='true'>*</b></span>
                     <select value={properties.category ?? ''} onChange={(event) => setProperty('category', event.target.value)}>
                         <option value='' disabled>Select a category</option>
-                        <option value='spot'>Spot</option>
+                        {(properties.category === 'spot' || canDemoteTitleToSpot) && <option value='spot'>Spot</option>}
                         <option value='title'>Title</option>
                     </select>
+                </label>
+            )}
+
+            {geometryType === 'Point' && properties.category === 'title' && (
+                <label className={styles.checkboxField}>
+                    <span>Coastal location</span>
+                    <input type='checkbox' role='switch' checked={properties.isCoastal ?? false} onChange={(event) => setProperty('isCoastal', event.target.checked)} />
                 </label>
             )}
 
