@@ -5,7 +5,8 @@
       "type": "Feature",
       "properties": {
         "name": "Fish River Mouth",
-        "category": "title"
+        "category": "title",
+        "isCoastal": true
       },
       "geometry": {
         "coordinates": [
