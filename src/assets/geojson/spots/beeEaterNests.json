@@ -1,0 +1,20 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bee-Eater Nests",
+        "category": "spot",
+        "description": "White-Fronted Bee-Eaters are open seen in the area near Boknes bridge. One of the areas with many nest holes are nearby at a sand quary site."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          26.72499,
+          -33.64014
+        ]
+      }
+    }
+  ]
+}
