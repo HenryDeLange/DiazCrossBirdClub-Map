@@ -337,6 +337,10 @@
     padding: 0.1rem 0 0.25rem;
 }
 
+.astra-page-embedded .astra-clock-wrap {
+    width: min(100%, 560px, 78vw, 62dvh);
+}
+
 .astra-clock-corner {
     position: absolute;
     display: flex;
@@ -543,6 +547,13 @@
     font-size: 7.5px;
     font-weight: 800;
     letter-spacing: 0.4px;
+}
+
+.astra-clock-center-segment-time {
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0;
 }
 
 .astra-clock-center-date {

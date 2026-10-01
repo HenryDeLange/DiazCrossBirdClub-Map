@@ -12,21 +12,34 @@ type EditorMapProps = {
     features: EditorFeature[];
     filePath: string;
     onChange: (features: EditorFeature[]) => void;
+    onGeometryModeChange: (active: boolean) => void;
     onSelect: (index: number) => void;
 }
 
 type EditorFeatureWithKey = Feature<Geometry, FeatureProps & { __editorKey: string }>;
-type SerializableLayer = L.Layer & { feature?: EditorFeatureWithKey; toGeoJSON: () => Feature | FeatureCollection };
+type SerializableLayer = L.Layer & { feature?: EditorFeatureWithKey; toGeoJSON: (precision?: number | false) => Feature | FeatureCollection };
 
 const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
 
-export function EditorMap({ editable, features, filePath, onChange, onSelect }: Readonly<EditorMapProps>) {
+export function EditorMap({ editable, features, filePath, onChange, onGeometryModeChange, onSelect }: Readonly<EditorMapProps>) {
     const map = useMap();
     const previousFilePath = useRef('');
+    const featuresRef = useRef(features);
+    const onChangeRef = useRef(onChange);
+    const onSelectRef = useRef(onSelect);
+    const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+    const handleEditRef = useRef<(() => void) | null>(null);
+
+    useEffect(() => {
+        featuresRef.current = features;
+        onChangeRef.current = onChange;
+        onSelectRef.current = onSelect;
+    }, [features, onChange, onSelect]);
 
     useEffect(() => {
         if (!editable) {
             previousFilePath.current = '';
+            onGeometryModeChange(false);
             return;
         }
         map.pm.addControls({
@@ -44,21 +57,28 @@ export function EditorMap({ editable, features, filePath, onChange, onSelect }: 
             cutPolygon: false,
             rotateMode: false
         });
+        const updateGeometryMode = () => {
+            onGeometryModeChange(map.pm.globalEditModeEnabled() || map.pm.globalDragModeEnabled());
+        };
+        map.on('pm:globaleditmodetoggled', updateGeometryMode);
+        map.on('pm:globaldragmodetoggled', updateGeometryMode);
 
-        return () => map.pm.removeControls();
-    }, [editable, map]);
+        return () => {
+            map.off('pm:globaleditmodetoggled', updateGeometryMode);
+            map.off('pm:globaldragmodetoggled', updateGeometryMode);
+            if (map.pm.globalEditModeEnabled()) {
+                map.pm.disableGlobalEditMode();
+            }
+            if (map.pm.globalDragModeEnabled()) {
+                map.pm.disableGlobalDragMode();
+            }
+            map.pm.removeControls();
+            onGeometryModeChange(false);
+        };
+    }, [editable, map, onGeometryModeChange]);
 
     useEffect(() => {
-        if (!editable) {
-            return;
-        }
-        const keyedFeatures = features.map((feature, index) => ({
-            ...feature,
-            properties: { ...feature.properties, __editorKey: String(index) }
-        }));
-        const sources = new Map(keyedFeatures.map((feature, index) => [String(index), feature]));
-        const collection: FeatureCollection<Geometry, FeatureProps & { __editorKey: string }> = { type: 'FeatureCollection', features: keyedFeatures };
-        const geoJsonLayer = L.geoJSON(collection, {
+        const geoJsonLayer = L.geoJSON(createFeatureCollection(featuresRef.current), {
             style: (feature) => getFeatureStyle(feature?.properties),
             pointToLayer: (_feature, latlng) => L.circleMarker(latlng, {
                 radius: 7,
@@ -69,10 +89,11 @@ export function EditorMap({ editable, features, filePath, onChange, onSelect }: 
             }),
             onEachFeature: (feature, layer) => {
                 const index = Number((feature.properties as FeatureProps & { __editorKey: string }).__editorKey);
-                layer.on('click', () => onSelect(index));
+                layer.on('click', () => onSelectRef.current(index));
             }
         });
         geoJsonLayer.addTo(map);
+        geoJsonLayerRef.current = geoJsonLayer;
         if (filePath && previousFilePath.current !== filePath) {
             const bounds = geoJsonLayer.getBounds();
             if (bounds.isValid()) {
@@ -86,25 +107,24 @@ export function EditorMap({ editable, features, filePath, onChange, onSelect }: 
             geoJsonLayer.eachLayer((layer) => {
                 const keyedLayer = layer as SerializableLayer;
                 const key = keyedLayer.feature?.properties.__editorKey;
-                const original = key === undefined ? undefined : sources.get(key);
+                const original = key === undefined ? undefined : featuresRef.current[Number(key)];
                 if (!original) {
                     return;
                 }
 
-                const serialized = keyedLayer.toGeoJSON();
+                const serialized = keyedLayer.toGeoJSON(false);
                 const parts = serialized.type === 'FeatureCollection' ? serialized.features : [serialized];
-                const properties = { ...original.properties } as FeatureProps & { __editorKey?: string };
-                delete properties.__editorKey;
                 const geometry = combineGeometry(original.geometry.type, parts);
                 if (geometry) {
-                    next[Number(key)] = { ...original, properties, geometry } as EditorFeature;
+                    next[Number(key)] = { ...original, geometry } as EditorFeature;
                 }
             });
 
             return next.filter((feature): feature is EditorFeature => feature !== undefined);
         };
 
-        const handleEdit = () => onChange(readFeatures());
+        const handleEdit = () => onChangeRef.current(readFeatures());
+        handleEditRef.current = handleEdit;
         const handleCreate = (event: L.PM.CreateEventHandler extends (event: infer T) => void ? T : never) => {
             const createdLayer = event.layer as SerializableLayer;
             const serialized = createdLayer.toGeoJSON();
@@ -113,22 +133,99 @@ export function EditorMap({ editable, features, filePath, onChange, onSelect }: 
             }
             const feature = serialized as EditorFeature;
             feature.properties = feature.geometry.type === 'Point' ? { name: '', category: 'spot' } : { name: '' };
+            const currentFeatures = featuresRef.current;
+            const index = currentFeatures.length;
             geoJsonLayer.addLayer(createdLayer);
-            const keyedCreatedLayer = createdLayer as SerializableLayer & { feature: EditorFeatureWithKey };
-            keyedCreatedLayer.feature = { ...feature, properties: { ...feature.properties, __editorKey: String(features.length) } };
-            createdLayer.on('click', () => onSelect(features.length));
-            onChange([...features, feature]);
-            onSelect(features.length);
+            const keyedCreatedLayer = createdLayer as SerializableLayer;
+            keyedCreatedLayer.feature = { ...feature, properties: { ...feature.properties, __editorKey: String(index) } };
+            createdLayer.on('pm:edit', handleEdit);
+            createdLayer.on('pm:dragend', handleEdit);
+            createdLayer.on('click', () => onSelectRef.current(index));
+            onChangeRef.current([...currentFeatures, feature]);
+            onSelectRef.current(index);
         };
-        map.on('pm:edit', handleEdit);
-        map.on('pm:create', handleCreate);
+        if (editable) {
+            geoJsonLayer.eachLayer((layer) => {
+                layer.on('pm:edit', handleEdit);
+                layer.on('pm:dragend', handleEdit);
+            });
+            map.on('pm:create', handleCreate);
+        }
 
         return () => {
-            map.off('pm:edit', handleEdit);
-            map.off('pm:create', handleCreate);
+            if (editable) {
+                geoJsonLayer.eachLayer((layer) => {
+                    layer.off('pm:edit', handleEdit);
+                    layer.off('pm:dragend', handleEdit);
+                });
+                map.off('pm:create', handleCreate);
+            }
             map.removeLayer(geoJsonLayer);
+            if (geoJsonLayerRef.current === geoJsonLayer) {
+                geoJsonLayerRef.current = null;
+            }
+            if (handleEditRef.current === handleEdit) {
+                handleEditRef.current = null;
+            }
         };
-    }, [editable, features, filePath, map, onChange, onSelect]);
+    }, [editable, filePath, map]);
+
+    useEffect(() => {
+        const geoJsonLayer = geoJsonLayerRef.current;
+        if (!geoJsonLayer) {
+            return;
+        }
+
+        const layersByKey = new Map<string, SerializableLayer>();
+        geoJsonLayer.eachLayer((layer) => {
+            const keyedLayer = layer as SerializableLayer;
+            const key = keyedLayer.feature?.properties.__editorKey;
+            if (key !== undefined) {
+                layersByKey.set(key, keyedLayer);
+            }
+        });
+
+        let rebuildLayers = layersByKey.size !== features.length;
+        if (!rebuildLayers) {
+            rebuildLayers = features.some((feature, index) => {
+                const layer = layersByKey.get(String(index));
+                if (!layer || layer.feature?.geometry.type !== feature.geometry.type) {
+                    return true;
+                }
+                const serialized = layer.toGeoJSON(false);
+                const parts = serialized.type === 'FeatureCollection' ? serialized.features : [serialized];
+                const geometry = combineGeometry(feature.geometry.type, parts);
+                return !geometry || JSON.stringify(geometry) !== JSON.stringify(feature.geometry);
+            });
+        }
+
+        if (rebuildLayers) {
+            geoJsonLayer.clearLayers();
+            geoJsonLayer.addData(createFeatureCollection(features));
+            if (editable && handleEditRef.current) {
+                geoJsonLayer.eachLayer((layer) => {
+                    layer.on('pm:edit', handleEditRef.current!);
+                    layer.on('pm:dragend', handleEditRef.current!);
+                });
+            }
+        }
+
+        geoJsonLayer.eachLayer((layer) => {
+            const keyedLayer = layer as SerializableLayer;
+            const key = keyedLayer.feature?.properties.__editorKey;
+            if (key === undefined) {
+                return;
+            }
+            const feature = features[Number(key)];
+            if (!feature) {
+                return;
+            }
+            keyedLayer.feature = { ...feature, properties: { ...feature.properties, __editorKey: key } };
+            if (keyedLayer instanceof L.Path) {
+                keyedLayer.setStyle(getFeatureStyle(feature.properties));
+            }
+        });
+    }, [editable, features, filePath, map]);
 
     return (
         <>
@@ -205,4 +302,14 @@ function combineGeometry(type: Geometry['type'], parts: Feature<Geometry>[]): Ge
         return coordinates.length ? { type, coordinates } : null;
     }
     return geometries[0] ?? null;
+}
+
+function createFeatureCollection(features: EditorFeature[]): FeatureCollection<Geometry, FeatureProps & { __editorKey: string }> {
+    return {
+        type: 'FeatureCollection',
+        features: features.map((feature, index) => ({
+            ...feature,
+            properties: { ...feature.properties, __editorKey: String(index) }
+        }))
+    };
 }

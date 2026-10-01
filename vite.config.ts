@@ -52,7 +52,7 @@ export default defineConfig({
             devOptions: {
                 enabled: true
             },
-            registerType: 'autoUpdate',
+            registerType: 'prompt',
             strategies: 'generateSW',
             workbox: {
                 cleanupOutdatedCaches: true,

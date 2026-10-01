@@ -1,7 +1,7 @@
 import type { FeatureCollection, Geometry } from 'geojson';
 import {
-    ArrowLeft, Check, ChevronDown, ChevronUp, Clipboard, ClipboardPaste, Layers,
-    LoaderCircle, MapPin, Plus, Route, Trash2, VectorPolygon, X
+    ArrowLeft, Check, ChevronDown, ChevronUp, CircleCheck, Clipboard, ClipboardPaste, Layers,
+    LoaderCircle, MapPin, Plus, Redo2, Route, Trash2, TriangleAlert, Undo2, VectorPolygon, X
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
 import { MapContainer } from 'react-leaflet';
@@ -20,7 +20,8 @@ import { validateFeatureCollection, type EditorFeature } from './geojsonValidati
 type BusyAction = 'loading' | 'handoff' | null;
 type EditorMode = 'fields' | 'raw';
 type LocationType = GitHubGeoJsonFile['type'];
-type ResizeAxis = 'x' | 'y';
+type ResizeAxis = 'x' | 'y' | 'feature-list';
+type GeometryHistory = { future: Geometry[][]; past: Geometry[][] };
 type ActiveDocument = {
     dirty: boolean;
     features: EditorFeature[];
@@ -34,6 +35,8 @@ const locationTypes: LocationType[] = ['outings', 'paths', 'points', 'spots'];
 const minimumDesktopPanelWidth = 18 * 16;
 const defaultDesktopPanelWidth = 23 * 16;
 const minimumMobilePanelHeight = 14 * 16;
+const minimumFeatureListHeight = 6 * 16;
+const defaultFeatureListHeight = 13 * 16;
 const locationTabByType: Record<LocationType, LocationTabName> = {
     outings: 'Outings',
     paths: 'Paths',
@@ -56,12 +59,19 @@ export default function EditPage() {
     const [isCreating, setIsCreating] = useState(false);
     const [desktopPanelWidth, setDesktopPanelWidth] = useState<number | null>(null);
     const [mobilePanelHeight, setMobilePanelHeight] = useState<number | null>(null);
+    const [featureListHeight, setFeatureListHeight] = useState<number | null>(null);
+    const [mobileEditorTab, setMobileEditorTab] = useState<'locations' | 'properties'>('locations');
+    const [canUndoGeometry, setCanUndoGeometry] = useState(false);
+    const [canRedoGeometry, setCanRedoGeometry] = useState(false);
+    const [geometryModeActive, setGeometryModeActive] = useState(false);
     const [selectedFeature, setSelectedFeature] = useState(0);
     const [newLocationName, setNewLocationName] = useState('');
     const [newLocationType, setNewLocationType] = useState<LocationType>('spots');
     const [confirmDelete, setConfirmDelete] = useState(false);
     const workspaceRef = useRef<HTMLElement>(null);
+    const panelBodyRef = useRef<HTMLDivElement>(null);
     const resizeAxis = useRef<ResizeAxis | null>(null);
+    const geometryHistory = useRef<GeometryHistory>({ past: [], future: [] });
 
     const validation = activeDocument
         ? validateFeatureCollection({ type: 'FeatureCollection', features: activeDocument.features })
@@ -71,15 +81,34 @@ export default function EditPage() {
         return () => window.clearTimeout(timeout);
     }, [locationSearch]);
 
+    useEffect(() => {
+        if (!activeDocument?.dirty) {
+            return;
+        }
+        const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+            event.preventDefault();
+            event.returnValue = '';
+        };
+        window.addEventListener('beforeunload', warnBeforeUnload);
+        return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+    }, [activeDocument?.dirty]);
+
     const visibleFiles = files
         .filter((file) => !debouncedLocationSearch || `${file.name} ${file.path}`.toLowerCase().includes(debouncedLocationSearch))
         .sort((left, right) => left.name.replace(/\.json$/i, '').localeCompare(right.name.replace(/\.json$/i, ''), undefined, { sensitivity: 'base' })
             || left.path.localeCompare(right.path));
     const isBusy = busy !== null;
     const pointCount = activeDocument?.features.filter((item) => item.geometry.type === 'Point').length ?? 0;
-    const workspaceStyle: CSSProperties & { '--editor-panel-width'?: string; '--editor-panel-height'?: string } = {
+    const workspaceStyle: CSSProperties & { '--editor-panel-width'?: string; '--editor-panel-height'?: string; '--editor-feature-list-height'?: string } = {
         '--editor-panel-width': desktopPanelWidth === null ? undefined : `${desktopPanelWidth}px`,
-        '--editor-panel-height': mobilePanelHeight === null ? undefined : `${mobilePanelHeight}px`
+        '--editor-panel-height': mobilePanelHeight === null ? undefined : `${mobilePanelHeight}px`,
+        '--editor-feature-list-height': featureListHeight === null ? undefined : `${featureListHeight}px`
+    };
+
+    const clearGeometryHistory = () => {
+        geometryHistory.current = { past: [], future: [] };
+        setCanUndoGeometry(false);
+        setCanRedoGeometry(false);
     };
 
     const handleResizePointerDown = (event: ReactPointerEvent<HTMLDivElement>, axis: ResizeAxis) => {
@@ -89,6 +118,19 @@ export default function EditPage() {
     };
 
     const handleResizePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
+        if (resizeAxis.current === 'feature-list') {
+            const panelBody = panelBodyRef.current;
+            if (!panelBody) {
+                return;
+            }
+            const bounds = panelBody.getBoundingClientRect();
+            setFeatureListHeight(clampPanelSize(
+                event.clientY - bounds.top,
+                minimumFeatureListHeight,
+                getMaxFeatureListHeight(panelBody)
+            ));
+            return;
+        }
         const workspace = workspaceRef.current;
         const axis = resizeAxis.current;
         if (!workspace || !axis) {
@@ -123,12 +165,20 @@ export default function EditPage() {
                 getMaxDesktopPanelWidth(workspaceRef.current)
             ));
         }
-        else {
+        else if (axis === 'y') {
             const currentHeight = mobilePanelHeight ?? window.innerHeight * 0.44;
             setMobilePanelHeight(clampPanelSize(
                 currentHeight + (event.key === positiveKey ? delta : -delta),
                 minimumMobilePanelHeight,
                 getMaxMobilePanelHeight(workspaceRef.current)
+            ));
+        }
+        else {
+            const currentHeight = featureListHeight ?? defaultFeatureListHeight;
+            setFeatureListHeight(clampPanelSize(
+                currentHeight + (event.key === positiveKey ? delta : -delta),
+                minimumFeatureListHeight,
+                getMaxFeatureListHeight(panelBodyRef.current)
             ));
         }
     };
@@ -139,10 +189,15 @@ export default function EditPage() {
     };
 
     const handleBackToLocations = () => {
+        if (activeDocument?.dirty && !window.confirm('Discard unsaved changes to this GeoJSON document?')) {
+            return;
+        }
         setActiveDocument(null);
         setIsCreating(false);
         setConfirmDelete(false);
         setError('');
+        setMobileEditorTab('locations');
+        clearGeometryHistory();
     };
 
     const handleOpenFile = async (file: GitHubGeoJsonFile) => {
@@ -159,6 +214,7 @@ export default function EditPage() {
                 path: file.path,
                 type: file.type
             });
+            clearGeometryHistory();
             setLocationSectionCollapsed(false);
             setIsCreating(false);
             setRawGeoJson(serializeFeatures(features));
@@ -166,6 +222,7 @@ export default function EditPage() {
             setEditorMode('fields');
             setClipboardFeedback('');
             setSelectedFeature(0);
+            setMobileEditorTab('locations');
             setConfirmDelete(false);
         }
         catch (openError) {
@@ -195,6 +252,7 @@ export default function EditPage() {
             geometry: { type: 'Point', coordinates: [defaultMapCenter.lng, defaultMapCenter.lat] }
         };
         setActiveDocument({ dirty: true, features: [firstFeature], isNew: true, name: fileName, path, type: newLocationType });
+        clearGeometryHistory();
         setLocationSectionCollapsed(false);
         setIsCreating(false);
         setRawGeoJson(serializeFeatures([firstFeature]));
@@ -202,12 +260,75 @@ export default function EditPage() {
         setEditorMode('fields');
         setClipboardFeedback('');
         setSelectedFeature(0);
+        setMobileEditorTab('locations');
         setNewLocationName('');
         setError('');
     };
 
-    const updateFeatures = useCallback((features: EditorFeature[]) => {
+    const updateFeatures = (features: EditorFeature[]) => {
+        if (!activeDocument) {
+            return;
+        }
+        const previousGeometries = activeDocument.features.map((item) => item.geometry);
+        const sameFeatureShapes = activeDocument.features.length === features.length
+            && activeDocument.features.every((item, index) => item.geometry.type === features[index].geometry.type);
+        const changedGeometry = sameFeatureShapes
+            && previousGeometries.some((geometry, index) => JSON.stringify(geometry) !== JSON.stringify(features[index].geometry));
+        if (changedGeometry) {
+            geometryHistory.current = {
+                past: [...geometryHistory.current.past, previousGeometries].slice(-50),
+                future: []
+            };
+            setCanUndoGeometry(true);
+            setCanRedoGeometry(false);
+        }
+        else if (!sameFeatureShapes) {
+            clearGeometryHistory();
+        }
         setActiveDocument((current) => current ? { ...current, dirty: true, features } : current);
+    };
+
+    const handleUndoGeometry = () => {
+        if (!activeDocument) {
+            return;
+        }
+        const { past, future } = geometryHistory.current;
+        const previousGeometries = past[past.length - 1];
+        if (!previousGeometries || !canApplyGeometries(activeDocument.features, previousGeometries)) {
+            clearGeometryHistory();
+            return;
+        }
+        geometryHistory.current = {
+            past: past.slice(0, -1),
+            future: [activeDocument.features.map((item) => item.geometry), ...future].slice(0, 50)
+        };
+        setCanUndoGeometry(past.length > 1);
+        setCanRedoGeometry(true);
+        setActiveDocument({ ...activeDocument, dirty: true, features: applyGeometries(activeDocument.features, previousGeometries) });
+    };
+
+    const handleRedoGeometry = () => {
+        if (!activeDocument) {
+            return;
+        }
+        const { past, future } = geometryHistory.current;
+        const nextGeometries = future[0];
+        if (!nextGeometries || !canApplyGeometries(activeDocument.features, nextGeometries)) {
+            clearGeometryHistory();
+            return;
+        }
+        geometryHistory.current = {
+            past: [...past, activeDocument.features.map((item) => item.geometry)].slice(-50),
+            future: future.slice(1)
+        };
+        setCanUndoGeometry(true);
+        setCanRedoGeometry(future.length > 1);
+        setActiveDocument({ ...activeDocument, dirty: true, features: applyGeometries(activeDocument.features, nextGeometries) });
+    };
+
+    const handleSelectFeature = useCallback((index: number) => {
+        setSelectedFeature(index);
+        setMobileEditorTab('properties');
     }, []);
 
     const updateProperties = useCallback((properties: FeatureProps) => {
@@ -282,6 +403,8 @@ export default function EditPage() {
     const handleRawGeoJsonChange = (value: string) => {
         setRawGeoJson(value);
         setClipboardFeedback('');
+        clearGeometryHistory();
+        setActiveDocument((current) => current ? { ...current, dirty: true } : current);
         let parsed: unknown;
         try {
             parsed = JSON.parse(value);
@@ -334,6 +457,7 @@ export default function EditPage() {
         }
         const features = [...activeDocument.features];
         [features[index], features[nextIndex]] = [features[nextIndex], features[index]];
+        clearGeometryHistory();
         setActiveDocument({ ...activeDocument, dirty: true, features });
         setSelectedFeature(nextIndex);
     };
@@ -353,6 +477,7 @@ export default function EditPage() {
                 properties: { ...features[replacementIndex].properties, category: 'title' }
             };
         }
+        clearGeometryHistory();
         setActiveDocument({ ...activeDocument, dirty: true, features });
         setSelectedFeature((selected) => selected === index
             ? Math.min(index, features.length - 1)
@@ -364,8 +489,12 @@ export default function EditPage() {
             return;
         }
 
-        const mobileDevice = window.matchMedia('(pointer: coarse)').matches;
-        const githubTab = mobileDevice ? null : window.open('about:blank', '_blank');
+        const githubTab = window.open('about:blank', '_blank');
+        if (!githubTab) {
+            setError('The browser blocked the new tab. Allow pop-ups for this site and try again.');
+            return;
+        }
+        githubTab.opener = null;
         setBusy('handoff');
         setError('');
         try {
@@ -378,13 +507,7 @@ export default function EditPage() {
             };
             await navigator.clipboard.writeText(`${JSON.stringify(collection, null, 2)}\n`);
             const url = getGitHubFileUrl(activeDocument.path, activeDocument.isNew ? 'new' : 'edit');
-            if (githubTab) {
-                githubTab.opener = null;
-                githubTab.location.replace(url);
-            }
-            else {
-                window.location.assign(url);
-            }
+            githubTab.location.replace(url);
         }
         catch (handoffError) {
             githubTab?.close();
@@ -414,20 +537,28 @@ export default function EditPage() {
             <header className={styles.topbar}>
                 <div className={styles.toolbarRow}>
                     <div className={styles.brand}>
-                        <a href={getBasePathname()} className={styles.iconButton} title='Back to the birding map' aria-label='Back to the birding map'><ArrowLeft /></a>
+                        <a href={getBasePathname()} className={styles.ghostIconButton} title='Back to the birding map' aria-label='Back to the birding map'><ArrowLeft /></a>
                         <div className={styles.brandTitle}><strong>Editor</strong></div>
+                        {activeDocument && editorMode === 'fields' && geometryModeActive && <div className={styles.historyActions}>
+                            <button type='button' className={styles.iconButton} onClick={handleUndoGeometry} disabled={isBusy || !canUndoGeometry} title='Undo map geometry change' aria-label='Undo map geometry change'><Undo2 /></button>
+                            <button type='button' className={styles.iconButton} onClick={handleRedoGeometry} disabled={isBusy || !canRedoGeometry} title='Redo map geometry change' aria-label='Redo map geometry change'><Redo2 /></button>
+                        </div>}
                     </div>
                     <div className={styles.topbarActions}>
-                        {!activeDocument && !isCreating && <button type='button' className={`${styles.button} ${styles.buttonPrimary}`} onClick={handleBeginCreate} disabled={isBusy}><Plus /> Create</button>}
+                        {!activeDocument && !isCreating && <button type='button' className={`${styles.button} ${styles.outlineButton}`} onClick={handleBeginCreate} disabled={isBusy}><Plus /> Create</button>}
                         {activeDocument && !confirmDelete && <>
-                            {!activeDocument.isNew && !confirmDelete && <button type='button' className={styles.dangerButton} onClick={() => setConfirmDelete(true)} disabled={isBusy}><Trash2 /> Delete</button>}
-                            <button type='button' className={`${styles.button} ${styles.buttonPrimary}`} onClick={() => void handleOpenGitHubEditor()} disabled={isBusy || !activeDocument.dirty || !validation.valid || rawErrors.length > 0}>
-                                {busy === 'handoff' ? <LoaderCircle /> : <Clipboard />} Copy, Open GitHub
+                            {!activeDocument.isNew && !confirmDelete && <button type='button' className={`${styles.button} ${styles.outlineButton}`} onClick={() => setConfirmDelete(true)} disabled={isBusy}><Trash2 /> Delete</button>}
+                            <button type='button' className={`${styles.button} ${styles.outlineButton}`} onClick={() => void handleOpenGitHubEditor()} disabled={isBusy || !activeDocument.dirty || !validation.valid || rawErrors.length > 0}>
+                                {busy !== null
+                                    ? <LoaderCircle />
+                                    : !validation.valid || rawErrors.length > 0
+                                        ? <TriangleAlert />
+                                        : !activeDocument.dirty ? <CircleCheck /> : <Clipboard />} Copy, Open GitHub
                             </button>
                         </>}
                         {confirmDelete && <div className={styles.deleteConfirm}>
                             <span>Delete file?</span>
-                            <button type='button' className={styles.dangerButton} onClick={handleDeleteOnGitHub} disabled={isBusy}><Trash2 /> Continue</button>
+                            <button type='button' className={styles.dangerButton} onClick={handleDeleteOnGitHub} disabled={isBusy}><Trash2 /> Confirm delete</button>
                             <button type='button' className={styles.iconButton} onClick={() => setConfirmDelete(false)} aria-label='Cancel delete'><X /></button>
                         </div>}
                     </div>
@@ -447,7 +578,8 @@ export default function EditPage() {
                             features={activeDocument?.features ?? []}
                             filePath={activeDocument?.path ?? ''}
                             onChange={updateFeatures}
-                            onSelect={setSelectedFeature}
+                            onGeometryModeChange={setGeometryModeActive}
+                            onSelect={handleSelectFeature}
                             editable={activeDocument !== null && editorMode === 'fields' && !isBusy}
                         />
                     </MapContainer>
@@ -489,7 +621,7 @@ export default function EditPage() {
 
                 <aside className={styles.sidePanel} id='editor-panel' aria-label='GeoJSON editor'>
                     <div className={styles.panelHeader}>
-                        {(activeDocument || isCreating) && <button type='button' className={styles.iconButton} onClick={handleBackToLocations} title='Back to locations' aria-label='Back to locations'><ArrowLeft /></button>}
+                        {(activeDocument || isCreating) && <button type='button' className={styles.ghostIconButton} onClick={handleBackToLocations} title='Back to locations' aria-label='Back to locations'><ArrowLeft /></button>}
                         <h2>{activeDocument ? activeDocument.name : isCreating ? 'New location' : 'Locations'}</h2>
                         {activeDocument && <button
                             type='button'
@@ -499,8 +631,15 @@ export default function EditPage() {
                             title={editorMode === 'fields' ? 'Show JSON' : 'Show Fields'}
                         >{editorMode === 'fields' ? 'Show JSON' : 'Show Fields'}</button>}
                     </div>
-                    <div className={`${styles.panelBody} ${editorMode === 'raw' ? styles.rawPanelBody : ''}`}>
-                        {!isCreating && (!activeDocument || editorMode === 'fields') && <section className={styles.panelSection}>
+                    <div
+                        ref={panelBodyRef}
+                        className={`${styles.panelBody} ${editorMode === 'raw' ? styles.rawPanelBody : ''} ${activeDocument && editorMode === 'fields' ? `${styles.featureEditorBody} ${mobileEditorTab === 'locations' ? styles.mobileLocationsActive : styles.mobilePropertiesActive}` : ''}`}
+                    >
+                        {activeDocument && editorMode === 'fields' && <div className={styles.mobileEditorTabs} role='group' aria-label='Editor sections'>
+                            <button type='button' aria-pressed={mobileEditorTab === 'locations'} onClick={() => setMobileEditorTab('locations')}>Birding location</button>
+                            <button type='button' aria-pressed={mobileEditorTab === 'properties'} onClick={() => setMobileEditorTab('properties')}>Field properties</button>
+                        </div>}
+                        {!isCreating && (!activeDocument || editorMode === 'fields') && <section className={`${styles.panelSection} ${activeDocument ? styles.locationPanelSection : ''} ${locationSectionCollapsed ? styles.locationListCollapsed : ''}`}>
                             <div className={styles.locationSectionHeading}>
                                 <h3 className={styles.sectionTitle}>{activeDocument ? 'Birding location' : 'Existing locations'}</h3>
                                 {activeDocument && <div className={styles.locationTypeBadge}>
@@ -536,10 +675,10 @@ export default function EditPage() {
                                 {files.length > 0 && visibleFiles.length === 0 && <div className={styles.noData}>No locations match your search.</div>}
                                 </div>
                             </>}
-                            {activeDocument && !locationSectionCollapsed && editorMode === 'fields' && <div className={styles.featureList}>
+                            {activeDocument && editorMode === 'fields' && <div className={`${styles.featureList} ${locationSectionCollapsed ? styles.featureListCollapsed : ''}`} id='editor-feature-list'>
                                 {activeDocument.features.map((item, index) => (
                                     <div className={styles.featureRow} key={`${index}-${item.id ?? item.properties.name}`}>
-                                        <button type='button' className={styles.featureButton} aria-pressed={selectedFeature === index} onClick={() => setSelectedFeature(index)}>
+                                        <button type='button' className={styles.featureButton} aria-pressed={selectedFeature === index} onClick={() => { setSelectedFeature(index); setMobileEditorTab('properties'); }}>
                                             <FeatureGeometryIcon geometryType={item.geometry.type} />
                                             <span>{item.properties.name || 'Unnamed feature'}</span>
                                             {item.properties.category === 'title' && <span className={styles.titleTag}>Title</span>}
@@ -554,6 +693,23 @@ export default function EditPage() {
                             </div>}
                         </section>}
 
+                        {activeDocument && editorMode === 'fields' && !locationSectionCollapsed && <div
+                            className={`${styles.resizeHandle} ${styles.featureResizeHandle}`}
+                            role='separator'
+                            aria-label='Resize birding location list'
+                            aria-orientation='horizontal'
+                            aria-controls='editor-feature-list'
+                            aria-valuemin={minimumFeatureListHeight}
+                            aria-valuemax={Math.max(minimumFeatureListHeight, window.innerHeight * 0.55)}
+                            aria-valuenow={featureListHeight ?? defaultFeatureListHeight}
+                            tabIndex={0}
+                            onPointerDown={(event) => handleResizePointerDown(event, 'feature-list')}
+                            onPointerMove={handleResizePointerMove}
+                            onPointerUp={handleResizePointerEnd}
+                            onPointerCancel={handleResizePointerEnd}
+                            onKeyDown={(event) => handleResizeKeyDown(event, 'feature-list')}
+                        />}
+
                         {!activeDocument && isCreating && <section className={`${styles.panelSection} ${styles.createSection}`}>
                             <div className={styles.formGrid}>
                                 <label className={styles.field}>
@@ -566,22 +722,29 @@ export default function EditPage() {
                                     <span>Location name</span>
                                     <input value={newLocationName} onChange={(event) => setNewLocationName(event.target.value)} maxLength={120} onKeyDown={(event) => { if (event.key === 'Enter') handleCreateLocation(); }} />
                                 </label>
-                                <button type='button' className={`${styles.button} ${styles.buttonPrimary}`} onClick={handleCreateLocation} disabled={isBusy}><Check /> Confirm</button>
+                                <button type='button' className={`${styles.button} ${styles.outlineButton}`} onClick={handleCreateLocation} disabled={isBusy}><Check /> Confirm</button>
                             </div>
                         </section>}
 
-                        {feature && <section className={`${styles.panelSection} ${editorMode === 'raw' ? styles.rawEditorSection : ''}`}>
-                            <h3 className={styles.sectionTitle}>{editorMode === 'fields' ? `${geometryLabel(feature.geometry.type)} properties` : 'GeoJSON'}</h3>
+                        {feature && <section className={`${styles.panelSection} ${editorMode === 'raw' ? styles.rawEditorSection : styles.propertyPanelSection}`}>
                             {editorMode === 'fields'
-                                ? <FeaturePropertiesEditor canDemoteTitleToSpot={canDemoteTitleToSpot} feature={feature} onChange={updateProperties} disabled={isBusy} />
-                                : <div className={styles.rawEditorPanel}>
-                                    <div className={styles.rawEditorActions}>
+                                ? <>
+                                    <h3 className={styles.sectionTitle}>{geometryLabel(feature.geometry.type)} properties</h3>
+                                    <FeaturePropertiesEditor canDemoteTitleToSpot={canDemoteTitleToSpot} feature={feature} onChange={updateProperties} disabled={isBusy} />
+                                </>
+                                : <>
+                                    <div className={styles.rawEditorHeader}>
+                                        <h3 className={styles.sectionTitle}>GeoJSON</h3>
+                                        <div className={styles.rawEditorActions}>
                                         <button type='button' className={styles.iconButton} onClick={() => void handleCopyRawGeoJson()} title='Copy raw GeoJSON' aria-label='Copy raw GeoJSON'><Clipboard /></button>
                                         <button type='button' className={styles.iconButton} onClick={() => void handlePasteRawGeoJson()} title='Paste GeoJSON from clipboard' aria-label='Paste GeoJSON from clipboard'><ClipboardPaste /></button>
                                         {clipboardFeedback && <span role='status'>{clipboardFeedback}</span>}
+                                        </div>
                                     </div>
-                                    <textarea className={styles.rawEditor} aria-label='Raw GeoJSON' spellCheck={false} value={rawGeoJson} onChange={(event) => handleRawGeoJsonChange(event.target.value)} />
-                                </div>}
+                                    <div className={styles.rawEditorPanel}>
+                                        <textarea className={styles.rawEditor} aria-label='Raw GeoJSON' spellCheck={false} value={rawGeoJson} onChange={(event) => handleRawGeoJsonChange(event.target.value)} />
+                                    </div>
+                                </>}
                         </section>}
 
                         {activeDocument && editorErrors.length > 0 && <div className={styles.validationBox} role='alert'>
@@ -615,6 +778,23 @@ function getMaxMobilePanelHeight(workspace: HTMLElement | null): number {
         return window.innerHeight * 0.44;
     }
     return Math.max(minimumMobilePanelHeight, workspaceHeight - window.innerHeight * 0.34 - 8);
+}
+
+function getMaxFeatureListHeight(panelBody: HTMLElement | null): number {
+    const panelHeight = panelBody?.getBoundingClientRect().height;
+    if (panelHeight === undefined) {
+        return defaultFeatureListHeight;
+    }
+    return Math.max(minimumFeatureListHeight, panelHeight - 12 * 16);
+}
+
+function canApplyGeometries(features: EditorFeature[], geometries: Geometry[]): boolean {
+    return features.length === geometries.length
+        && features.every((feature, index) => feature.geometry.type === geometries[index].type);
+}
+
+function applyGeometries(features: EditorFeature[], geometries: Geometry[]): EditorFeature[] {
+    return features.map((feature, index) => ({ ...feature, geometry: geometries[index] }));
 }
 
 function clampPanelSize(value: number, minimum: number, maximum: number): number {

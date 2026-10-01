@@ -8,7 +8,7 @@ type MapLegendFooterProps = {
 
 export function MapLegendFooter({ onOpenCache }: Readonly<MapLegendFooterProps>) {
     const { preference, cyclePreference } = useTheme();
-    const themeLabel = preference === 'system' ? 'auto' : preference;
+    const themeLabel = preference === 'system' ? 'Auto' : `${preference.slice(0, 1).toUpperCase()}${preference.slice(1)}`;
 
     return (
         <>
@@ -23,9 +23,9 @@ export function MapLegendFooter({ onOpenCache }: Readonly<MapLegendFooterProps>)
                 </div>
             </div>
             <div className={styles.footerActions} role='group' aria-label='Map actions'>
-                <a href={getEditPathname()} className={styles.action} title='Edit GeoJSON locations' aria-label='Edit GeoJSON locations'>edit</a>
+                    <a href={getEditPathname()} className={styles.action} title='Edit GeoJSON locations' aria-label='Edit GeoJSON locations'>Edit</a>
                 <span aria-hidden='true'>|</span>
-                <button type='button' className={styles.action} onClick={onOpenCache} title='Clear cached app data' aria-label='Clear cached app data'>cache</button>
+                    <button type='button' className={styles.action} onClick={onOpenCache} title='Clear cached app data' aria-label='Clear cached app data'>Cache</button>
                 <span aria-hidden='true'>|</span>
                 <button type='button' className={styles.action} onClick={cyclePreference} title={`Theme: ${themeLabel}. Select to cycle light, dark, and auto.`} aria-label={`Theme: ${themeLabel}. Select to cycle light, dark, and auto.`}>{themeLabel}</button>
             </div>

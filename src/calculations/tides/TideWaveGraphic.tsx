@@ -138,6 +138,7 @@ export const TideWaveGraphic = memo(function TideWaveGraphic({ extremes, date, n
                         onKeyDown={handleKeyDown}
                     >
                         <title>{currentTimeLabel}. Drag or use the arrow keys to change time.</title>
+                        <line className={styles.tidesCurrentTimeHitArea} x1={currentTimePoint.x} y1='8' x2={currentTimePoint.x} y2='220' />
                         <circle className={styles.tidesCurrentTimeCircle} cx={currentTimePoint.x} cy='-8' r='16' />
                         <Clock3 className={styles.tidesCurrentTimeIcon} x={currentTimePoint.x - 11} y={-19} width='22' height='22' aria-hidden='true' />
                     </g>}

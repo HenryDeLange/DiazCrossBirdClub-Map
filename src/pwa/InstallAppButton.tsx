@@ -1,21 +1,25 @@
-import { ArrowBigDownDash } from 'lucide-react';
+import { ArrowBigDownDash, RefreshCw } from 'lucide-react';
 import { MapControlButton } from '../map/components/MapControlButton';
+import { usePwaUpdate } from './pwaUpdate';
 import { usePwaInstall } from './usePwaInstall';
 
 export function InstallAppButton() {
     const { canInstall, install } = usePwaInstall();
+    const { isUpdateAvailable, reloadWithUpdate } = usePwaUpdate();
 
-    if (!canInstall) {
+    if (!canInstall && !isUpdateAvailable) {
         return null;
     }
 
     return (
         <MapControlButton
             groupClassName='installGroup'
-            onClick={() => void install()}
-            title='Install DCBC Birding Map'
+            onClick={() => void (isUpdateAvailable ? reloadWithUpdate() : install())}
+            title={isUpdateAvailable ? 'Reload DCBC Birding Map' : 'Install DCBC Birding Map'}
         >
-            <ArrowBigDownDash aria-hidden='true' />
+            {isUpdateAvailable
+                ? <RefreshCw aria-hidden='true' />
+                : <ArrowBigDownDash aria-hidden='true' />}
         </MapControlButton>
     );
 }

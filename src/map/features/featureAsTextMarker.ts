@@ -1,5 +1,5 @@
 import * as geojson from 'geojson';
-import { DivIcon, LatLng, Layer, Marker } from 'leaflet';
+import { CircleMarker, DivIcon, LatLng, Layer, LayerGroup, Marker } from 'leaflet';
 import type { FeatureProps } from '../geojson/types';
 import { onEachFeatureShowPopup } from './featurePopup';
 import { escapeHtml } from './htmlUtils';
@@ -24,11 +24,20 @@ export function pointToLayerShowText(
         const divIcon = new DivIcon({
             html: markerName,
             className: 'spot-marker',
-            iconSize: [350, 8]
+            iconSize: [350, 8],
+            iconAnchor: [175, 28]
         });
         const marker = new Marker(latlng, { icon: divIcon, zIndexOffset: 999 });
+        const point = new CircleMarker(latlng, {
+            radius: 5,
+            color: '#fff',
+            weight: 2,
+            fillColor: '#0f8094',
+            fillOpacity: 1
+        });
         onEachFeatureShowPopup(feature, marker);
-        return marker;
+        onEachFeatureShowPopup(feature, point);
+        return new LayerGroup([point, marker]);
     }
     else {
         const divIcon = new DivIcon({

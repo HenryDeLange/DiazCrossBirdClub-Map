@@ -1,7 +1,7 @@
 import { memo } from 'react';
-import styles from './AstraPage.module.css';
 import { AstraClockPanel } from './AstraClock';
 import { AstraDetailsPanel } from './AstraDetailsPanel';
+import styles from './AstraPage.module.css';
 import type { SkyEvent } from './astraTypes';
 import type { AstronomyData, TimelineSegment } from './sunTimes';
 
@@ -31,6 +31,7 @@ export const AstraDashboard = memo(function AstraDashboard({ astronomy, now, cur
                         astronomy={astronomy}
                         now={now}
                         currentMinutes={currentMinutes}
+                        selectedSegment={selectedSegment}
                         selectedSegmentId={selectedSegmentId}
                         selectedMarkerId={selectedMarkerId}
                         isCurrentTimeSelected={isCurrentTimeSelected}

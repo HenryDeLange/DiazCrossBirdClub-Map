@@ -1,4 +1,5 @@
 import type { Geometry } from 'geojson';
+import { Check } from 'lucide-react';
 import type { FeatureProps } from '../map/geojson/types';
 import styles from './EditPage.module.css';
 import type { EditorFeature } from './geojsonValidation';
@@ -15,6 +16,7 @@ const lineTypes = new Set<Geometry['type']>(['LineString', 'MultiLineString']);
 export function FeaturePropertiesEditor({ canDemoteTitleToSpot, disabled, feature, onChange }: Readonly<FeaturePropertiesEditorProps>) {
     const geometryType = feature.geometry.type;
     const properties = feature.properties;
+    const isCoastal = properties.isCoastal ?? false;
     const isLine = lineTypes.has(geometryType);
 
     const setProperty = (key: keyof FeatureProps, value: string | number | boolean) => {
@@ -37,7 +39,7 @@ export function FeaturePropertiesEditor({ canDemoteTitleToSpot, disabled, featur
             </label>
             <label className={styles.field}>
                 <span>Description</span>
-                <textarea value={properties.description ?? ''} onChange={(event) => setProperty('description', event.target.value)} rows={3} maxLength={2000} />
+                <textarea value={properties.description ?? ''} onChange={(event) => setProperty('description', event.target.value)} rows={3} maxLength={2000} spellCheck />
             </label>
 
             {geometryType === 'Point' && (
@@ -52,10 +54,14 @@ export function FeaturePropertiesEditor({ canDemoteTitleToSpot, disabled, featur
             )}
 
             {geometryType === 'Point' && properties.category === 'title' && (
-                <label className={styles.checkboxField}>
+                <div className={styles.field}>
                     <span>Coastal location</span>
-                    <input type='checkbox' role='switch' checked={properties.isCoastal ?? false} onChange={(event) => setProperty('isCoastal', event.target.checked)} />
-                </label>
+                    <label className={styles.checkboxOption}>
+                        <input className={styles.checkboxInput} type='checkbox' checked={isCoastal} onChange={(event) => setProperty('isCoastal', event.target.checked)} />
+                        <span className={`${styles.checkboxMark} ${isCoastal ? styles.checkboxMarkChecked : ''}`} aria-hidden='true'>{isCoastal && <Check />}</span>
+                        <span>{isCoastal ? 'Is coastal' : 'Is not coastal'}</span>
+                    </label>
+                </div>
             )}
 
             {isLine && (

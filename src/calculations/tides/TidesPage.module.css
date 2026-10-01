@@ -434,6 +434,13 @@
     stroke: none;
 }
 
+.tides-current-time-hit-area {
+    stroke: transparent;
+    stroke-width: 24;
+    pointer-events: stroke;
+    vector-effect: non-scaling-stroke;
+}
+
 .tides-current-time-icon {
     color: var(--tides-muted);
     display: block;
