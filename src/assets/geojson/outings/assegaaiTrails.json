@@ -8,11 +8,11 @@
         "category": "title"
       },
       "geometry": {
+        "type": "Point",
         "coordinates": [
           26.5776897,
           -33.4736724
-        ],
-        "type": "Point"
+        ]
       }
     },
     {
@@ -24,6 +24,7 @@
         "linkWeb": "https://assegaaitrails.co.za"
       },
       "geometry": {
+        "type": "Polygon",
         "coordinates": [
           [
             [
@@ -43,16 +44,20 @@
               -33.49313612156752
             ],
             [
-              26.563579389302888,
-              -33.50410129260527
+              26.560829907852458,
+              -33.49964420300661
             ],
             [
-              26.568204320892107,
-              -33.503563760563964
+              26.564383826841357,
+              -33.50391563917023
             ],
             [
-              26.569598926533615,
-              -33.50512143932535
+              26.566693792304953,
+              -33.50668396051776
+            ],
+            [
+              26.56991971826679,
+              -33.50635395487983
             ],
             [
               26.5812859,
@@ -79,8 +84,7 @@
               -33.4772404
             ]
           ]
-        ],
-        "type": "Polygon"
+        ]
       }
     },
     {
@@ -91,6 +95,7 @@
         "road": "access"
       },
       "geometry": {
+        "type": "LineString",
         "coordinates": [
           [
             26.53399433967172,
@@ -192,8 +197,22 @@
             26.567844957699037,
             -33.50275858934822
           ]
-        ],
-        "type": "LineString"
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Assegaai Trails - Office",
+        "category": "spot",
+        "description": "The entrance gate and main office."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          26.562372,
+          -33.500919
+        ]
       }
     },
     {
@@ -219,6 +238,7 @@
         "road": "birding"
       },
       "geometry": {
+        "type": "LineString",
         "coordinates": [
           [
             26.56937172312712,
@@ -464,8 +484,7 @@
             26.5930183,
             -33.4924133
           ]
-        ],
-        "type": "LineString"
+        ]
       }
     },
     {
@@ -476,6 +495,7 @@
         "road": "birding"
       },
       "geometry": {
+        "type": "LineString",
         "coordinates": [
           [
             26.57393299614796,
@@ -621,8 +641,7 @@
             26.568746485672392,
             -33.50303538907747
           ]
-        ],
-        "type": "LineString"
+        ]
       }
     },
     {
@@ -633,6 +652,7 @@
         "road": "birding"
       },
       "geometry": {
+        "type": "LineString",
         "coordinates": [
           [
             26.569910780724683,
@@ -666,15 +686,14 @@
             26.570743379875154,
             -33.503886606879576
           ]
-        ],
-        "type": "LineString"
+        ]
       }
     },
     {
       "type": "Feature",
       "properties": {
-        "name": "Assegaai Trails - Office",
-        "description": "The main office.",
+        "name": "Assegaai Trails - Conference Center",
+        "description": "The large conference venue.",
         "category": "spot"
       },
       "geometry": {
