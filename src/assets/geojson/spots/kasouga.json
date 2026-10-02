@@ -5,7 +5,8 @@
       "type": "Feature",
       "properties": {
         "name": "Kasouga",
-        "category": "title"
+        "category": "title",
+        "isCoastal": true
       },
       "geometry": {
         "type": "Point",
@@ -432,7 +433,8 @@
       "type": "Feature",
       "properties": {
         "name": "Kasouga  - Parking Area",
-        "category": "spot"
+        "category": "spot",
+        "description": "The main parking area at the lagoon."
       },
       "geometry": {
         "type": "Point",
