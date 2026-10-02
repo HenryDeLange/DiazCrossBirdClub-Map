@@ -8,12 +8,20 @@ export type INatObservationRequest = {
     webUrl: string;
 }
 
+export type SmoothedMapBounds = {
+    north: number;
+    east: number;
+    south: number;
+    west: number;
+}
+
 export function getINatObservationRequest(map: LeafletMap): INatObservationRequest {
     const bounds = map.getBounds();
     const boundsQuery = createBoundsQuery(bounds);
     const apiQuery = new URLSearchParams({
         captive: 'false',
         iconic_taxa: 'Aves',
+        preferred_place_id: '6986',
         ...Object.fromEntries(boundsQuery),
         verifiable: 'true',
         per_page: '500'
@@ -44,15 +52,25 @@ export function getINatTaxonObservationsUrl(webUrl: string, taxonId: number | un
     return url.toString();
 }
 
-function createBoundsQuery(bounds: LatLngBounds): URLSearchParams {
+export function getSmoothedMapBounds(bounds: LatLngBounds): SmoothedMapBounds {
     const northEast = bounds.getNorthEast();
     const southWest = bounds.getSouthWest();
 
+    return {
+        north: roundOutward(northEast.lat, 'max'),
+        east: roundOutward(northEast.lng, 'max'),
+        south: roundOutward(southWest.lat, 'min'),
+        west: roundOutward(southWest.lng, 'min')
+    };
+}
+
+function createBoundsQuery(bounds: LatLngBounds): URLSearchParams {
+    const { north, east, south, west } = getSmoothedMapBounds(bounds);
     return new URLSearchParams({
-        nelat: String(roundOutward(northEast.lat, 'max')),
-        nelng: String(roundOutward(northEast.lng, 'max')),
-        swlat: String(roundOutward(southWest.lat, 'min')),
-        swlng: String(roundOutward(southWest.lng, 'min'))
+        nelat: String(north),
+        nelng: String(east),
+        swlat: String(south),
+        swlng: String(west)
     });
 }
 

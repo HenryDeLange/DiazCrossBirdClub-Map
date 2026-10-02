@@ -105,6 +105,37 @@ export default defineConfig({
                         }
                     },
                     {
+                        // Refresh occurrence facets for the rounded visible area, falling back to cache when offline.
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'gbif-occurrence-search',
+                            networkTimeoutSeconds: 4,
+                            expiration: {
+                                maxEntries: 300,
+                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90 // ~3 months
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        },
+                        urlPattern: ({ url }) => url.origin === 'https://api.gbif.org' && url.pathname === '/v1/occurrence/search'
+                    },
+                    {
+                        // Species names and taxonomy change slowly, so reuse cached details for up to three months.
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'gbif-species-details',
+                            expiration: {
+                                maxEntries: 10000,
+                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        },
+                        urlPattern: ({ url }) => url.origin === 'https://api.gbif.org' && /^\/v1\/species\/\d+$/.test(url.pathname)
+                    },
+                    {
                         // iNaturalist taxon photos (thumbnails shown in the species list), served either
                         // from static.inaturalist.org or directly from the S3 bucket (region-specific subdomains included)
                         // e.g. https://inaturalist-open-data.s3.amazonaws.com/photos/9818143/medium.jpeg

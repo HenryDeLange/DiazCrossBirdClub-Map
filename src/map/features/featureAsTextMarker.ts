@@ -52,13 +52,13 @@ export function pointToLayerShowText(
                     return;
                 }
 
-                const width = Math.ceil(element.getBoundingClientRect().width);
-                const height = Math.ceil(element.getBoundingClientRect().height);
+                const width = Math.ceil(element.scrollWidth);
+                const height = Math.ceil(element.scrollHeight);
                 marker.setIcon(new DivIcon({
                     html: markerName,
                     className: 'text-marker',
                     iconSize: [width, height],
-                    iconAnchor: [width / 2, 0]
+                    iconAnchor: [width / 2, height + 4]
                 }));
             });
         });

@@ -1,33 +1,44 @@
-import { Copyright } from 'lucide-react';
+import { Copyright, Heart } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import styles from './SpeciesListControl.module.css';
 import type { INatSpeciesCardProps } from './types';
 
 export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INatSpeciesCardProps>) {
-    const [isAttributionOpen, setIsAttributionOpen] = useState(false);
-    const attributionRef = useRef<HTMLDivElement | null>(null);
+    const [openPopup, setOpenPopup] = useState<'attribution' | 'conservation' | null>(null);
+    const cardRef = useRef<HTMLDivElement | null>(null);
     const image = speciesCount.taxon.default_photo ?? null;
     const mediumImageUrl = image?.medium_url ?? '';
     const squareImageUrl = image?.square_url ?? '';
+    const conservationStatus = speciesCount.taxon.conservation_status;
+    const statusLabel = conservationStatus?.status_name
+        ? conservationStatus.status_name.charAt(0).toUpperCase() + conservationStatus.status_name.slice(1)
+        : conservationStatus?.status;
+    const hasConservationStatus = Boolean(statusLabel);
     const [imageUrl, setImageUrl] = useState(mediumImageUrl || squareImageUrl);
 
     useEffect(() => {
-        if (!isAttributionOpen) {
+        if (!openPopup) {
             return;
         }
 
-        const handleOutsideClick = (event: MouseEvent) => {
-            if (attributionRef.current && !attributionRef.current.contains(event.target as Node)) {
-                setIsAttributionOpen(false);
+        const handleOutsidePointerDown = (event: PointerEvent) => {
+            const card = cardRef.current;
+            const clickedInsidePopup = card !== null && event.composedPath().some((target) => (
+                target instanceof Element
+                && card.contains(target)
+                && (target.matches('[role="tooltip"]') || target.matches('button[aria-expanded="true"]'))
+            ));
+            if (!clickedInsidePopup) {
+                setOpenPopup(null);
             }
         };
 
-        document.addEventListener('mousedown', handleOutsideClick);
-        return () => document.removeEventListener('mousedown', handleOutsideClick);
-    }, [isAttributionOpen]);
+        document.addEventListener('pointerdown', handleOutsidePointerDown, true);
+        return () => document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
+    }, [openPopup]);
 
     return (
-        <div className={styles.card}>
+        <div ref={cardRef} className={styles.card}>
             <div className={styles.cardMedia}>
                 {imageUrl ? (
                     <img
@@ -59,7 +70,30 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
                 </a>
             </div>
             <div className={styles.cardMeta}>
-                <span className={styles.cardScientific}><i>{speciesCount.taxon.name}</i></span>
+                <div className={styles.cardScientificRow}>
+                    <span className={styles.cardScientific}><i>{speciesCount.taxon.name}</i></span>
+                    {hasConservationStatus && (
+                        <button
+                            type='button'
+                            className={`${styles.cardMetaIconTrigger} ${styles.conservationTrigger}`}
+                            aria-label='Show conservation status'
+                            aria-expanded={openPopup === 'conservation'}
+                            title={`Conservation status: ${statusLabel ?? ''}${conservationStatus?.authority ? ` (${conservationStatus.authority})` : ''}`}
+                            onClick={() => setOpenPopup((current) => current === 'conservation' ? null : 'conservation')}
+                        >
+                            <Heart className={styles.cardMetaIcon} />
+                        </button>
+                    )}
+                    {openPopup === 'conservation' && hasConservationStatus && (
+                        <div className={styles.cardMetaPopup} role='tooltip'>
+                            <strong>{statusLabel}</strong>
+                            {conservationStatus?.authority && <span>Authority: {conservationStatus.authority}</span>}
+                            {conservationStatus?.status && conservationStatus.status !== conservationStatus.status_name && (
+                                <span>Code: {conservationStatus.status}</span>
+                            )}
+                        </div>
+                    )}
+                </div>
                 <div className={styles.cardMetaRow}>
                     {typeof speciesCount.count === 'number' && (
                         observationsUrl ? (
@@ -71,20 +105,18 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
                         )
                     )}
                     {image?.attribution && (
-                        <div className={styles.cardAttribution} ref={attributionRef}>
-                            <button
-                                type='button'
-                                className={styles.cardAttributionTrigger}
-                                aria-label='Show image attribution'
-                                aria-expanded={isAttributionOpen}
-                                onClick={() => setIsAttributionOpen((current) => !current)}
-                            >
-                                <Copyright className={styles.cardAttributionIcon} />
-                            </button>
-                            {isAttributionOpen && (
-                                <div className={styles.cardAttributionTooltip}>{image.attribution}</div>
-                            )}
-                        </div>
+                        <button
+                            type='button'
+                            className={styles.cardMetaIconTrigger}
+                            aria-label='Show image attribution'
+                            aria-expanded={openPopup === 'attribution'}
+                            onClick={() => setOpenPopup((current) => current === 'attribution' ? null : 'attribution')}
+                        >
+                            <Copyright className={styles.cardMetaIcon} />
+                        </button>
+                    )}
+                    {openPopup === 'attribution' && image?.attribution && (
+                        <div className={styles.cardMetaPopup} role='tooltip'>{image.attribution}</div>
                     )}
                 </div>
             </div>

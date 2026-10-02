@@ -84,13 +84,13 @@ export default function BirdingMap() {
     }, []);
 
     const closeOpenDrawerState = useCallback(() => {
-        if (openDrawerRef.current === 'locations') {
+        if (openDrawerRef.current === 'locations' || drawerBackTarget === 'locations') {
             closeLocationsDrawer();
         }
 
         setOpenDrawer(null);
         setDrawerBackTarget(null);
-    }, [closeLocationsDrawer]);
+    }, [closeLocationsDrawer, drawerBackTarget]);
 
     const openNestedDrawer = useCallback((drawer: Exclude<OpenDrawer, null>) => {
         const current = openDrawerRef.current;

@@ -15,6 +15,13 @@ export type INatTaxon = {
     name: string;
     preferred_common_name?: string;
     default_photo?: INatPhoto;
+    conservation_status?: INatConservationStatus;
+}
+
+export type INatConservationStatus = {
+    authority?: string;
+    status?: string;
+    status_name?: string;
 }
 
 export type INatPhoto = {
