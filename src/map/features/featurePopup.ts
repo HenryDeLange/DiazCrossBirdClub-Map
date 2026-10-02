@@ -4,7 +4,12 @@ import type { FeatureProps } from '../geojson/types';
 import styles from './featurePopup.module.css';
 import { escapeHtml, getSafeExternalUrl } from './htmlUtils';
 
-export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry, FeatureProps>, layer: Layer, allowPointPopup = false) {
+export function onEachFeatureShowPopup(
+    feature: geojson.Feature<geojson.Geometry, FeatureProps>,
+    layer: Layer,
+    allowPointPopup = false,
+    onTitleClick?: (searchText: string) => void
+) {
     if (feature.geometry.type === 'Point' && feature.properties.category !== 'spot' && !allowPointPopup) {
         return;
     }
@@ -18,11 +23,20 @@ export function onEachFeatureShowPopup(feature: geojson.Feature<geojson.Geometry
 
     layer.bindPopup(`
         <div class='${styles.content}'>
-            <div class='${styles.title}'>${escapeHtml(feature.properties.name ?? '')}</div>
+            <button class='${styles.title}' type='button'>${escapeHtml(feature.properties.name ?? '')}</button>
             <div class='${styles.description}'>${escapeHtml(feature.properties.description ?? '')}</div>
             ${linkMarkup}
         </div>
     `);
+
+    if (onTitleClick && feature.properties.name) {
+        layer.on('popupopen', (event) => {
+            const title = event.popup.getElement()?.querySelector<HTMLButtonElement>(`.${styles.title}`);
+            if (title) {
+                title.onclick = () => onTitleClick(feature.properties.name!);
+            }
+        });
+    }
 }
 
 function createExternalLink(label: string, value: string | undefined): string | null {

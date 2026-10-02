@@ -6,7 +6,19 @@
     background: var(--panel-bg);
 }
 
-.title { font-size: 1.05rem; font-weight: 800; color: var(--page-text); }
+.title {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--page-text);
+    font: inherit;
+    font-size: 1.05rem;
+    font-weight: 800;
+    text-align: left;
+    cursor: pointer;
+}
+
+.title:focus-visible { outline: 2px solid var(--action-color); outline-offset: 2px; }
 
 .description {
     color: var(--drawer-muted);

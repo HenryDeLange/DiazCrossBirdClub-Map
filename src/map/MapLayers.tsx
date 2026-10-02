@@ -83,7 +83,11 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                             />
                         ))}
                         {showSpotLabels && points.map((layer, index) => (
-                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
+                            <SpotNameLabels
+                                key={`spot-label-${index}`}
+                                layer={layer}
+                                onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Points')}
+                            />
                         ))}
                     </LayerGroup>
                 </LayersControl.Overlay>
@@ -97,7 +101,11 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                             />
                         ))}
                         {showSpotLabels && spots.map((layer, index) => (
-                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
+                            <SpotNameLabels
+                                key={`spot-label-${index}`}
+                                layer={layer}
+                                onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Spots')}
+                            />
                         ))}
                     </LayerGroup>
                 </LayersControl.Overlay>
@@ -111,7 +119,11 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                             />
                         ))}
                         {showSpotLabels && outings.map((layer, index) => (
-                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
+                            <SpotNameLabels
+                                key={`spot-label-${index}`}
+                                layer={layer}
+                                onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Outings')}
+                            />
                         ))}
                     </LayerGroup>
                 </LayersControl.Overlay>
