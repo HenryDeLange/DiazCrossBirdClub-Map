@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight, Clock3, RotateCcw, WavesHorizontal } from 'lucide-react';
-import { memo, type KeyboardEvent, type PointerEvent } from 'react';
+import { memo, useEffect, useMemo, useRef, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react';
+import { formatCurrentDate } from '../astra/astraUtils';
 import styles from './TidesPage.module.css';
 import type { WeightedTideExtreme } from './tideData';
 import { createSmoothPath, formatDateInput, formatLevel, formatTideTime, getCurrentTimePoint, getDateAtTimeInTimeZone, getMinutesOfDayInTimeZone, getWaveChartPoints, getWaveChartTicks } from './tidesUtils';
@@ -15,31 +16,45 @@ type TideWaveGraphicProps = {
 }
 
 export const TideWaveGraphic = memo(function TideWaveGraphic({ extremes, date, now, nowAdjusted, onDateChange, onTimeChange, onResetTime }: Readonly<TideWaveGraphicProps>) {
-    const chartPoints = getWaveChartPoints(extremes, date);
-    const visibleChartPoints = chartPoints.filter(({ x }) => x >= 20 && x <= 980);
-    const wavePath = createSmoothPath(chartPoints);
-    const chartBottom = 198;
-    const areaPath = `${wavePath} L ${chartPoints.at(-1)?.x ?? 0} ${chartBottom} L ${chartPoints[0]?.x ?? 0} ${chartBottom} Z`;
+    const chartPoints = useMemo(() => getWaveChartPoints(extremes, date), [date, extremes]);
+    const visibleChartPoints = useMemo(() => chartPoints.filter(({ x }) => x >= 20 && x <= 980), [chartPoints]);
+    const wavePath = useMemo(() => createSmoothPath(chartPoints), [chartPoints]);
+    const areaPath = useMemo(() => `${wavePath} L ${chartPoints.at(-1)?.x ?? 0} 198 L ${chartPoints[0]?.x ?? 0} 198 Z`, [chartPoints, wavePath]);
     const timeZone = extremes[0]?.timeZone ?? 'UTC';
+    const chartTicks = useMemo(() => getWaveChartTicks(date, timeZone), [date, timeZone]);
     const currentTimePoint = getCurrentTimePoint(chartPoints, timeZone, now);
     const currentTimeLabel = `Selected time ${formatTideTime(now, timeZone)}`;
     const minutesOfDay = getMinutesOfDayInTimeZone(now, timeZone);
+    const pendingMinutes = useRef<number | null>(null);
+    const pendingFrame = useRef<number | null>(null);
+
+    useEffect(() => () => {
+        if (pendingFrame.current !== null) {
+            cancelAnimationFrame(pendingFrame.current);
+        }
+    }, []);
 
     const setTimeFromMinutes = (value: number) => {
         const boundedMinutes = Math.max(0, Math.min(1439, value));
+        if (boundedMinutes === minutesOfDay) {
+            return;
+        }
+
         onTimeChange(getDateAtTimeInTimeZone(date, timeZone, Math.floor(boundedMinutes / 60), boundedMinutes % 60));
     };
 
-    const getMinutesFromPointer = (event: PointerEvent<SVGGElement>) => {
-        const bounds = event.currentTarget.ownerSVGElement?.getBoundingClientRect();
+    const getMinutesFromClientX = (clientX: number, svg: SVGSVGElement | null) => {
+        const bounds = svg?.getBoundingClientRect();
         if (!bounds?.width) {
             return null;
         }
 
-        const pointerX = ((event.clientX - bounds.left) / bounds.width) * 1000;
+        const pointerX = ((clientX - bounds.left) / bounds.width) * 1000;
         const chartX = Math.max(20, Math.min(980, pointerX));
         return Math.max(0, Math.min(1439, Math.round(((chartX - 20) / 960) * 1440)));
     };
+
+    const getMinutesFromPointer = (event: PointerEvent<SVGGElement>) => getMinutesFromClientX(event.clientX, event.currentTarget.ownerSVGElement);
 
     const handlePointerDown = (event: PointerEvent<SVGGElement>) => {
         event.preventDefault();
@@ -56,14 +71,43 @@ export const TideWaveGraphic = memo(function TideWaveGraphic({ extremes, date, n
         }
 
         const nextMinutes = getMinutesFromPointer(event);
-        if (nextMinutes !== null) {
-            setTimeFromMinutes(nextMinutes);
+        if (nextMinutes === null) {
+            return;
+        }
+
+        pendingMinutes.current = nextMinutes;
+        if (pendingFrame.current === null) {
+            pendingFrame.current = requestAnimationFrame(() => {
+                pendingFrame.current = null;
+                const pending = pendingMinutes.current;
+                pendingMinutes.current = null;
+                if (pending !== null) {
+                    setTimeFromMinutes(pending);
+                }
+            });
         }
     };
 
     const handlePointerUp = (event: PointerEvent<SVGGElement>) => {
+        if (pendingFrame.current !== null) {
+            cancelAnimationFrame(pendingFrame.current);
+            pendingFrame.current = null;
+        }
+        pendingMinutes.current = null;
+        const nextMinutes = getMinutesFromPointer(event);
+        if (nextMinutes !== null) {
+            setTimeFromMinutes(nextMinutes);
+        }
+
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
             event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    };
+
+    const handleChartClick = (event: MouseEvent<SVGSVGElement>) => {
+        const nextMinutes = getMinutesFromClientX(event.clientX, event.currentTarget);
+        if (nextMinutes !== null) {
+            setTimeFromMinutes(nextMinutes);
         }
     };
 
@@ -98,12 +142,13 @@ export const TideWaveGraphic = memo(function TideWaveGraphic({ extremes, date, n
                     {nowAdjusted && <button type='button' className={styles.tidesResetTime} onClick={onResetTime} aria-label='Reset to current time' title='Reset to current time'><RotateCcw aria-hidden='true' /></button>}
                     <span className={styles.tidesWaveNavigation}>
                         <button type='button' className={styles.tidesDayButton} onClick={() => shiftDate(-1)} aria-label='Previous day' title='Previous day'><ChevronLeft aria-hidden='true' /></button>
+                        <time className={styles.tidesDayDate} dateTime={formatDateInput(date)}>{formatCurrentDate(date)}</time>
                         <button type='button' className={styles.tidesDayButton} onClick={() => shiftDate(1)} aria-label='Next day' title='Next day'><ChevronRight aria-hidden='true' /></button>
                     </span>
                 </h2>
             </header>
             <div className={styles.tidesWaveGraphic}>
-                <svg viewBox='0 -26 1000 312' role='img' aria-label='Estimated tide heights across 24 hours with 12-hour axis markers'>
+                <svg viewBox='0 -26 1000 312' role='img' aria-label='Estimated tide heights across 24 hours. Click or tap the graph to select a time. 12-hour axis markers' onClick={handleChartClick}>
                     <defs>
                         <clipPath id='tides-wave-plot-clip'>
                             <rect x='20' y='0' width='960' height='230' />
@@ -142,7 +187,7 @@ export const TideWaveGraphic = memo(function TideWaveGraphic({ extremes, date, n
                         <circle className={styles.tidesCurrentTimeCircle} cx={currentTimePoint.x} cy='-8' r='16' />
                         <Clock3 className={styles.tidesCurrentTimeIcon} x={currentTimePoint.x - 11} y={-19} width='22' height='22' aria-hidden='true' />
                     </g>}
-                    {getWaveChartTicks(date, timeZone).map((tick) => (
+                    {chartTicks.map((tick) => (
                         <g key={tick.label} className={styles.tidesWaveTick}>
                             <line x1={tick.x} y1='220' x2={tick.x} y2='228' />
                             <text x={tick.x} y='274' textAnchor='middle'>{tick.label}</text>

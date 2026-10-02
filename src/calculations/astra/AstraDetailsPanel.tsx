@@ -11,7 +11,6 @@ type AstraDetailsPanelProps = {
     now: Date;
     selectedSegment: TimelineSegment | null;
     selectedMarkerId: string | null;
-    isTodaySelected: boolean;
     skyEvents: SkyEvent[];
     onSelectEvent: (event: SkyEvent) => void;
 }
@@ -30,8 +29,8 @@ type SkyMarkerDetails = {
     color: string;
 }
 
-export const AstraDetailsPanel = memo(function AstraDetailsPanel({ astronomy, now, selectedSegment, selectedMarkerId, isTodaySelected, skyEvents, onSelectEvent }: Readonly<AstraDetailsPanelProps>) {
-    const isCurrentTimeSelected = isTodaySelected && selectedMarkerId === 'current-time';
+export const AstraDetailsPanel = memo(function AstraDetailsPanel({ astronomy, now, selectedSegment, selectedMarkerId, skyEvents, onSelectEvent }: Readonly<AstraDetailsPanelProps>) {
+    const isCurrentTimeSelected = selectedMarkerId === 'current-time';
     const heading = getDetailHeading(astronomy, selectedSegment, selectedMarkerId, isCurrentTimeSelected);
 
     return (

@@ -7,6 +7,19 @@ const CHART_WIDTH = 960;
 const CHART_HEIGHT = 150;
 const CHART_TOP = 48;
 const MINUTES_PER_DAY = 24 * 60;
+const tideTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+const minutesOfDayFormatters = new Map<string, Intl.DateTimeFormat>();
+const zonedDateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+
+function getCachedTimeZoneFormatter(cache: Map<string, Intl.DateTimeFormat>, timeZone: string, locale: string | undefined, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+    let formatter = cache.get(timeZone);
+    if (!formatter) {
+        formatter = new Intl.DateTimeFormat(locale, { ...options, timeZone });
+        cache.set(timeZone, formatter);
+    }
+
+    return formatter;
+}
 
 export function formatDateInput(date: Date): string {
     const year = date.getFullYear();
@@ -25,7 +38,7 @@ export function getTideSelectedDate(value: string): Date | null {
 }
 
 export function formatTideTime(value: Date, timeZone: string): string {
-    return new Intl.DateTimeFormat(undefined, { timeZone, hour: 'numeric', minute: '2-digit' }).format(value);
+    return getCachedTimeZoneFormatter(tideTimeFormatters, timeZone, undefined, { hour: 'numeric', minute: '2-digit' }).format(value);
 }
 
 export function formatDistance(distance: number | undefined): string {
@@ -122,7 +135,7 @@ export function getCurrentTimePoint(points: WaveChartPoint[], timeZone: string, 
 }
 
 export function getMinutesOfDayInTimeZone(value: Date, timeZone: string): number {
-    const timeParts = new Intl.DateTimeFormat('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(value);
+    const timeParts = getCachedTimeZoneFormatter(minutesOfDayFormatters, timeZone, 'en-US', { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(value);
     const hours = Number(timeParts.find((part) => part.type === 'hour')?.value ?? 0);
     const minutes = Number(timeParts.find((part) => part.type === 'minute')?.value ?? 0);
     return hours * 60 + minutes;
@@ -132,18 +145,18 @@ export function getDateAtTimeInTimeZone(date: Date, timeZone: string, hours: num
     const [year, month, day] = formatDateInput(date).split('-').map(Number);
     const targetTime = Date.UTC(year, month - 1, day, hours, minutes);
     let timestamp = targetTime;
+    const formatter = getCachedTimeZoneFormatter(zonedDateTimeFormatters, timeZone, 'en-US', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23'
+    });
 
     for (let iteration = 0; iteration < 4; iteration += 1) {
-        const parts = new Intl.DateTimeFormat('en-US', {
-            timeZone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hourCycle: 'h23'
-        }).formatToParts(new Date(timestamp));
+        const parts = formatter.formatToParts(new Date(timestamp));
         const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find((item) => item.type === type)?.value ?? 0);
         const representedTime = Date.UTC(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'), part('second'));
         const adjustment = targetTime - representedTime;

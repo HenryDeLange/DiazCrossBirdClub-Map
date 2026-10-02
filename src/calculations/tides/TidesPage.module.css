@@ -296,7 +296,7 @@
 .tides-wave-navigation {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.1rem;
     margin-left: auto;
 }
 
@@ -306,23 +306,29 @@
     width: 2rem;
     height: 2rem;
     padding: 0;
-    border: 1px solid var(--tides-line);
-    border-radius: 50%;
-    background: var(--tides-surface);
-    color: var(--tides-ink);
+    border: 0;
+    background: transparent;
+    color: var(--tides-muted);
     cursor: pointer;
 }
 
 .tides-day-button:hover,
 .tides-day-button:focus-visible {
-    border-color: var(--tides-ink);
-    background: var(--tides-selected);
+    color: var(--tides-ink);
     outline: none;
 }
 
-.tides-day-button svg {
+.tides-wave-header h2 .tides-day-button svg {
     width: 1.15rem;
     height: 1.15rem;
+    color: currentColor;
+}
+
+.tides-day-date {
+    color: var(--tides-muted);
+    font-size: 0.78em;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .tides-current-panel strong {
@@ -386,6 +392,7 @@
     width: 100%;
     height: auto;
     overflow: visible;
+    cursor: crosshair;
 }
 
 .tides-wave-area {
@@ -438,7 +445,6 @@
     stroke: transparent;
     stroke-width: 24;
     pointer-events: stroke;
-    vector-effect: non-scaling-stroke;
 }
 
 .tides-current-time-icon {

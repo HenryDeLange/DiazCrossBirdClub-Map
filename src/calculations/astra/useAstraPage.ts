@@ -21,7 +21,6 @@ export type AstraPageState = {
     selectedSegmentId: string | null;
     selectedMarkerId: string | null;
     skyEvents: SkyEvent[];
-    isTodaySelected: boolean;
     isCurrentTimeSelected: boolean;
     onDateChange: (value: string) => void;
     onCoordinatesChange: (value: Coordinates) => void;
@@ -81,8 +80,7 @@ export function useAstraPage({ embedded = false, initialCoordinates, locationVie
         : allSegments.find((segment) => segment.id === selectedSegmentId) ?? null, [allSegments, selectedSegmentId]);
     const skyEvents = useMemo(() => astronomy ? buildSkyEvents(astronomy) : [], [astronomy]);
     const currentMinutes = minutesSinceMidnight(now);
-    const isTodaySelected = selectedDate !== null && formatDateInput(selectedDate) === formatDateInput(now);
-    const isCurrentTimeSelected = isTodaySelected && selectedMarkerId === 'current-time';
+    const isCurrentTimeSelected = selectedMarkerId === 'current-time';
 
     const onDateChange = useCallback((value: string) => setDateValue(value), []);
     const onCoordinatesChange = useCallback((value: Coordinates) => setCoordinates(value), []);
@@ -129,7 +127,6 @@ export function useAstraPage({ embedded = false, initialCoordinates, locationVie
         selectedSegmentId,
         selectedMarkerId,
         skyEvents,
-        isTodaySelected,
         isCurrentTimeSelected,
         onDateChange,
         onCoordinatesChange,

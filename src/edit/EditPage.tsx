@@ -71,6 +71,7 @@ export default function EditPage() {
     const workspaceRef = useRef<HTMLElement>(null);
     const panelBodyRef = useRef<HTMLDivElement>(null);
     const resizeAxis = useRef<ResizeAxis | null>(null);
+    const editorHistoryEntryRef = useRef(false);
     const geometryHistory = useRef<GeometryHistory>({ past: [], future: [] });
 
     const validation = activeDocument
@@ -105,11 +106,11 @@ export default function EditPage() {
         '--editor-feature-list-height': featureListHeight === null ? undefined : `${featureListHeight}px`
     };
 
-    const clearGeometryHistory = () => {
+    const clearGeometryHistory = useCallback(() => {
         geometryHistory.current = { past: [], future: [] };
         setCanUndoGeometry(false);
         setCanRedoGeometry(false);
-    };
+    }, []);
 
     const handleResizePointerDown = (event: ReactPointerEvent<HTMLDivElement>, axis: ResizeAxis) => {
         event.preventDefault();
@@ -188,9 +189,17 @@ export default function EditPage() {
         setError('');
     };
 
-    const handleBackToLocations = () => {
-        if (activeDocument?.dirty && !window.confirm('Discard unsaved changes to this GeoJSON document?')) {
+    const pushEditorHistoryEntry = useCallback(() => {
+        if (editorHistoryEntryRef.current) {
             return;
+        }
+        window.history.pushState({ ...window.history.state, editorDocument: true }, '', window.location.href);
+        editorHistoryEntryRef.current = true;
+    }, []);
+
+    const closeEditorPanel = useCallback(() => {
+        if (activeDocument?.dirty && !window.confirm('Discard unsaved changes to this GeoJSON document?')) {
+            return false;
         }
         setActiveDocument(null);
         setIsCreating(false);
@@ -198,7 +207,32 @@ export default function EditPage() {
         setError('');
         setMobileEditorTab('locations');
         clearGeometryHistory();
+        return true;
+    }, [activeDocument?.dirty, clearGeometryHistory]);
+
+    const handleBackToLocations = () => {
+        if (!closeEditorPanel()) {
+            return;
+        }
+        if (editorHistoryEntryRef.current) {
+            editorHistoryEntryRef.current = false;
+            window.history.back();
+        }
     };
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (!editorHistoryEntryRef.current) {
+                return;
+            }
+            editorHistoryEntryRef.current = false;
+            if (!closeEditorPanel()) {
+                pushEditorHistoryEntry();
+            }
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, [closeEditorPanel, pushEditorHistoryEntry]);
 
     const handleOpenFile = async (file: GitHubGeoJsonFile) => {
         setBusy('loading');
@@ -206,6 +240,7 @@ export default function EditPage() {
         try {
             const collection = await getGeoJsonFile(file.path);
             const features = collection.features as EditorFeature[];
+            pushEditorHistoryEntry();
             setActiveDocument({
                 dirty: false,
                 features,
@@ -251,6 +286,7 @@ export default function EditPage() {
             properties: { name, category: 'title' },
             geometry: { type: 'Point', coordinates: [defaultMapCenter.lng, defaultMapCenter.lat] }
         };
+        pushEditorHistoryEntry();
         setActiveDocument({ dirty: true, features: [firstFeature], isNew: true, name: fileName, path, type: newLocationType });
         clearGeometryHistory();
         setLocationSectionCollapsed(false);

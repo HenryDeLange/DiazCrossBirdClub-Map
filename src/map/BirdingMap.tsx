@@ -54,7 +54,9 @@ export default function BirdingMap() {
 
     useEffect(() => {
         const updateDimensions = () => setMapHeight(getViewportHeight());
-        const updateAfterLayout = () => window.requestAnimationFrame(updateDimensions);
+        const updateAfterLayout = () => window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(updateDimensions);
+        });
 
         window.addEventListener('resize', updateDimensions);
         window.addEventListener('orientationchange', updateDimensions);

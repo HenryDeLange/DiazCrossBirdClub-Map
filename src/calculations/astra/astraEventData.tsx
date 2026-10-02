@@ -1,20 +1,35 @@
-import { MoonStar, Sun, Sunrise, Sunset } from 'lucide-react';
+import { Bird, Moon, MoonStar, Sun, Sunrise, Sunset } from 'lucide-react';
 import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
 import MoonsetIcon from '../../assets/astra/moonset.svg?react';
-import type { SkyEvent } from './astraTypes';
+import type { AstraIcon, SkyEvent } from './astraTypes';
 import { formatMoonTime, isValidDate, minutesOnTimeline, minutesSinceMidnight } from './astraUtils';
-import { formatTime, type AstronomyData } from './sunTimes';
+import { formatTime, type AstronomyData, type TimelineSegment } from './sunTimes';
+
+export function getTimelineSegmentIcon(segment: TimelineSegment, astronomy: AstronomyData): AstraIcon {
+    if (segment.id === astronomy.moonSegment?.id) {
+        return Moon;
+    }
+
+    if (astronomy.birdingSegments.some((birdingSegment) => birdingSegment.id === segment.id)) {
+        return Bird;
+    }
+
+    return segment.label === 'Night' || segment.label === 'Midnight' ? MoonStar : Sun;
+}
 
 export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
-    const twilightEvents: SkyEvent[] = astronomy.twilightSegments.map((segment) => ({
-        id: `twilight-${segment.id}`,
-        label: segment.label,
-        value: formatTime(segment.start),
-        icon: segment.label === 'Night' || segment.label === 'Midnight' ? <MoonStar size={16} aria-hidden='true' /> : <Sun size={16} aria-hidden='true' />,
-        color: segment.color,
-        segment,
-        minutes: segment.startMinutes
-    }));
+    const twilightEvents: SkyEvent[] = astronomy.twilightSegments.map((segment) => {
+        const Icon = getTimelineSegmentIcon(segment, astronomy);
+        return {
+            id: `twilight-${segment.id}`,
+            label: segment.label,
+            value: formatTime(segment.start),
+            icon: <Icon width={16} height={16} aria-hidden='true' />,
+            color: segment.color,
+            segment,
+            minutes: segment.startMinutes
+        };
+    });
     const sunEvents: SkyEvent[] = [
         { id: 'sunrise', label: 'Sunrise', value: formatTime(astronomy.sunTimes.sunrise), time: astronomy.sunTimes.sunrise, icon: <Sunrise size={15} aria-hidden='true' /> },
         { id: 'solar-noon', label: 'Solar noon', value: formatTime(astronomy.sunTimes.solarNoon), time: astronomy.sunTimes.solarNoon, icon: <Sun size={15} aria-hidden='true' /> },

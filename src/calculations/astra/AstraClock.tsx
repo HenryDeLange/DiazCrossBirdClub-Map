@@ -1,26 +1,27 @@
-import { Bird, Clock3, Moon, Sun, SunMoon } from 'lucide-react';
+import { Bird, ChevronLeft, ChevronRight, Clock3, Moon, Sun, SunMoon } from 'lucide-react';
 import { memo, type KeyboardEvent } from 'react';
 import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
 import MoonsetIcon from '../../assets/astra/moonset.svg?react';
 import styles from './AstraPage.module.css';
+import { getTimelineSegmentIcon } from './astraEventData';
 import type { AstraIcon } from './astraTypes';
 import { annularSectorPath, formatCurrentDate, formatMinutes, formatMoonTime, getSolarMidnightMinutes, orderSegmentsForSelection, polarPoint, ringArcPath } from './astraUtils';
-import { describeMoonPhase, formatTime, type AstronomyData, type TimelineSegment } from './sunTimes';
+import { describeMoonPhase, formatDateInput, formatTime, type AstronomyData, type TimelineSegment } from './sunTimes';
 
 type AstraClockPanelProps = {
     astronomy: AstronomyData;
     now: Date;
     currentMinutes: number;
+    onDateChange: (value: string) => void;
     selectedSegment: TimelineSegment | null;
     selectedSegmentId: string | null;
     selectedMarkerId: string | null;
     isCurrentTimeSelected: boolean;
-    showCurrentTime: boolean;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
 }
 
-export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, currentMinutes, selectedSegment, selectedSegmentId, selectedMarkerId, isCurrentTimeSelected, showCurrentTime, onSelectSegment, onSelectMarker }: Readonly<AstraClockPanelProps>) {
+export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, isCurrentTimeSelected, onSelectSegment, onSelectMarker }: Readonly<AstraClockPanelProps>) {
     return (
         <div className={styles.astraClockPanel}>
             <ClockCornerEvent markerId='moonrise' label='Moonrise' value={formatMoonTime(astronomy.moonTimes.rise, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown)} icon={MoonriseIcon} position='top-left' tone='moon' selected={selectedMarkerId === 'moonrise'} onSelect={onSelectMarker} />
@@ -31,13 +32,13 @@ export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, c
                 <TimelineClock
                     astronomy={astronomy}
                     currentMinutes={currentMinutes}
+                    onDateChange={onDateChange}
                     selectedSegment={selectedSegment}
                     selectedSegmentId={selectedSegmentId}
                     selectedMarkerId={selectedMarkerId}
                     currentDate={formatCurrentDate(astronomy.date)}
                     currentTime={formatTime(now)}
                     isCurrentTimeSelected={isCurrentTimeSelected}
-                    showCurrentTime={showCurrentTime}
                     onSelectSegment={onSelectSegment}
                     onSelectMarker={onSelectMarker}
                 />
@@ -49,18 +50,26 @@ export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, c
 type TimelineClockProps = {
     astronomy: AstronomyData;
     currentMinutes: number;
+    onDateChange: (value: string) => void;
     selectedSegment: TimelineSegment | null;
     selectedSegmentId: string | null;
     selectedMarkerId: string | null;
     currentDate: string;
     currentTime: string;
     isCurrentTimeSelected: boolean;
-    showCurrentTime: boolean;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
 }
 
-const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, selectedSegment, selectedSegmentId, selectedMarkerId, currentDate, currentTime, isCurrentTimeSelected, showCurrentTime, onSelectSegment, onSelectMarker }: Readonly<TimelineClockProps>) {
+const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, currentDate, currentTime, isCurrentTimeSelected, onSelectSegment, onSelectMarker }: Readonly<TimelineClockProps>) {
+    const CenterIcon: AstraIcon = selectedSegment ? getTimelineSegmentIcon(selectedSegment, astronomy) : SunMoon;
+    const centerIconSize = selectedSegment ? 20 : 24;
+    const shiftDate = (amount: number) => {
+        const nextDate = new Date(astronomy.date);
+        nextDate.setDate(nextDate.getDate() + amount);
+        onDateChange(formatDateInput(nextDate));
+    };
+
     return (
         <svg className={styles.astraClock} viewBox='0 0 320 320' role='img' aria-label='Clickable circular timeline of solar light, moonlight and birding periods'>
             <circle className={styles.astraClockFace} cx='160' cy='160' r='148' />
@@ -72,15 +81,25 @@ const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, s
             {astronomy.moonSegment && <MoonRingSegment segment={astronomy.moonSegment} selected={astronomy.moonSegment.id === selectedSegmentId} onSelect={onSelectSegment} />}
             <circle className={styles.astraClockCenter} cx='160' cy='160' r='60' />
             <g className={styles.astraClockCenterContent} transform='translate(160 160)'>
-                <text className={styles.astraClockCenterDate} x='0' y='-32' textAnchor='middle'>{currentDate}</text>
+                <g className={styles.astraClockDateNavigation} role='button' tabIndex={0} aria-label='Previous day' onClick={() => shiftDate(-1)} onKeyDown={(event) => handleKeyboardActivation(event, () => shiftDate(-1))}>
+                    <title>Previous day</title>
+                    <circle cx='-31.5' cy='-29' r='9' fill='transparent' />
+                    <ChevronLeft className={styles.astraClockDateNavigationIcon} x='-39.5' y='-37' width='16' height='16' aria-hidden='true' />
+                </g>
+                <text className={styles.astraClockCenterDate} x='0' y='-24' textAnchor='middle'>{currentDate}</text>
+                <g className={styles.astraClockDateNavigation} role='button' tabIndex={0} aria-label='Next day' onClick={() => shiftDate(1)} onKeyDown={(event) => handleKeyboardActivation(event, () => shiftDate(1))}>
+                    <title>Next day</title>
+                    <circle cx='31.5' cy='-29' r='9' fill='transparent' />
+                    <ChevronRight className={styles.astraClockDateNavigationIcon} x='23.5' y='-37' width='16' height='16' aria-hidden='true' />
+                </g>
                 {selectedSegment && <>
-                    <text className={styles.astraClockCenterSegmentTime} x='-18' y='0' textAnchor='end' dominantBaseline='middle' fill={selectedSegment.color}>{formatTime(selectedSegment.start)}</text>
-                    <text className={styles.astraClockCenterSegmentTime} x='18' y='0' textAnchor='start' dominantBaseline='middle' fill={selectedSegment.color}>{formatTime(selectedSegment.end)}</text>
+                    <text className={styles.astraClockCenterSegmentTime} x='-13.5' y='0' textAnchor='end' dominantBaseline='middle' fill={selectedSegment.color}>{formatTime(selectedSegment.start)}</text>
+                    <text className={styles.astraClockCenterSegmentTime} x='13.5' y='0' textAnchor='start' dominantBaseline='middle' fill={selectedSegment.color}>{formatTime(selectedSegment.end)}</text>
                 </>}
-                <SunMoon className={styles.astraClockCenterIcon} x='-12' y='-12' width='24' height='24' aria-hidden='true' />
-                {showCurrentTime && <text className={styles.astraClockCenterTime} x='0' y='38' textAnchor='middle'>{currentTime}</text>}
+                <CenterIcon className={styles.astraClockCenterIcon} x={-centerIconSize / 2} y={-centerIconSize / 2} width={centerIconSize} height={centerIconSize} style={{ color: selectedSegment?.color ?? 'var(--astra-muted)', width: centerIconSize, height: centerIconSize }} aria-hidden='true' />
+                <text className={styles.astraClockCenterTime} x='0' y='38' textAnchor='middle'>{currentTime}</text>
             </g>
-            {showCurrentTime && <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={() => onSelectMarker('current-time')} />}
+            <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={() => onSelectMarker('current-time')} />
         </svg>
     );
 });

@@ -61,7 +61,12 @@ export function orderSegmentsForSelection(segments: TimelineSegment[], selectedS
 }
 
 export function formatCurrentDate(date: Date): string {
-    return new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date);
+    const formatter = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' });
+    const parts = formatter.formatToParts(date);
+    const day = parts.find((part) => part.type === 'day');
+    const month = parts.find((part) => part.type === 'month');
+
+    return day && month ? `${day.value} ${month.value}` : formatter.format(date);
 }
 
 export function getSelectedDate(value: string): Date | null {

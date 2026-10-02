@@ -9,18 +9,18 @@ type AstraDashboardProps = {
     astronomy: AstronomyData | null;
     now: Date;
     currentMinutes: number;
+    onDateChange: (value: string) => void;
     selectedSegment: TimelineSegment | null;
     selectedSegmentId: string | null;
     selectedMarkerId: string | null;
     skyEvents: SkyEvent[];
-    isTodaySelected: boolean;
     isCurrentTimeSelected: boolean;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
     onSelectEvent: (event: SkyEvent) => void;
 }
 
-export const AstraDashboard = memo(function AstraDashboard({ astronomy, now, currentMinutes, selectedSegment, selectedSegmentId, selectedMarkerId, skyEvents, isTodaySelected, isCurrentTimeSelected, onSelectSegment, onSelectMarker, onSelectEvent }: Readonly<AstraDashboardProps>) {
+export const AstraDashboard = memo(function AstraDashboard({ astronomy, now, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, skyEvents, isCurrentTimeSelected, onSelectSegment, onSelectMarker, onSelectEvent }: Readonly<AstraDashboardProps>) {
     return (
         <section className={styles.astraDashboard}>
             {!astronomy ? (
@@ -31,11 +31,11 @@ export const AstraDashboard = memo(function AstraDashboard({ astronomy, now, cur
                         astronomy={astronomy}
                         now={now}
                         currentMinutes={currentMinutes}
+                        onDateChange={onDateChange}
                         selectedSegment={selectedSegment}
                         selectedSegmentId={selectedSegmentId}
                         selectedMarkerId={selectedMarkerId}
                         isCurrentTimeSelected={isCurrentTimeSelected}
-                        showCurrentTime={isTodaySelected}
                         onSelectSegment={onSelectSegment}
                         onSelectMarker={onSelectMarker}
                     />
@@ -44,7 +44,6 @@ export const AstraDashboard = memo(function AstraDashboard({ astronomy, now, cur
                         now={now}
                         selectedSegment={selectedSegment}
                         selectedMarkerId={selectedMarkerId}
-                        isTodaySelected={isTodaySelected}
                         skyEvents={skyEvents}
                         onSelectEvent={onSelectEvent}
                     />
