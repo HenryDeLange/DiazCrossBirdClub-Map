@@ -4,9 +4,9 @@ DiazCrossBirdClub-Map is a Vite + React 19 + TypeScript PWA for exploring Diaz C
 
 ## Routing and State
 
-- `src/App.tsx` selects the map, standalone `/astra`, or standalone `/tides` view. `src/appRouting.ts` is base-path aware; `src/map/locationUtils.ts` handles location slugs and reserves `astra` and `tides`.
-- `src/map/BirdingMap.tsx` owns the Leaflet map, responsive drawer state/height, nested drawer back navigation, Escape/popstate handling, location deep links, astronomy context, map center/zoom persistence, and layer state.
-- `src/map/components/MapDrawer.tsx` is the shared animated, resizable drawer with close/back controls and optional header actions. Embedded pages own their internal scrolling.
+- `src/App.tsx` lazy-loads only the selected map, standalone `/astra`, standalone `/tides`, or `/edit` route. `src/appRouting.ts` is base-path aware; `src/map/locationUtils.ts` handles location slugs and reserves `astra` and `tides`.
+- `src/map/BirdingMap.tsx` owns the Leaflet map, responsive drawer state/height, nested drawer back navigation, Escape/popstate handling, location deep links, astronomy context, map center/zoom persistence, and layer state. Drawer-only Escape/popstate listeners are attached only while a drawer is open. Leaflet vector paths use the Canvas renderer.
+- `src/map/components/MapDrawer.tsx` is the shared animated, resizable drawer with close/back controls and optional header actions. Closed drawer content is omitted from the DOM outside its close animation; embedded Astra/Tides pages are lazy-loaded when opened. Embedded pages own their internal scrolling.
 - `src/map/controls/` contains the Locations, iNaturalist species, Astra, Tides, locate, and logo controls. Location controls preserve the selected tab and can open nested Astra or iNaturalist views.
 - `src/pwa/` contains the custom install prompt flow and the app-cache inspection/clear drawer. `src/theme/` provides the system/light/dark preference context used by the map and applied before the app renders.
 

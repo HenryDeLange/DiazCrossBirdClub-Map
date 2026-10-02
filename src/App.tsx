@@ -1,11 +1,12 @@
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { LoadingOrError } from './LoadingOrError';
 import { isAstraPath, isEditPath, isTidesPath } from './appRouting';
-import AstraPage from './calculations/astra/AstraPage';
-import TidesPage from './calculations/tides/TidesPage';
-import EditPage from './edit/EditPage';
-import BirdingMap from './map/BirdingMap';
 import { ThemeProvider } from './theme/ThemeProvider';
+
+const BirdingMap = lazy(() => import('./map/BirdingMap'));
+const AstraPage = lazy(() => import('./calculations/astra/AstraPage'));
+const TidesPage = lazy(() => import('./calculations/tides/TidesPage'));
+const EditPage = lazy(() => import('./edit/EditPage'));
 
 export default function App() {
     return (

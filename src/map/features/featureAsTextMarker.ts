@@ -1,7 +1,6 @@
 import * as geojson from 'geojson';
-import { CircleMarker, DivIcon, LatLng, Layer, LayerGroup, Marker } from 'leaflet';
+import { CircleMarker, DivIcon, LatLng, Layer, Marker } from 'leaflet';
 import type { FeatureProps } from '../geojson/types';
-import { onEachFeatureShowPopup } from './featurePopup';
 import { escapeHtml } from './htmlUtils';
 
 type TextMarkerClickPayload = {
@@ -21,13 +20,6 @@ export function pointToLayerShowText(
     const markerName = escapeHtml(name);
 
     if (feature.properties.category === 'spot') {
-        const divIcon = new DivIcon({
-            html: markerName,
-            className: 'spot-marker',
-            iconSize: [350, 8],
-            iconAnchor: [175, 28]
-        });
-        const marker = new Marker(latlng, { icon: divIcon, zIndexOffset: 999 });
         const point = new CircleMarker(latlng, {
             radius: 5,
             color: '#fff',
@@ -35,9 +27,7 @@ export function pointToLayerShowText(
             fillColor: '#0f8094',
             fillOpacity: 1
         });
-        onEachFeatureShowPopup(feature, marker);
-        onEachFeatureShowPopup(feature, point);
-        return new LayerGroup([point, marker]);
+        return point;
     }
     else {
         const divIcon = new DivIcon({
@@ -69,4 +59,21 @@ export function pointToLayerShowText(
         });
         return marker;
     }
+}
+
+export function pointToLayerSpotLabel(
+    feature: geojson.Feature<geojson.Point, FeatureProps>,
+    latlng: LatLng
+): Layer {
+    const markerName = escapeHtml(feature.properties.name ?? '');
+    const marker = new Marker(latlng, {
+        icon: new DivIcon({
+            html: markerName,
+            className: 'spot-marker',
+            iconSize: [350, 8],
+            iconAnchor: [175, 28]
+        }),
+        zIndexOffset: 999
+    });
+    return marker;
 }

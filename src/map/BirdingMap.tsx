@@ -73,7 +73,6 @@ export default function BirdingMap() {
     }, []);
 
     const [mapView] = useState(getStoredMapView);
-    const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number }>(mapView.center);
     const clampedDrawerHeight = clampDrawerHeight(drawerHeight, mapHeight);
 
     const closeLocationsDrawer = useCallback(() => {
@@ -234,7 +233,7 @@ export default function BirdingMap() {
     }, [openDrawer]);
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === 'undefined' || openDrawer === null) {
             return;
         }
 
@@ -251,7 +250,7 @@ export default function BirdingMap() {
         return () => {
             window.removeEventListener('popstate', onPopState);
         };
-    }, [closeOpenDrawerState]);
+    }, [closeOpenDrawerState, openDrawer]);
 
     useEffect(() => {
         localStorage.setItem('mapLayerState', JSON.stringify(layerState));
@@ -262,7 +261,7 @@ export default function BirdingMap() {
     }, [drawerHeight]);
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === 'undefined' || openDrawer === null) {
             return;
         }
 
@@ -277,7 +276,7 @@ export default function BirdingMap() {
         return () => {
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, [closeDrawer]);
+    }, [closeDrawer, openDrawer]);
 
     useEffect(() => {
         const initialLocationKey = initialLocationKeys[0] ?? '';
@@ -296,6 +295,7 @@ export default function BirdingMap() {
             center={mapView.center}
             zoom={mapView.zoom}
             scrollWheelZoom
+            preferCanvas
             attributionControl={false}
             zoomControl={false}
             className={styles.map}
@@ -337,7 +337,6 @@ export default function BirdingMap() {
                 onToggle={handleToggleTides}
                 coordinates={tidesLocation}
                 locationName={tidesLocation?.name}
-                mapCenter={mapCenter}
             />
             <AstraControl
                 drawerHeight={clampedDrawerHeight}
@@ -348,7 +347,6 @@ export default function BirdingMap() {
                 coordinates={astronomyLocation}
                 locationName={astronomyLocation?.name}
                 onToggle={handleToggleAstra}
-                mapCenter={mapCenter}
             />
             <InstallAppButton />
             <MapLegendFooter onOpenCache={handleOpenCache} />
@@ -366,7 +364,7 @@ export default function BirdingMap() {
                 onLayerStateChange={setLayerState}
                 onTextMarkerClick={handleTextMarkerClick}
             />
-            <MapEvents onMapCenterChange={setMapCenter} />
+            <MapEvents />
         </MapContainer>
     );
 }

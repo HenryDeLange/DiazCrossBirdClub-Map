@@ -1,10 +1,14 @@
 import { ExternalLink, WavesHorizontal } from 'lucide-react';
+import { lazy, Suspense } from 'react';
+import { useMap } from 'react-leaflet';
 import { getTidesPathname } from '../../appRouting';
 import type { Coordinates } from '../../calculations/components/dateLocationUtils';
-import TidesPage from '../../calculations/tides/TidesPage';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
+import drawerStyles from '../components/MapDrawer.module.css';
 import styles from './TidesControl.module.css';
+
+const TidesPage = lazy(() => import('../../calculations/tides/TidesPage'));
 
 type TidesControlProps = {
     drawerHeight: number;
@@ -15,10 +19,10 @@ type TidesControlProps = {
     onBack?: () => void;
     coordinates: Coordinates | null;
     locationName?: string;
-    mapCenter: { lat: number; lng: number };
 }
 
-export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName, mapCenter }: Readonly<TidesControlProps>) {
+export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName }: Readonly<TidesControlProps>) {
+    const mapCenter = useMap().getCenter();
     const initialCoordinates = coordinates ?? { latitude: mapCenter.lat, longitude: mapCenter.lng };
     const isLocationView = coordinates !== null;
 
@@ -42,7 +46,9 @@ export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'
             >
-                <TidesPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} />
+                <Suspense fallback={<div className={drawerStyles.empty} role='status'>Loading tide guide...</div>}>
+                    <TidesPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} />
+                </Suspense>
             </MapDrawer>
         </>
     );

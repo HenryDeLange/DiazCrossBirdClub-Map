@@ -37,9 +37,18 @@ export function MapDrawer({
     const [isVisible, setIsVisible] = useState(false);
     const [isSettled, setIsSettled] = useState(false);
     const [panelHeight, setPanelHeight] = useState(() => clampHeight(height, minHeight));
+    const hasBeenOpenedRef = useRef(isOpen);
     const dragRef = useRef<{ pointerId: number; startY: number; startHeight: number } | null>(null);
 
     useEffect(() => {
+        if (!isOpen && !hasBeenOpenedRef.current) {
+            return;
+        }
+
+        if (isOpen) {
+            hasBeenOpenedRef.current = true;
+        }
+
         const resetSettledFrameId = requestAnimationFrame(() => setIsSettled(false));
 
         if (isOpen) {
@@ -69,9 +78,13 @@ export function MapDrawer({
     }, [isOpen]);
 
     useEffect(() => {
+        if (!isOpen && !isRendered) {
+            return;
+        }
+
         const frameId = requestAnimationFrame(() => setPanelHeight(clampHeight(height, minHeight)));
         return () => cancelAnimationFrame(frameId);
-    }, [height, minHeight]);
+    }, [height, isOpen, isRendered, minHeight]);
 
     const handlePointerDown = (event: PointerEvent<HTMLButtonElement>) => {
         event.preventDefault();

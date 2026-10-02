@@ -1,10 +1,10 @@
-import { memo } from 'react';
-import { LayerGroup, LayersControl, TileLayer } from 'react-leaflet';
+import { memo, useEffect, useState } from 'react';
+import { LayerGroup, LayersControl, TileLayer, useMap } from 'react-leaflet';
 import { outings } from './geojson/outings';
 import { paths } from './geojson/paths';
 import { points } from './geojson/points';
 import { spots } from './geojson/spots';
-import { GenericGeoJSONLayer } from './layers/GenericGeoJSONLayer';
+import { GenericGeoJSONLayer, SpotNameLabels } from './layers/GenericGeoJSONLayer';
 import { LayerStateSync } from './layers/LayerStateSync';
 import type { LayerState, LayerStateSetter } from './layers/layerState';
 import type { LocationTabName } from './locationUtils';
@@ -18,8 +18,24 @@ type MapLayersProps = {
 
 const subdomains = ['mt0', 'mt1', 'mt2', 'mt3'];
 const maxZoom = 20;
+const spotLabelMinZoom = 15;
 
 export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLayerStateChange, onTextMarkerClick }: Readonly<MapLayersProps>) {
+    const map = useMap();
+    const [showSpotLabels, setShowSpotLabels] = useState(() => map.getZoom() >= spotLabelMinZoom);
+
+    useEffect(() => {
+        const updateSpotLabelVisibility = () => {
+            const shouldShowLabels = map.getZoom() >= spotLabelMinZoom;
+            setShowSpotLabels((current) => current === shouldShowLabels ? current : shouldShowLabels);
+        };
+
+        map.on('zoomend', updateSpotLabelVisibility);
+        return () => {
+            map.off('zoomend', updateSpotLabelVisibility);
+        };
+    }, [map]);
+
     return (
         <>
             <LayersControl position='topright'>
@@ -66,6 +82,9 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                                 onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Points')}
                             />
                         ))}
+                        {showSpotLabels && points.map((layer, index) => (
+                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
+                        ))}
                     </LayerGroup>
                 </LayersControl.Overlay>
                 <LayersControl.Overlay name='Birding Spots' checked={layerState.overlays['Birding Spots']}>
@@ -77,6 +96,9 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                                 onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Spots')}
                             />
                         ))}
+                        {showSpotLabels && spots.map((layer, index) => (
+                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
+                        ))}
                     </LayerGroup>
                 </LayersControl.Overlay>
                 <LayersControl.Overlay name='Birding Outings' checked={layerState.overlays['Birding Outings']}>
@@ -87,6 +109,9 @@ export const MapLayers = memo(function MapLayers({ isDarkMode, layerState, onLay
                                 layer={layer}
                                 onTextMarkerClick={(searchText) => onTextMarkerClick(searchText, 'Outings')}
                             />
+                        ))}
+                        {showSpotLabels && outings.map((layer, index) => (
+                            <SpotNameLabels key={`spot-label-${index}`} layer={layer} />
                         ))}
                     </LayerGroup>
                 </LayersControl.Overlay>

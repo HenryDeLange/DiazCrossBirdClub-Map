@@ -1,10 +1,14 @@
 import { ExternalLink, SunMoon } from 'lucide-react';
+import { lazy, Suspense } from 'react';
+import { useMap } from 'react-leaflet';
 import { getAstraPathname } from '../../appRouting';
-import AstraPage from '../../calculations/astra/AstraPage';
 import type { Coordinates } from '../../calculations/components/dateLocationUtils';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
+import drawerStyles from '../components/MapDrawer.module.css';
 import styles from './AstraControl.module.css';
+
+const AstraPage = lazy(() => import('../../calculations/astra/AstraPage'));
 
 type AstraControlProps = {
     drawerHeight: number;
@@ -15,10 +19,10 @@ type AstraControlProps = {
     onBack?: () => void;
     coordinates: Coordinates | null;
     locationName?: string;
-    mapCenter: { lat: number; lng: number };
 }
 
-export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName, mapCenter }: Readonly<AstraControlProps>) {
+export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName }: Readonly<AstraControlProps>) {
+    const mapCenter = useMap().getCenter();
     const initialCoordinates = coordinates ?? { latitude: mapCenter.lat, longitude: mapCenter.lng };
     const isLocationView = coordinates !== null;
 
@@ -42,7 +46,9 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'
             >
-                <AstraPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} locationView={isLocationView} />
+                <Suspense fallback={<div className={drawerStyles.empty} role='status'>Loading sun and moon guide...</div>}>
+                    <AstraPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} locationView={isLocationView} />
+                </Suspense>
             </MapDrawer>
         </>
     );
