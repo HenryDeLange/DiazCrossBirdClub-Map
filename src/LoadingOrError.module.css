@@ -1,0 +1,87 @@
+.loadingScreen {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
+    min-height: 100%;
+    background: var(--page-bg);
+    color: var(--page-text);
+}
+
+.loadingContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.logo {
+    width: 152px;
+    height: 152px;
+    box-sizing: border-box;
+    padding: 10px;
+    border-radius: 50%;
+    background: #fff;
+    object-fit: contain;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.14);
+}
+
+.message {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.loadingDots {
+    display: inline-flex;
+    min-width: 1.1em;
+}
+
+.loadingDots > span {
+    opacity: 0;
+}
+
+.loadingDots > span:first-child {
+    opacity: 1;
+}
+
+.loadingDots > span:nth-child(2) {
+    animation: showSecondDot 1.2s steps(1, end) infinite;
+}
+
+.loadingDots > span:nth-child(3) {
+    animation: showThirdDot 1.2s steps(1, end) infinite;
+}
+
+@keyframes showSecondDot {
+    0%, 32% {
+        opacity: 0;
+    }
+
+    33%, 100% {
+        opacity: 1;
+    }
+}
+
+@keyframes showThirdDot {
+    0%, 65% {
+        opacity: 0;
+    }
+
+    66%, 100% {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loadingDots > span:nth-child(2),
+    .loadingDots > span:nth-child(3) {
+        animation: none;
+        opacity: 1;
+    }
+}

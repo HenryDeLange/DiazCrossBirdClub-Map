@@ -2,9 +2,11 @@ import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 import type { Feature, FeatureCollection, Geometry } from 'geojson';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef } from 'react';
 import { LayersControl, TileLayer, useMap } from 'react-leaflet';
 import type { FeatureProps } from '../map/geojson/types';
+import '../map/map.css';
 import type { EditorFeature } from './geojsonValidation';
 
 type EditorMapProps = {
