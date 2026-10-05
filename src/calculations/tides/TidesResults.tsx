@@ -26,7 +26,7 @@ export const TidesResults = memo(function TidesResults({ currentTide, now, nowAd
         <div className={styles.tidesResults}>
             <div className={styles.tidesWaveColumn}>
                 {weightedExtremes.length > 0 && <TideWaveGraphic extremes={weightedExtremes} date={selectedDate} now={now} nowAdjusted={nowAdjusted} onDateChange={onDateChange} onTimeChange={onTimeChange} onResetTime={onResetTime} />}
-                {currentTide && <TideCurrentPanel currentTide={currentTide} now={now} />}
+                {currentTide && <TideCurrentPanel currentTide={currentTide} now={now} nowAdjusted={nowAdjusted} />}
                 <TideMoonPanel date={selectedDate} coordinates={coordinates} />
                 <p className={styles.tidesDisclaimer}>Tide estimates are for planning birdwatching activities, not navigation.</p>
             </div>

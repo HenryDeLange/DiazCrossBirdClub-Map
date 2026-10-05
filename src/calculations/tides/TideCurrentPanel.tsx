@@ -7,9 +7,10 @@ import { formatLevel, formatTideTime } from './tidesUtils';
 type TideCurrentPanelProps = {
     currentTide: CurrentTideStatus;
     now: Date;
+    nowAdjusted: boolean;
 }
 
-export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, now }: Readonly<TideCurrentPanelProps>) {
+export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, now, nowAdjusted }: Readonly<TideCurrentPanelProps>) {
     const DirectionIcon = currentTide.incoming ? WavesArrowUp : WavesArrowDown;
     const NextTideIcon = currentTide.nextTide.high ? WavesArrowUp : WavesArrowDown;
     const followingTide = currentTide.followingTide;
@@ -21,7 +22,7 @@ export const TideCurrentPanel = memo(function TideCurrentPanel({ currentTide, no
                 <div className={styles.tidesCurrentTime}>
                     <Clock3 aria-hidden='true' />
                     <div className={styles.tidesCurrentDetails}>
-                        <span>Now</span>
+                        <span>{nowAdjusted ? 'Time' : 'Now'}</span>
                         <strong>{formatTideTime(now, currentTide.timeZone)}</strong>
                     </div>
                 </div>
