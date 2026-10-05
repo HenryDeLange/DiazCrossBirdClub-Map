@@ -83,8 +83,17 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
 
         const handleAfterPrint = () => setIsPrintViewOpen(false);
         window.addEventListener('afterprint', handleAfterPrint);
-        window.print();
-        return () => window.removeEventListener('afterprint', handleAfterPrint);
+        let printFrame: number | undefined;
+        const renderFrame = window.requestAnimationFrame(() => {
+            printFrame = window.requestAnimationFrame(() => window.print());
+        });
+        return () => {
+            window.cancelAnimationFrame(renderFrame);
+            if (printFrame !== undefined) {
+                window.cancelAnimationFrame(printFrame);
+            }
+            window.removeEventListener('afterprint', handleAfterPrint);
+        };
     }, [isPrintViewOpen]);
 
     return (
