@@ -1,11 +1,20 @@
+import { useEffect, useLayoutEffect } from 'react';
 import { TidesDashboard } from './TidesDashboard';
 import { TidesHeader } from './TidesHeader';
 import styles from './TidesPage.module.css';
 import type { TidesPageProps } from './tidesTypes';
+import { formatCurrentTideSummary } from './tidesUtils';
 import { useTidesPage } from './useTidesPage';
 
-export default function TidesPage({ embedded = false, initialCoordinates }: Readonly<TidesPageProps>) {
+export default function TidesPage({ embedded = false, initialCoordinates, onCopyTextChange }: Readonly<TidesPageProps>) {
     const page = useTidesPage({ embedded, initialCoordinates });
+    const copyText = page.currentTide ? formatCurrentTideSummary(page.currentTide, page.now, page.dateValue, page.coordinates) : null;
+
+    useLayoutEffect(() => {
+        onCopyTextChange?.(copyText);
+    }, [copyText, onCopyTextChange]);
+
+    useEffect(() => () => onCopyTextChange?.(null), [onCopyTextChange]);
 
     return (
         <main className={`${styles.tidesPage}${page.embedded ? ` ${styles.tidesPageEmbedded}` : ''}`}>
@@ -18,6 +27,7 @@ export default function TidesPage({ embedded = false, initialCoordinates }: Read
                     onCoordinatesChange={page.onCoordinatesChange}
                     requestLocationOnMount={page.shouldRequestLocation}
                     onShare={page.onShare}
+                    copyText={copyText}
                 />
                 <TidesDashboard
                     selectedDate={page.selectedDate}

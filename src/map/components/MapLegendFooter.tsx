@@ -23,9 +23,9 @@ export function MapLegendFooter({ onOpenCache }: Readonly<MapLegendFooterProps>)
                 </div>
             </div>
             <div className={styles.footerActions} role='group' aria-label='Map actions'>
-                    <a href={getEditPathname()} className={styles.action} title='Edit GeoJSON locations' aria-label='Edit GeoJSON locations'>Edit</a>
+                <a href={getEditPathname()} className={styles.action} title='Edit GeoJSON locations' aria-label='Edit GeoJSON locations'>Edit</a>
                 <span aria-hidden='true'>|</span>
-                    <button type='button' className={styles.action} onClick={onOpenCache} title='Clear cached app data' aria-label='Clear cached app data'>Cache</button>
+                <button type='button' className={styles.action} onClick={onOpenCache} title='Clear cached app data' aria-label='Clear cached app data'>Cache</button>
                 <span aria-hidden='true'>|</span>
                 <button type='button' className={styles.action} onClick={cyclePreference} title={`Theme: ${themeLabel}. Select to cycle light, dark, and auto.`} aria-label={`Theme: ${themeLabel}. Select to cycle light, dark, and auto.`}>{themeLabel}</button>
             </div>

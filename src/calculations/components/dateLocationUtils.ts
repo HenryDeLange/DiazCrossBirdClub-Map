@@ -12,6 +12,17 @@ export function formatCoordinate(value: number, precision: number): string {
     return roundCoordinate(value, precision).toFixed(precision);
 }
 
+export function formatDateAndCoordinatesForClipboard(dateValue: string, coordinates: Coordinates, precision: number): string {
+    const latitude = formatCoordinate(coordinates.latitude, precision);
+    const longitude = formatCoordinate(coordinates.longitude, precision);
+    const latitudeHemisphere = latitude.startsWith('-') ? 'S' : 'N';
+    const longitudeHemisphere = longitude.startsWith('-') ? 'W' : 'E';
+    const latitudeMagnitude = latitude.startsWith('-') ? latitude.slice(1) : latitude;
+    const longitudeMagnitude = longitude.startsWith('-') ? longitude.slice(1) : longitude;
+
+    return `${dateValue}\n${latitudeHemisphere} ${latitudeMagnitude} ${longitudeHemisphere} ${longitudeMagnitude}`;
+}
+
 export function getQueryCoordinates(): Coordinates | null {
     const params = new URLSearchParams(window.location.search);
     const latitudeValue = params.get('lat');

@@ -1,10 +1,11 @@
-import { Printer } from 'lucide-react';
+import { ExternalLink, Printer } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
 import gbifLogo from '../../../assets/gbif/gbif-mark-green-logo.svg';
 import inatLogo from '../../../assets/inat/inat-logo.png';
+import { CopyToClipboardButton } from '../../../calculations/components/CopyToClipboardButton';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import { MapControlButton } from '../../components/MapControlButton';
 import mapControlStyles from '../../components/MapControlButton.module.css';
@@ -75,6 +76,15 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
             commonName: species.commonName,
             scientificName: species.scientificName
         }))).sort((first, second) => first.commonName.localeCompare(second.commonName)), [gbifData, inatData, isINat]);
+    const hasChecklistData = !loading && !error && printableSpecies.length > 0;
+    const checklistText = useMemo(() => hasChecklistData
+        ? [
+            checklistTitle,
+            `${printableSpecies.length.toLocaleString()} birds`,
+            '',
+            ...printableSpecies.map((species) => `${species.commonName} (${species.scientificName})`)
+        ].join('\n')
+        : null, [checklistTitle, hasChecklistData, printableSpecies]);
 
     useEffect(() => {
         if (!isPrintViewOpen) {
@@ -136,20 +146,28 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                     <div className={styles.headerActions}>
                         {isINat && (
                             <a
-                                className={styles.link}
+                                className={`drawer-header-action ${styles.viewButton}`}
                                 href={inat.inatUrl}
                                 target='_blank'
                                 rel='noreferrer'
+                                title='View on iNaturalist'
                                 aria-label='View on iNaturalist'
                             >
-                                View on iNaturalist
+                                <ExternalLink size={17} aria-hidden='true' />
                             </a>
                         )}
+                        <CopyToClipboardButton
+                            text={checklistText}
+                            className={`drawer-header-action ${styles.copyButton}`}
+                            copyLabel='Copy species checklist'
+                            copiedLabel='Species checklist copied'
+                            failedLabel='Could not copy species checklist'
+                        />
                         <button
                             type='button'
                             className={`drawer-header-action ${styles.printButton}`}
                             onClick={() => setIsPrintViewOpen(true)}
-                            disabled={printableSpecies.length === 0}
+                            disabled={!hasChecklistData}
                             title='Print species checklist'
                             aria-label='Print species checklist'
                         >

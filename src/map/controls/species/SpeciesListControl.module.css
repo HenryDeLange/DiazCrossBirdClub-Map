@@ -12,7 +12,11 @@
 .mobileTitle { display: none; }
 .speciesCount { color: var(--drawer-muted); font-size: 0.82rem; font-weight: 700; white-space: nowrap; }
 .countUnit { display: inline; }
-.printButton { border-color: transparent !important; }
+.printButton,
+.copyButton,
+.viewButton { border-color: transparent !important; }
+.printButton:disabled,
+.copyButton:disabled { cursor: not-allowed; opacity: 0.5; }
 .headerActions { display: flex; align-items: center; flex-shrink: 0; gap: 0.65rem; }
 .sourceToggle { display: inline-flex; flex-shrink: 0; align-items: center; gap: 0.15rem; padding: 0.15rem; border: 1px solid var(--control-border); border-radius: 0.45rem; background: var(--drawer-bg); }
 .sourceButton { display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0.35rem; border: 1px solid transparent; border-radius: 0.3rem; background: transparent; cursor: pointer; }
@@ -21,9 +25,9 @@
 .sourceButton[aria-pressed='true'] img { filter: none; opacity: 0.85; }
 .sourceButton:hover { background: var(--button-hover); }
 .sourceButton:focus-visible { outline: 2px solid var(--action-color); outline-offset: 2px; }
-.link { color: var(--drawer-muted) !important; text-decoration: none; font-weight: 700; }
-.link:hover,
-.link:focus-visible { text-decoration: underline; }
+.viewButton { color: var(--drawer-muted) !important; font-style: normal; text-decoration: none; }
+.viewButton:hover,
+.viewButton:focus-visible { border-color: var(--action-color); color: var(--action-color) !important; }
 
 .card {
     display: flex;

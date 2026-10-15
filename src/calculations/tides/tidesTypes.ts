@@ -4,6 +4,7 @@ import type { TidePrediction, TideStation, WeightedTideExtreme, WeightedTideLeve
 export type TidesPageProps = {
     embedded?: boolean;
     initialCoordinates?: Coordinates;
+    onCopyTextChange?: (text: string | null) => void;
 }
 
 export type TideStationState = {

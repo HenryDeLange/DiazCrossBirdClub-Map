@@ -1,7 +1,8 @@
 import { ExternalLink, WavesHorizontal } from 'lucide-react';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useCallback, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { getTidesPathname } from '../../appRouting';
+import { CopyToClipboardButton } from '../../calculations/components/CopyToClipboardButton';
 import type { Coordinates } from '../../calculations/components/dateLocationUtils';
 import { MapControlButton } from '../components/MapControlButton';
 import { MapDrawer } from '../components/MapDrawer';
@@ -22,6 +23,17 @@ type TidesControlProps = {
 }
 
 export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, coordinates, locationName }: Readonly<TidesControlProps>) {
+    const copyTextRef = useRef<string | null>(null);
+    const copyTextAvailableRef = useRef(false);
+    const [hasCopyText, setHasCopyText] = useState(false);
+    const handleCopyTextChange = useCallback((text: string | null) => {
+        copyTextRef.current = text;
+        const isAvailable = text !== null;
+        if (copyTextAvailableRef.current !== isAvailable) {
+            copyTextAvailableRef.current = isAvailable;
+            setHasCopyText(isAvailable);
+        }
+    }, []);
     const mapCenter = useMap().getCenter();
     const initialCoordinates = coordinates ?? { latitude: mapCenter.lat, longitude: mapCenter.lng };
     const isLocationView = coordinates !== null;
@@ -41,13 +53,18 @@ export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
                 onBack={onBack}
                 backLabel={locationName}
                 title='TIDES'
-                headerAction={!isLocationView && <a className={`drawer-header-action ${styles.headerAction}`} href={getTidesPathname()} target='_blank' rel='noreferrer' aria-label='Open tide guide in a new tab' title='Open tide guide in a new tab'><ExternalLink size={18} /></a>}
+                headerAction={!isLocationView && (
+                    <div className={styles.headerActions}>
+                        <CopyToClipboardButton text={null} textRef={copyTextRef} enabled={hasCopyText} className={`drawer-header-action ${styles.headerAction}`} copyLabel='Copy current, next, and following tide details' copiedLabel='Tide details copied' failedLabel='Could not copy tide details' />
+                        <a className={`drawer-header-action ${styles.headerAction}`} href={getTidesPathname()} target='_blank' rel='noreferrer' aria-label='Open tide guide in a new tab' title='Open tide guide in a new tab'><ExternalLink size={18} /></a>
+                    </div>
+                )}
                 height={drawerHeight}
                 onHeightChange={onDrawerHeightChange}
                 maxHeight='calc(100dvh - 1rem)'
             >
                 <Suspense fallback={<div className={drawerStyles.empty} role='status'>Loading tide guide...</div>}>
-                    <TidesPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} />
+                    <TidesPage key={`${initialCoordinates.latitude}:${initialCoordinates.longitude}`} embedded initialCoordinates={initialCoordinates} onCopyTextChange={handleCopyTextChange} />
                 </Suspense>
             </MapDrawer>
         </>

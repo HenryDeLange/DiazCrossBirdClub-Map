@@ -1,5 +1,6 @@
-import { isValidDateInput } from '../components/dateLocationUtils';
-import { formatTime, type TimelineSegment } from './sunTimes';
+import { formatDateAndCoordinatesForClipboard, isValidDateInput, type Coordinates } from '../components/dateLocationUtils';
+import type { SkyEvent } from './astraTypes';
+import { formatTime, type AstronomyData, type TimelineSegment } from './sunTimes';
 
 const MINUTES_PER_DAY = 1440;
 const MILLISECONDS_PER_DAY = 86400000;
@@ -83,4 +84,34 @@ export function minutesOnTimeline(date: Date, timelineStart: Date): number {
     const dateDay = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
     const dayOffset = Math.round((dateDay - startDay) / MILLISECONDS_PER_DAY);
     return minutesSinceMidnight(date) + dayOffset * MINUTES_PER_DAY;
+}
+
+export function formatSkyEventsForClipboard(dateValue: string, coordinates: Coordinates, events: SkyEvent[]): string {
+    const rows = [
+        formatDateAndCoordinatesForClipboard(dateValue, coordinates, 4),
+        ''
+    ];
+
+    for (const event of events) {
+        const start = event.segment ? formatTime(event.segment.start) : event.value;
+        const end = event.segment ? formatTime(event.segment.end) : '';
+        rows.push(`${event.label.padEnd(28)}${start.padEnd(10)}${end}`);
+    }
+
+    return rows.join('\n');
+}
+
+export function formatAstraBirdingSummaryForClipboard(dateValue: string, coordinates: Coordinates, astronomy: AstronomyData): string {
+    const rows = [
+        formatDateAndCoordinatesForClipboard(dateValue, coordinates, 4),
+        '',
+        `${'Sunrise and sunset'.padEnd(28)}${formatTime(astronomy.sunTimes.sunrise)}  ${formatTime(astronomy.sunTimes.sunset)}`,
+        ''
+    ];
+
+    for (const segment of astronomy.birdingSegments) {
+        rows.push(`${segment.label.padEnd(28)}${formatTime(segment.start).padEnd(8)}${formatTime(segment.end)}`);
+    }
+
+    return rows.join('\n');
 }

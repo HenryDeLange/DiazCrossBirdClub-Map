@@ -1,11 +1,23 @@
+import { useEffect, useLayoutEffect, useMemo } from 'react';
 import { AstraDashboard } from './AstraDashboard';
 import { AstraHeader } from './AstraHeader';
 import styles from './AstraPage.module.css';
 import type { AstraPageProps } from './astraTypes';
+import { formatAstraBirdingSummaryForClipboard, formatSkyEventsForClipboard } from './astraUtils';
 import { useAstraPage } from './useAstraPage';
 
-export default function AstraPage({ embedded = false, initialCoordinates, locationView = false }: Readonly<AstraPageProps>) {
+export default function AstraPage({ embedded = false, initialCoordinates, locationView = false, onCopyTextChange }: Readonly<AstraPageProps>) {
     const page = useAstraPage({ embedded, initialCoordinates, locationView });
+    const copyTexts = useMemo(() => page.astronomy ? {
+        summary: formatAstraBirdingSummaryForClipboard(page.dateValue, page.coordinates, page.astronomy),
+        fullEvents: formatSkyEventsForClipboard(page.dateValue, page.coordinates, page.skyEvents)
+    } : null, [page.astronomy, page.coordinates, page.dateValue, page.skyEvents]);
+
+    useLayoutEffect(() => {
+        onCopyTextChange?.(copyTexts);
+    }, [copyTexts, onCopyTextChange]);
+
+    useEffect(() => () => onCopyTextChange?.(null), [onCopyTextChange]);
 
     return (
         <main className={`${styles.astraPage}${page.embedded ? ` ${styles.astraPageEmbedded}` : ''}`}>
@@ -20,6 +32,7 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
                     requestLocationOnMount={page.shouldRequestLocation}
                     onInputValidityChange={page.onInputValidityChange}
                     onShare={page.onShare}
+                    copyTexts={copyTexts}
                 />
                 <AstraDashboard
                     astronomy={page.astronomy}

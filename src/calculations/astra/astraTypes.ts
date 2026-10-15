@@ -6,6 +6,12 @@ export type AstraPageProps = {
     embedded?: boolean;
     initialCoordinates?: Coordinates;
     locationView?: boolean;
+    onCopyTextChange?: (texts: AstraCopyTexts | null) => void;
+}
+
+export type AstraCopyTexts = {
+    summary: string;
+    fullEvents: string;
 }
 
 export type AstraIcon = ComponentType<SVGProps<SVGSVGElement>>;

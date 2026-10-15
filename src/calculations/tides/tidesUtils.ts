@@ -1,4 +1,4 @@
-import { isValidDateInput } from '../components/dateLocationUtils';
+import { formatDateAndCoordinatesForClipboard, isValidDateInput, type Coordinates } from '../components/dateLocationUtils';
 import { getWeightedTideLevel, type TidePrediction, type WeightedTideExtreme } from './tideData';
 import type { CurrentTideStatus, WaveChartPoint, WaveChartTick } from './tidesTypes';
 
@@ -8,6 +8,7 @@ const CHART_HEIGHT = 150;
 const CHART_TOP = 48;
 const MINUTES_PER_DAY = 24 * 60;
 const tideTimeFormatters = new Map<string, Intl.DateTimeFormat>();
+const tideClipboardTimeFormatters = new Map<string, Intl.DateTimeFormat>();
 const minutesOfDayFormatters = new Map<string, Intl.DateTimeFormat>();
 const zonedDateTimeFormatters = new Map<string, Intl.DateTimeFormat>();
 
@@ -41,6 +42,10 @@ export function formatTideTime(value: Date, timeZone: string): string {
     return getCachedTimeZoneFormatter(tideTimeFormatters, timeZone, undefined, { hour: 'numeric', minute: '2-digit' }).format(value);
 }
 
+export function formatTideClipboardTime(value: Date, timeZone: string): string {
+    return getCachedTimeZoneFormatter(tideClipboardTimeFormatters, timeZone, undefined, { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(value);
+}
+
 export function formatDistance(distance: number | undefined): string {
     if (typeof distance !== 'number' || !Number.isFinite(distance)) {
         return '';
@@ -55,6 +60,25 @@ export function sortByStationDistance(left: TidePrediction, right: TidePredictio
 
 export function formatLevel(level: number): string {
     return level.toFixed(2);
+}
+
+export function formatCurrentTideSummary(currentTide: CurrentTideStatus, now: Date, dateValue: string, coordinates: Coordinates): string {
+    const formatRow = (label: string, time: string, level: number, tideType: string) => {
+        return `${label.padEnd(9)}  ${time}  ->  ${formatLevel(level)} m  (${tideType})`;
+    };
+    const rows = [
+        formatDateAndCoordinatesForClipboard(dateValue, coordinates, 1),
+        '',
+        formatRow('At Time', formatTideClipboardTime(now, currentTide.timeZone), currentTide.level, currentTide.incoming ? 'incoming' : 'outgoing'),
+        formatRow('Next', formatTideClipboardTime(currentTide.nextTide.time, currentTide.nextTide.timeZone), currentTide.nextTide.level, currentTide.nextTide.high ? 'high' : 'low')
+    ];
+
+    if (currentTide.followingTide) {
+        const followingTide = currentTide.followingTide;
+        rows.push(formatRow('Following', formatTideClipboardTime(followingTide.time, followingTide.timeZone), followingTide.level, followingTide.high ? 'high' : 'low'));
+    }
+
+    return rows.join('\n');
 }
 
 export function getCurrentTideStatus(predictions: TidePrediction[], extremes: WeightedTideExtreme[], selectedDate: Date | null, now: Date): CurrentTideStatus | null {

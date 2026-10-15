@@ -22,7 +22,7 @@ export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
         const Icon = getTimelineSegmentIcon(segment, astronomy);
         return {
             id: `twilight-${segment.id}`,
-            label: segment.label,
+            label: getSkyEventLabel(segment),
             value: formatTime(segment.start),
             icon: <Icon width={16} height={16} aria-hidden='true' />,
             color: segment.color,
@@ -67,4 +67,12 @@ export function buildSkyEvents(astronomy: AstronomyData): SkyEvent[] {
     }));
 
     return [...twilightEvents, ...sunEvents, ...moonEvents].sort((first, second) => first.minutes - second.minutes);
+}
+
+function getSkyEventLabel(segment: TimelineSegment): string {
+    if (segment.id.startsWith('day-start-') || segment.id.startsWith('midnight-end-')) {
+        return 'Early night';
+    }
+
+    return segment.id.startsWith('night-') ? 'Late night' : segment.label;
 }

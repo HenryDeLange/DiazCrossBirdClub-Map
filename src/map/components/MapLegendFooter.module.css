@@ -49,8 +49,8 @@
     text-decoration: none;
 }
 
-.action:hover,
-.action:focus-visible,
+.footerActions .action:hover,
+.footerActions .action:focus-visible,
 .footerLinks a:hover,
 .footerLinks a:focus-visible {
     color: #ffffff !important;
