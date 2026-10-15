@@ -44,9 +44,12 @@ export default function AstraPage({ embedded = false, initialCoordinates, locati
                     selectedMarkerId={page.selectedMarkerId}
                     skyEvents={page.skyEvents}
                     isCurrentTimeSelected={page.isCurrentTimeSelected}
+                    isTimeAdjusted={page.isTimeAdjusted}
                     onSelectSegment={page.onSelectSegment}
                     onSelectMarker={page.onSelectMarker}
                     onSelectEvent={page.onSelectEvent}
+                    onTimeChange={page.onTimeChange}
+                    onResetTime={page.onResetTime}
                 />
             </div>
         </main>

@@ -22,12 +22,15 @@ export type AstraPageState = {
     selectedMarkerId: string | null;
     skyEvents: SkyEvent[];
     isCurrentTimeSelected: boolean;
+    isTimeAdjusted: boolean;
     onDateChange: (value: string) => void;
     onCoordinatesChange: (value: Coordinates) => void;
     onInputValidityChange: (value: boolean) => void;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
     onSelectEvent: (event: SkyEvent) => void;
+    onTimeChange: (minutes: number) => void;
+    onResetTime: () => void;
     onShare: () => void;
 }
 
@@ -42,12 +45,17 @@ export function useAstraPage({ embedded = false, initialCoordinates, locationVie
     const [selectedSegmentId, setSelectedSegmentId] = useState<string | null>(null);
     const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
     const [now, setNow] = useState(() => new Date());
+    const [isTimeAdjusted, setIsTimeAdjusted] = useState(false);
     const [inputFieldsReady, setInputFieldsReady] = useState(true);
 
     useEffect(() => {
+        if (isTimeAdjusted) {
+            return;
+        }
+
         const intervalId = window.setInterval(() => setNow(new Date()), 60000);
         return () => window.clearInterval(intervalId);
-    }, []);
+    }, [isTimeAdjusted]);
 
     useEffect(() => {
         if (embedded) {
@@ -83,6 +91,18 @@ export function useAstraPage({ embedded = false, initialCoordinates, locationVie
     const isCurrentTimeSelected = selectedMarkerId === 'current-time';
 
     const onDateChange = useCallback((value: string) => setDateValue(value), []);
+    const onTimeChange = useCallback((minutes: number) => {
+        setNow((currentNow) => {
+            const selectedTime = new Date(currentNow);
+            selectedTime.setHours(Math.floor(minutes / 60), Math.floor(minutes % 60), 0, 0);
+            return selectedTime;
+        });
+        setIsTimeAdjusted(true);
+    }, []);
+    const onResetTime = useCallback(() => {
+        setNow(new Date());
+        setIsTimeAdjusted(false);
+    }, []);
     const onCoordinatesChange = useCallback((value: Coordinates) => setCoordinates(value), []);
     const onInputValidityChange = useCallback((value: boolean) => setInputFieldsReady(value), []);
     const onSelectSegment = useCallback((segment: TimelineSegment) => {
@@ -128,12 +148,15 @@ export function useAstraPage({ embedded = false, initialCoordinates, locationVie
         selectedMarkerId,
         skyEvents,
         isCurrentTimeSelected,
+        isTimeAdjusted,
         onDateChange,
         onCoordinatesChange,
         onInputValidityChange,
         onSelectSegment,
         onSelectMarker,
         onSelectEvent,
+        onTimeChange,
+        onResetTime,
         onShare
     };
 }

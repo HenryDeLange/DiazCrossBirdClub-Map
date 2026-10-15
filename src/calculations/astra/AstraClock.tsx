@@ -1,5 +1,5 @@
-import { Bird, ChevronLeft, ChevronRight, Clock3, Moon, Sun, SunMoon } from 'lucide-react';
-import { memo, type KeyboardEvent } from 'react';
+import { Bird, ChevronLeft, ChevronRight, Clock3, Moon, RotateCcw, Sun, SunMoon } from 'lucide-react';
+import { memo, useRef, type KeyboardEvent, type PointerEvent } from 'react';
 import MoonriseIcon from '../../assets/astra/moonrise.svg?react';
 import MoonsetIcon from '../../assets/astra/moonset.svg?react';
 import styles from './AstraPage.module.css';
@@ -17,11 +17,14 @@ type AstraClockPanelProps = {
     selectedSegmentId: string | null;
     selectedMarkerId: string | null;
     isCurrentTimeSelected: boolean;
+    isTimeAdjusted: boolean;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
+    onTimeChange: (minutes: number) => void;
+    onResetTime: () => void;
 }
 
-export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, isCurrentTimeSelected, onSelectSegment, onSelectMarker }: Readonly<AstraClockPanelProps>) {
+export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, isCurrentTimeSelected, isTimeAdjusted, onSelectSegment, onSelectMarker, onTimeChange, onResetTime }: Readonly<AstraClockPanelProps>) {
     return (
         <div className={styles.astraClockPanel}>
             <ClockCornerEvent markerId='moonrise' label='Moonrise' value={formatMoonTime(astronomy.moonTimes.rise, astronomy.moonTimes.alwaysUp, astronomy.moonTimes.alwaysDown)} icon={MoonriseIcon} position='top-left' tone='moon' selected={selectedMarkerId === 'moonrise'} onSelect={onSelectMarker} />
@@ -39,8 +42,11 @@ export const AstraClockPanel = memo(function AstraClockPanel({ astronomy, now, c
                     currentDate={formatCurrentDate(astronomy.date)}
                     currentTime={formatTime(now)}
                     isCurrentTimeSelected={isCurrentTimeSelected}
+                    isTimeAdjusted={isTimeAdjusted}
                     onSelectSegment={onSelectSegment}
                     onSelectMarker={onSelectMarker}
+                    onTimeChange={onTimeChange}
+                    onResetTime={onResetTime}
                 />
             </div>
         </div>
@@ -57,11 +63,14 @@ type TimelineClockProps = {
     currentDate: string;
     currentTime: string;
     isCurrentTimeSelected: boolean;
+    isTimeAdjusted: boolean;
     onSelectSegment: (segment: TimelineSegment) => void;
     onSelectMarker: (markerId: string) => void;
+    onTimeChange: (minutes: number) => void;
+    onResetTime: () => void;
 }
 
-const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, currentDate, currentTime, isCurrentTimeSelected, onSelectSegment, onSelectMarker }: Readonly<TimelineClockProps>) {
+const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, onDateChange, selectedSegment, selectedSegmentId, selectedMarkerId, currentDate, currentTime, isCurrentTimeSelected, isTimeAdjusted, onSelectSegment, onSelectMarker, onTimeChange, onResetTime }: Readonly<TimelineClockProps>) {
     const CenterIcon: AstraIcon = selectedSegment ? getTimelineSegmentIcon(selectedSegment, astronomy) : SunMoon;
     const centerIconSize = selectedSegment ? 20 : 24;
     const shiftDate = (amount: number) => {
@@ -80,6 +89,19 @@ const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, o
             <MoonPercentageMarker minutes={getSolarMidnightMinutes(astronomy.sunTimes.solarNoon)} fraction={astronomy.moonIllumination.fraction} phaseName={describeMoonPhase(astronomy.moonIllumination.phase)} selected={selectedMarkerId === 'moon-phase'} onSelect={onSelectMarker} />
             {astronomy.moonSegment && <MoonRingSegment segment={astronomy.moonSegment} selected={astronomy.moonSegment.id === selectedSegmentId} onSelect={onSelectSegment} />}
             <circle className={styles.astraClockCenter} cx='160' cy='160' r='60' />
+            <circle
+                className={styles.astraClockTimeJumpArea}
+                cx='160'
+                cy='160'
+                r='60'
+                aria-hidden='true'
+                onClick={(event) => {
+                    const minutes = getMinutesAtPointer(event.clientX, event.clientY, event.currentTarget.ownerSVGElement);
+                    if (minutes !== null) {
+                        onTimeChange(minutes);
+                    }
+                }}
+            />
             <g className={styles.astraClockCenterContent} transform='translate(160 160)'>
                 <g className={styles.astraClockDateNavigation} role='button' tabIndex={0} aria-label='Previous day' onClick={() => shiftDate(-1)} onKeyDown={(event) => handleKeyboardActivation(event, () => shiftDate(-1))}>
                     <title>Previous day</title>
@@ -97,9 +119,14 @@ const TimelineClock = memo(function TimelineClock({ astronomy, currentMinutes, o
                     <text className={styles.astraClockCenterSegmentTime} x='13.5' y='0' textAnchor='start' dominantBaseline='middle' fill={selectedSegment.color}>{formatTime(selectedSegment.end)}</text>
                 </>}
                 <CenterIcon className={styles.astraClockCenterIcon} x={-centerIconSize / 2} y={-centerIconSize / 2} width={centerIconSize} height={centerIconSize} style={{ color: selectedSegment?.color ?? 'var(--astra-muted)', width: centerIconSize, height: centerIconSize }} aria-hidden='true' />
-                <text className={styles.astraClockCenterTime} x='0' y='38' textAnchor='middle'>{currentTime}</text>
+                <text className={styles.astraClockCenterTime} x='0' y='29' textAnchor='middle'>{currentTime}</text>
+                {isTimeAdjusted && <g className={styles.astraClockCenterResetTime} role='button' tabIndex={0} aria-label='Reset to current time' onClick={onResetTime} onKeyDown={(event) => handleKeyboardActivation(event, onResetTime)}>
+                    <title>Reset to current time</title>
+                    <circle cx='0' cy='43' r='7' />
+                    <RotateCcw x='-5' y='38' width='10' height='10' aria-hidden='true' />
+                </g>}
             </g>
-            <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={() => onSelectMarker('current-time')} />
+            <CurrentTimeMarker minutes={currentMinutes} selected={isCurrentTimeSelected} onSelect={() => onSelectMarker('current-time')} onTimeChange={onTimeChange} />
         </svg>
     );
 });
@@ -167,14 +194,76 @@ const ClockCornerEvent = memo(function ClockCornerEvent({ markerId, label, value
     );
 });
 
-const CurrentTimeMarker = memo(function CurrentTimeMarker({ minutes, selected, onSelect }: Readonly<{ minutes: number; selected: boolean; onSelect: () => void }>) {
+const CurrentTimeMarker = memo(function CurrentTimeMarker({ minutes, selected, onSelect, onTimeChange }: Readonly<{ minutes: number; selected: boolean; onSelect: () => void; onTimeChange: (minutes: number) => void }>) {
+    const hasDragged = useRef(false);
     const point = polarPoint(minutes, 60);
+    const lineStart = polarPoint(minutes, 72);
     const lineEnd = polarPoint(minutes, 159);
     const label = `Current time ${formatMinutes(minutes)}`;
+    const handlePointerDown = (event: PointerEvent<SVGGElement>) => {
+        event.preventDefault();
+        hasDragged.current = false;
+        event.currentTarget.setPointerCapture(event.pointerId);
+    };
+    const handlePointerMove = (event: PointerEvent<SVGGElement>) => {
+        if (!event.currentTarget.hasPointerCapture(event.pointerId)) {
+            return;
+        }
+
+        const nextMinutes = getMinutesAtPointer(event.clientX, event.clientY, event.currentTarget.ownerSVGElement);
+        if (nextMinutes !== null) {
+            hasDragged.current = true;
+            onTimeChange(nextMinutes);
+        }
+    };
+    const handlePointerUp = (event: PointerEvent<SVGGElement>) => {
+        if (hasDragged.current) {
+            const nextMinutes = getMinutesAtPointer(event.clientX, event.clientY, event.currentTarget.ownerSVGElement);
+            if (nextMinutes !== null) {
+                onTimeChange(nextMinutes);
+            }
+        }
+
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    };
+    const handlePointerCancel = (event: PointerEvent<SVGGElement>) => {
+        hasDragged.current = false;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+            event.currentTarget.releasePointerCapture(event.pointerId);
+        }
+    };
+    const handleClick = () => {
+        if (hasDragged.current) {
+            hasDragged.current = false;
+            return;
+        }
+
+        onSelect();
+    };
+    const handleKeyDown = (event: KeyboardEvent<SVGGElement>) => {
+        const minuteSteps: Record<string, number> = { ArrowLeft: -5, ArrowDown: -5, ArrowRight: 5, ArrowUp: 5 };
+        if (event.key in minuteSteps) {
+            event.preventDefault();
+            onTimeChange(Math.max(0, Math.min(1439, Math.floor(minutes) + minuteSteps[event.key])));
+        }
+        else if (event.key === 'Home') {
+            event.preventDefault();
+            onTimeChange(0);
+        }
+        else if (event.key === 'End') {
+            event.preventDefault();
+            onTimeChange(1439);
+        }
+        else {
+            handleKeyboardActivation(event, onSelect);
+        }
+    };
 
     return (
-        <g className={`${styles.astraChartMarker} ${styles.astraCurrentTimeMarker}${selected ? ` ${styles.astraChartMarkerSelected}` : ''}`} role='button' tabIndex={0} aria-label={label} onClick={onSelect} onKeyDown={(event) => handleKeyboardActivation(event, onSelect)}>
-            <line className={styles.astraCurrentTimeLine} x1={point.x} y1={point.y} x2={lineEnd.x} y2={lineEnd.y} />
+        <g className={`${styles.astraChartMarker} ${styles.astraCurrentTimeMarker}${selected ? ` ${styles.astraChartMarkerSelected}` : ''}`} role='slider' tabIndex={0} aria-label={label} aria-valuemin={0} aria-valuemax={1439} aria-valuenow={Math.floor(minutes)} aria-valuetext={formatMinutes(minutes)} onClick={handleClick} onKeyDown={handleKeyDown} onPointerDown={handlePointerDown} onPointerMove={handlePointerMove} onPointerUp={handlePointerUp} onPointerCancel={handlePointerCancel}>
+            <line className={styles.astraCurrentTimeLine} x1={lineStart.x} y1={lineStart.y} x2={lineEnd.x} y2={lineEnd.y} />
             <circle className={styles.astraCurrentTimeHitArea} cx={point.x} cy={point.y} r='10' />
             <Clock3 className={styles.astraCurrentTimeIcon} x={point.x - 6} y={point.y - 6} width='12' height='12' aria-hidden='true' />
         </g>
@@ -200,4 +289,16 @@ function handleKeyboardActivation(event: KeyboardEvent<SVGElement>, onSelect: ()
         event.preventDefault();
         onSelect();
     }
+}
+
+function getMinutesAtPointer(clientX: number, clientY: number, svg: SVGSVGElement | null): number | null {
+    const inverseMatrix = svg?.getScreenCTM()?.inverse();
+    if (!inverseMatrix) {
+        return null;
+    }
+
+    const point = new DOMPoint(clientX, clientY).matrixTransform(inverseMatrix);
+    const angle = Math.atan2(point.y - 160, point.x - 160) + Math.PI / 2;
+    const normalizedAngle = (angle + Math.PI * 2) % (Math.PI * 2);
+    return Math.round((normalizedAngle / (Math.PI * 2)) * 1440) % 1440;
 }

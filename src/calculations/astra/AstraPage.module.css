@@ -524,6 +524,15 @@
     stroke-width: 1;
 }
 
+.astra-clock-time-jump-area {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 20;
+    pointer-events: stroke;
+    cursor: crosshair;
+    touch-action: none;
+}
+
 .astra-clock-center-content {
     pointer-events: none;
     -webkit-user-select: none;
@@ -599,6 +608,28 @@
 .astra-clock-center-time {
     font-size: 9.5px;
     letter-spacing: 0;
+}
+
+.astra-clock-center-reset-time {
+    color: var(--astra-muted);
+    cursor: pointer;
+    outline: none;
+    pointer-events: all;
+}
+
+.astra-clock-center-reset-time circle {
+    fill: transparent;
+    pointer-events: all;
+}
+
+.astra-clock-center-reset-time svg {
+    display: block;
+    pointer-events: none;
+}
+
+.astra-clock-center-reset-time:hover,
+.astra-clock-center-reset-time:focus-visible {
+    color: var(--astra-ink);
 }
 
 .astra-birding-start-marker,
@@ -687,6 +718,12 @@
 
 .astra-current-time-marker {
     color: var(--astra-current);
+    cursor: grab;
+    touch-action: none;
+}
+
+.astra-current-time-marker:active {
+    cursor: grabbing;
 }
 
 .astra-current-time-line {
