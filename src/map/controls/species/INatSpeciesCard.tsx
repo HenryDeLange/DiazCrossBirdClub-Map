@@ -1,65 +1,83 @@
-import { Copyright, Heart } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { INatTaxon, INatTaxonPhoto } from '../../iNatTypes';
+import { SpeciesImageGallery } from './SpeciesImageGallery';
+import { SpeciesMetadataIndicators } from './SpeciesMetadataIndicators';
 import styles from './SpeciesListControl.module.css';
-import type { INatSpeciesCardProps } from './types';
+import { getINatPhotoUrl } from './iNatPhotoUrl';
+import { throttledFetchWithRetry } from './throttledFetch';
+import type { INatSpeciesCardProps, SpeciesImage } from './types';
+import type { INatPhoto } from '../../iNatTypes';
 
 export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INatSpeciesCardProps>) {
-    const [openPopup, setOpenPopup] = useState<'attribution' | 'conservation' | null>(null);
-    const cardRef = useRef<HTMLDivElement | null>(null);
-    const image = speciesCount.taxon.default_photo ?? null;
-    const mediumImageUrl = image?.medium_url ?? '';
-    const squareImageUrl = image?.square_url ?? '';
-    const conservationStatus = speciesCount.taxon.conservation_status;
-    const statusLabel = conservationStatus?.status_name
-        ? conservationStatus.status_name.charAt(0).toUpperCase() + conservationStatus.status_name.slice(1)
-        : conservationStatus?.status;
-    const hasConservationStatus = Boolean(statusLabel);
-    const [imageUrl, setImageUrl] = useState(mediumImageUrl || squareImageUrl);
+    const [selectedImage, setSelectedImage] = useState<SpeciesImage | null>(null);
+    const [taxonPhotos, setTaxonPhotos] = useState<INatTaxonPhoto[] | null>(null);
+    const [taxonPhotosLoading, setTaxonPhotosLoading] = useState(false);
+    const photoRequestStartedRef = useRef(false);
+    const photoRequestRef = useRef<AbortController | null>(null);
+    const images = useMemo(() => {
+        const photos = (taxonPhotos ?? speciesCount.taxon.taxon_photos ?? [])
+            .slice()
+            .sort((first, second) => (first.position ?? Number.MAX_SAFE_INTEGER) - (second.position ?? Number.MAX_SAFE_INTEGER))
+            .map((taxonPhoto, index) => createINatImage(taxonPhoto.photo, index, getTaxonPhotoLabels(taxonPhoto)))
+            .filter((image): image is SpeciesImage => image !== null);
+        if (photos.length > 0) {
+            return photos;
+        }
 
-    useEffect(() => {
-        if (!openPopup) {
+        const defaultPhoto = speciesCount.taxon.default_photo;
+        const image = defaultPhoto ? createINatImage(defaultPhoto, 0) : null;
+        return image ? [image] : [];
+    }, [speciesCount.taxon.default_photo, speciesCount.taxon.taxon_photos, taxonPhotos]);
+    const handleSelectedImageChange = useCallback((image: SpeciesImage | null) => setSelectedImage(image), []);
+    const loadTaxonPhotos = useCallback(() => {
+        const taxonId = speciesCount.taxon.id;
+        if (!taxonId || speciesCount.taxon.taxon_photos?.length || photoRequestStartedRef.current) {
             return;
         }
 
-        const handleOutsidePointerDown = (event: PointerEvent) => {
-            const card = cardRef.current;
-            const clickedInsidePopup = card !== null && event.composedPath().some((target) => (
-                target instanceof Element
-                && card.contains(target)
-                && (target.matches('[role="tooltip"]') || target.matches('button[aria-expanded="true"]'))
-            ));
-            if (!clickedInsidePopup) {
-                setOpenPopup(null);
-            }
-        };
+        photoRequestStartedRef.current = true;
+        const controller = new AbortController();
+        photoRequestRef.current = controller;
+        setTaxonPhotosLoading(true);
+        throttledFetchWithRetry(`https://api.inaturalist.org/v1/taxa/${taxonId}?include_taxon_photos=true`, { signal: controller.signal })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error(`iNaturalist taxon request failed with status ${response.status}`);
+                }
+                return response.json() as Promise<{ results?: INatTaxon[] }>;
+            })
+            .then((response) => {
+                const photos = response.results?.[0]?.taxon_photos;
+                if (!photos) {
+                    throw new Error(`iNaturalist taxon response did not include photos for taxon ${taxonId}`);
+                }
+                setTaxonPhotos(photos);
+            })
+            .catch((error: unknown) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                console.error(`Error fetching iNaturalist taxon photos for ${taxonId}:`, error);
+            })
+            .finally(() => {
+                if (!controller.signal.aborted) {
+                    setTaxonPhotosLoading(false);
+                }
+            });
+    }, [speciesCount.taxon.id, speciesCount.taxon.taxon_photos]);
 
-        document.addEventListener('pointerdown', handleOutsidePointerDown, true);
-        return () => document.removeEventListener('pointerdown', handleOutsidePointerDown, true);
-    }, [openPopup]);
+    useEffect(() => () => photoRequestRef.current?.abort(), []);
 
     return (
-        <div ref={cardRef} className={styles.card}>
-            <div className={styles.cardMedia}>
-                {imageUrl ? (
-                    <img
-                        className={styles.cardImage}
-                        alt={speciesCount.taxon.name}
-                        src={imageUrl}
-                        loading='lazy'
-                        decoding='async'
-                        onError={() => {
-                            if (imageUrl !== squareImageUrl && squareImageUrl) {
-                                setImageUrl(squareImageUrl);
-                                return;
-                            }
-
-                            setImageUrl('');
-                        }}
-                    />
-                ) : (
-                    <div className={`${styles.cardImage} ${styles.cardImageEmpty}`}>No image available</div>
-                )}
-            </div>
+        <div className={styles.card}>
+            <SpeciesImageGallery
+                imageAlt={speciesCount.taxon.preferred_common_name || speciesCount.taxon.name}
+                images={images}
+                conservationStatus={speciesCount.taxon.conservation_status}
+                additionalImagesLoading={taxonPhotosLoading}
+                onSelectedImageChange={handleSelectedImageChange}
+                onOpen={loadTaxonPhotos}
+            />
             <div className={styles.cardTitle}>
                 <a
                     href={speciesCount.taxon.id ? `https://www.inaturalist.org/taxa/${speciesCount.taxon.id}` : undefined}
@@ -72,27 +90,6 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
             <div className={styles.cardMeta}>
                 <div className={styles.cardScientificRow}>
                     <span className={styles.cardScientific}><i>{speciesCount.taxon.name}</i></span>
-                    {hasConservationStatus && (
-                        <button
-                            type='button'
-                            className={`${styles.cardMetaIconTrigger} ${styles.conservationTrigger}`}
-                            aria-label='Show conservation status'
-                            aria-expanded={openPopup === 'conservation'}
-                            title={`Conservation status: ${statusLabel ?? ''}${conservationStatus?.authority ? ` (${conservationStatus.authority})` : ''}`}
-                            onClick={() => setOpenPopup((current) => current === 'conservation' ? null : 'conservation')}
-                        >
-                            <Heart className={styles.cardMetaIcon} />
-                        </button>
-                    )}
-                    {openPopup === 'conservation' && hasConservationStatus && (
-                        <div className={styles.cardMetaPopup} role='tooltip'>
-                            <strong>{statusLabel}</strong>
-                            {conservationStatus?.authority && <span>Authority: {conservationStatus.authority}</span>}
-                            {conservationStatus?.status && conservationStatus.status !== conservationStatus.status_name && (
-                                <span>Code: {conservationStatus.status}</span>
-                            )}
-                        </div>
-                    )}
                 </div>
                 <div className={styles.cardMetaRow}>
                     {typeof speciesCount.count === 'number' && (
@@ -104,22 +101,59 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
                             <span className={styles.cardCount}>{speciesCount.count.toLocaleString()} observations</span>
                         )
                     )}
-                    {image?.attribution && (
-                        <button
-                            type='button'
-                            className={styles.cardMetaIconTrigger}
-                            aria-label='Show image attribution'
-                            aria-expanded={openPopup === 'attribution'}
-                            onClick={() => setOpenPopup((current) => current === 'attribution' ? null : 'attribution')}
-                        >
-                            <Copyright className={styles.cardMetaIcon} />
-                        </button>
-                    )}
-                    {openPopup === 'attribution' && image?.attribution && (
-                        <div className={styles.cardMetaPopup} role='tooltip'>{image.attribution}</div>
-                    )}
+                    <SpeciesMetadataIndicators attribution={selectedImage?.attribution} />
                 </div>
             </div>
         </div>
     );
+}
+
+function createINatImage(photo: INatPhoto, index: number, labels: string[] = []): SpeciesImage | null {
+    const sourceUrl = photo.original_url ?? photo.url ?? photo.medium_url ?? photo.square_url;
+    const fullUrl = photo.original_url ?? getINatPhotoUrl(sourceUrl, 'original') ?? sourceUrl;
+    const thumbnailUrl = photo.medium_url ?? photo.square_url ?? photo.url ?? fullUrl;
+    if (!fullUrl || !thumbnailUrl) {
+        return null;
+    }
+    const largeUrl = getINatPhotoUrl(sourceUrl, 'large') ?? fullUrl;
+
+    return {
+        id: `inat-${photo.id ?? index}-${fullUrl}`,
+        source: 'inat',
+        thumbnailUrl,
+        ...(largeUrl !== fullUrl ? { largeUrl } : {}),
+        fullUrl,
+        attribution: photo.attribution,
+        labels
+    };
+}
+
+function getTaxonPhotoLabels(taxonPhoto: INatTaxonPhoto): string[] {
+    const labels = new Set<string>();
+    if (taxonPhoto.primary === true) {
+        labels.add('Primary');
+    } else if (taxonPhoto.primary === false) {
+        labels.add('Secondary');
+    }
+    if (taxonPhoto.rank) {
+        labels.add(formatLabel(taxonPhoto.rank));
+    }
+    if (taxonPhoto.life_stage) {
+        labels.add(formatLabel(taxonPhoto.life_stage));
+    }
+    for (const annotation of [...(taxonPhoto.annotations ?? []), ...(taxonPhoto.photo.annotations ?? [])]) {
+        const value = annotation.controlled_value?.label ?? annotation.value ?? annotation.label;
+        if (value) {
+            const attribute = annotation.controlled_attribute?.label;
+            labels.add(attribute ? `${formatLabel(attribute)}: ${formatLabel(value)}` : formatLabel(value));
+        }
+    }
+    return [...labels];
+}
+
+function formatLabel(value: string): string {
+    return value
+        .replace(/[_-]+/g, ' ')
+        .toLowerCase()
+        .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }

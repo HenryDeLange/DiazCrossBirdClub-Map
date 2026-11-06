@@ -32,6 +32,7 @@ export function LocationsControl({
     initialSearchQuery,
     initialTab,
     initialFocusQuery,
+    expandedLocationName,
     searchVersion
 }: Readonly<LocationsControlProps>) {
     const tabs = useMemo<LocationTab[]>(() => locationCollectionSources.map((source) => ({
@@ -44,11 +45,12 @@ export function LocationsControl({
                 onOpenInat={onOpenInat}
                 onLocationSelected={onLocationSelected}
                 initialFocusQuery={initialFocusQuery}
+                expandedLocationName={expandedLocationName}
                 onOpenAstronomy={onOpenAstronomy}
                 onOpenTides={onOpenTides}
             />
         )
-    })), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
+    })), [expandedLocationName, initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
     const allContent = useMemo(() => (searchQuery: string) => (
         <LocationFeatureDetails
             sources={locationCollectionSources}
@@ -57,10 +59,11 @@ export function LocationsControl({
             onOpenInat={onOpenInat}
             onLocationSelected={onLocationSelected}
             initialFocusQuery={initialFocusQuery}
+            expandedLocationName={expandedLocationName}
             onOpenAstronomy={onOpenAstronomy}
             onOpenTides={onOpenTides}
         />
-    ), [initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
+    ), [expandedLocationName, initialFocusQuery, onClose, onLocationSelected, onOpenAstronomy, onOpenInat, onOpenTides]);
 
     return (
         <>

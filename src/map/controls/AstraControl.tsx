@@ -46,7 +46,7 @@ export function AstraControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
             <MapControlButton
                 groupClassName='astraGroup'
                 onClick={onToggle}
-                title='Open sun and moon guide'
+                title='Sun and Moon Times'
             >
                 <SunMoon />
             </MapControlButton>

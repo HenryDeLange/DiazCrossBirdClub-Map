@@ -7,17 +7,29 @@
 }
 
 .title {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    margin: 0;
     padding: 0;
     border: 0;
+    border-radius: 0;
     background: transparent;
     color: var(--page-text);
     font: inherit;
     font-size: 1.05rem;
     font-weight: 800;
+    line-height: 1.2;
     text-align: left;
+    white-space: normal;
+    appearance: none;
+    -webkit-appearance: none;
     cursor: pointer;
 }
 
+.title:hover,
+.title:focus-visible { color: var(--action-color); text-decoration: underline; text-underline-offset: 0.15em; }
 .title:focus-visible { outline: 2px solid var(--action-color); outline-offset: 2px; }
 
 .description {

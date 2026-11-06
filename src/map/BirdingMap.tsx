@@ -43,6 +43,7 @@ export default function BirdingMap() {
     const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
     const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
+    const [expandedLocationName, setExpandedLocationName] = useState(initialLocationSelection?.name ?? '');
     const warnedInitialLocationKeyRef = useRef('');
 
     const [layerState, setLayerState] = useState<LayerState>(getInitialLayerState);
@@ -78,6 +79,7 @@ export default function BirdingMap() {
     const closeLocationsDrawer = useCallback(() => {
         setLocationSearchQuery('');
         setInitialFocusQuery('');
+        setExpandedLocationName('');
         setSelectedLocationsTab(undefined);
         clearLocationPath();
     }, []);
@@ -156,6 +158,7 @@ export default function BirdingMap() {
         setLocationSearchQuery(locationName);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
+        setExpandedLocationName(locationName);
         setLocationPath(locationName);
     }, []);
 
@@ -170,6 +173,7 @@ export default function BirdingMap() {
         setLocationSearchQuery(location.name);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
+        setExpandedLocationName(location.name);
         setLocationPath(location.name);
         setAstronomyLocation(location);
         openNestedDrawer('astra');
@@ -182,6 +186,7 @@ export default function BirdingMap() {
         setLocationSearchQuery(location.name);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
+        setExpandedLocationName(location.name);
         setLocationPath(location.name);
         setTidesLocation(location);
         openNestedDrawer('tides');
@@ -199,6 +204,7 @@ export default function BirdingMap() {
         setLocationSearchQuery(searchText);
         setLocationSearchVersion((current) => current + 1);
         setInitialFocusQuery('');
+        setExpandedLocationName(searchText);
         setLocationPath(searchText);
         if (openDrawerRef.current === null && typeof window !== 'undefined') {
             window.history.pushState({ ...window.history.state, drawer: 'locations' }, '', window.location.href);
@@ -237,7 +243,11 @@ export default function BirdingMap() {
             return;
         }
 
-        const onPopState = () => {
+        const onPopState = (event: PopStateEvent) => {
+            if (event.state?.drawer === openDrawerRef.current) {
+                return;
+            }
+
             drawerHistoryEntryRef.current = false;
 
             if (openDrawerRef.current !== null) {
@@ -326,6 +336,7 @@ export default function BirdingMap() {
                 initialSearchQuery={locationSearchQuery}
                 initialTab={selectedLocationsTab}
                 initialFocusQuery={initialFocusQuery || undefined}
+                expandedLocationName={expandedLocationName || undefined}
                 searchVersion={locationSearchVersion}
             />
             <TidesControl
@@ -464,5 +475,3 @@ function DrawerInteractionLock({ isOpen }: Readonly<{ isOpen: boolean }>) {
 
     return null;
 }
-
-

@@ -14,16 +14,17 @@ export function LocationFeatureDetails({
     onOpenInat,
     onLocationSelected,
     initialFocusQuery,
+    expandedLocationName,
     onOpenAstronomy,
     onOpenTides
 }: Readonly<FeatureDetailsProps>) {
     const map = useMap();
     const normalizedQuery = searchQuery.trim().toLowerCase();
     const hasHandledInitialFocus = useRef(false);
-    const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
     const sourceGeojson = useMemo(() => sources.flatMap(({ geojson }) => geojson), [sources]);
     const handleGroupToggle = useCallback((groupKey: string, isExpanded: boolean) => {
-        setCollapsedGroups((current) => ({ ...current, [groupKey]: isExpanded }));
+        setExpandedGroups((current) => ({ ...current, [groupKey]: isExpanded }));
     }, []);
 
     useEffect(() => {
@@ -62,13 +63,17 @@ export function LocationFeatureDetails({
     return (
         <div className={styles.list}>
             {allGroups.map(({ group, tab, id: groupKey }) => {
+                const isInitiallyExpandedGroup = expandedLocationName
+                    ? groupContainsLocation(group, expandedLocationName)
+                    : false;
+
                 return (
                     <LocationFeatureGroup
                         key={groupKey}
                         group={group}
                         groupKey={groupKey}
                         tab={tab}
-                        isExpanded={!collapsedGroups[groupKey]}
+                        isExpanded={expandedGroups[groupKey] ?? isInitiallyExpandedGroup}
                         onToggle={handleGroupToggle}
                         onClose={onClose}
                         onOpenInat={onOpenInat}
@@ -80,6 +85,11 @@ export function LocationFeatureDetails({
             })}
         </div>
     );
+}
+
+function groupContainsLocation(group: FeatureGroup, locationName: string): boolean {
+    return group.heading?.properties.name === locationName
+        || group.items.some(({ feature }) => feature.properties.name === locationName);
 }
 
 function compareLocationItems(left: FeatureGroup['items'][number], right: FeatureGroup['items'][number]): number {

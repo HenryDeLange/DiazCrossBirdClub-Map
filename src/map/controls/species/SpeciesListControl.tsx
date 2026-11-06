@@ -1,5 +1,5 @@
 import { ExternalLink, Printer } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMap } from 'react-leaflet';
 import { useDebounceValue } from 'usehooks-ts';
@@ -11,15 +11,19 @@ import { MapControlButton } from '../../components/MapControlButton';
 import mapControlStyles from '../../components/MapControlButton.module.css';
 import { MapDrawer } from '../../components/MapDrawer';
 import drawerStyles from '../../components/MapDrawer.module.css';
-import { getINatTaxonObservationsUrl } from './iNatObservationUrl';
+import { GBIFSpeciesCard } from './GBIFSpeciesCard';
+import { getBufferedMapBounds, getINatTaxonObservationsUrl } from './iNatObservationUrl';
 import { INatSpeciesCard } from './INatSpeciesCard';
 import styles from './SpeciesListControl.module.css';
-import type { SpeciesListControlProps } from './types';
+import { VirtualizedGrid } from './VirtualizedGrid';
+import type { GbifSpecies, SpeciesListControlProps } from './types';
 import { useGbifSpeciesChecklist } from './useGbifSpeciesChecklist';
 import { useSpeciesObservations } from './useSpeciesObservations';
 
 export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, locationName }: Readonly<SpeciesListControlProps>) {
     const map = useMap();
+    const gbifMediaBounds = getBufferedMapBounds(map);
+    const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const [source, setSource] = useState<'inat' | 'gbif'>('inat');
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearchInput] = useDebounceValue(searchInput, 300);
@@ -37,6 +41,10 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
     const checklistTitle = isINat ? 'iNaturalist Species Checklist' : 'GBIF Checklist';
 
     const normalizedSearch = debouncedSearchInput.trim().toLowerCase();
+
+    useLayoutEffect(() => {
+        scrollContainerRef.current?.scrollTo(0, 0);
+    }, [normalizedSearch]);
 
     const filteredINatResults = useMemo(() => {
         if (!inatData) {
@@ -63,8 +71,15 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
             return gbifData;
         }
 
-        return gbifData.filter((species) => species.commonName.toLowerCase().includes(normalizedSearch)
-            || species.scientificName.toLowerCase().includes(normalizedSearch));
+        const matchingSpecies = gbifData.filter((species) => (species.commonName ?? '').toLowerCase().includes(normalizedSearch)
+            || (species.scientificName ?? '').toLowerCase().includes(normalizedSearch)
+            || String(species.speciesKey).includes(normalizedSearch));
+        if (matchingSpecies.length > 0) {
+            const unresolvedSpecies = gbifData.filter((species) => !species.commonName || !species.scientificName).slice(0, 8);
+            return [...matchingSpecies, ...unresolvedSpecies.filter((species) => !matchingSpecies.includes(species))];
+        }
+
+        return gbifData.filter((species) => !species.commonName || !species.scientificName).slice(0, 8);
     }, [gbifData, normalizedSearch]);
 
     const printableSpecies = useMemo(() => (isINat
@@ -73,10 +88,25 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
             scientificName: species.taxon.name
         }))
         : (gbifData ?? []).map((species) => ({
-            commonName: species.commonName,
-            scientificName: species.scientificName
+            commonName: species.commonName || `GBIF taxon ${species.speciesKey}`,
+            scientificName: species.scientificName || `Taxon ${species.speciesKey}`
         }))).sort((first, second) => first.commonName.localeCompare(second.commonName)), [gbifData, inatData, isINat]);
-    const hasChecklistData = !loading && !error && printableSpecies.length > 0;
+    const hasChecklistData = !loading
+        && !error
+        && printableSpecies.length > 0
+        && (isINat || gbif.namesReady);
+    const checklistNamesPending = !isINat && gbif.namesLoading;
+    const checklistNamesError = !isINat && gbif.namesError;
+    const copyLabel = checklistNamesPending
+        ? `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
+        : checklistNamesError
+            ? 'GBIF names could not all be loaded'
+            : 'Copy species checklist';
+    const printLabel = checklistNamesPending
+        ? `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
+        : checklistNamesError
+            ? 'GBIF names could not all be loaded'
+            : 'Print species checklist';
     const checklistText = useMemo(() => hasChecklistData
         ? [
             checklistTitle,
@@ -118,7 +148,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                     }
                     onToggle();
                 }}
-                title='iNaturalist Species List'
+                title='Species List'
             >
                 <span className={mapControlStyles.inatLogo} aria-hidden='true' />
             </MapControlButton>
@@ -158,8 +188,9 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                         )}
                         <CopyToClipboardButton
                             text={checklistText}
+                            enabled={hasChecklistData}
                             className={`drawer-header-action ${styles.copyButton}`}
-                            copyLabel='Copy species checklist'
+                            copyLabel={copyLabel}
                             copiedLabel='Species checklist copied'
                             failedLabel='Could not copy species checklist'
                         />
@@ -168,8 +199,8 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                             className={`drawer-header-action ${styles.printButton}`}
                             onClick={() => setIsPrintViewOpen(true)}
                             disabled={!hasChecklistData}
-                            title='Print species checklist'
-                            aria-label='Print species checklist'
+                            title={printLabel}
+                            aria-label={printLabel}
                         >
                             <Printer size={17} aria-hidden='true' />
                         </button>
@@ -213,7 +244,25 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                         </div>
                     </div>
                 </div>
-                <div className={drawerStyles.content}>
+                <div className={drawerStyles.content} ref={scrollContainerRef} data-species-scroll-root>
+                    {checklistNamesPending && (
+                        <div className={styles.nameLoadStatus} role='status'>
+                            Loading GBIF species names ({gbif.namesProgress.completed.toLocaleString()} of {gbif.namesProgress.total.toLocaleString()}). Copy and print will be available when complete.
+                        </div>
+                    )}
+                    {checklistNamesError && (
+                        <div className={styles.nameLoadError} role='alert'>
+                            Some GBIF species names could not be loaded.
+                            <button
+                                type='button'
+                                className='drawer-header-action'
+                                onClick={gbif.retryMissingNames}
+                                disabled={gbif.namesLoading}
+                            >
+                                Retry names
+                            </button>
+                        </div>
+                    )}
                     {loading && !error && (
                         <div className={drawerStyles.empty}>{isINat ? 'Loading species...' : 'Loading GBIF checklist...'}</div>
                     )}
@@ -224,30 +273,46 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                         <div className={drawerStyles.empty}>{currentCount === 0 ? 'No bird species were found in the visible map area.' : 'No species match your search.'}</div>
                     )}
                     {!loading && !error && (isINat ? filteredINatResults.length : filteredGbifResults.length) > 0 && (
-                        <div className={styles.grid}>
-                            {isINat
-                                ? filteredINatResults.map((speciesCount, index) => (
+                        isINat
+                            ? (
+                                <VirtualizedGrid
+                                    items={filteredINatResults}
+                                    scrollElementRef={scrollContainerRef}
+                                    layout='species'
+                                    className={styles.grid}
+                                    rowClassName={styles.virtualGridRow}
+                                    minItemWidth={192}
+                                    gap={16}
+                                    estimateRowSize={270}
+                                    getItemKey={(speciesCount, index) => `${speciesCount.taxon.id ?? index}_${speciesCount.taxon.name}`}
+                                    renderItem={(speciesCount) => (
                                     <INatSpeciesCard
-                                        key={`${index}_${speciesCount.taxon.name}`}
                                         speciesCount={speciesCount}
                                         observationsUrl={getINatTaxonObservationsUrl(inat.inatUrl, speciesCount.taxon.id)}
                                     />
-                                ))
-                                : filteredGbifResults.map((species) => (
-                                    <a className={styles.gbifCard} key={species.speciesKey} href={`https://www.gbif.org/species/${species.speciesKey}`} target='_blank' rel='noreferrer'>
-                                        <span className={styles.gbifCommonName}>{species.commonName}</span>
-                                        <i className={styles.gbifScientificName}>{species.scientificName}</i>
-                                        {species.conservationStatus?.status_name && (
-                                            <span
-                                                className={styles.conservationStatus}
-                                                title={`${species.conservationStatus.authority ? `${species.conservationStatus.authority}: ` : ''}${species.conservationStatus.status_name}`}
-                                            >
-                                                {species.conservationStatus.status_name.charAt(0).toUpperCase() + species.conservationStatus.status_name.slice(1)}
-                                            </span>
-                                        )}
-                                    </a>
-                                ))}
-                        </div>
+                                    )}
+                                />
+                            )
+                            : (
+                                <VirtualizedGrid
+                                    items={filteredGbifResults}
+                                    scrollElementRef={scrollContainerRef}
+                                    layout='species'
+                                    className={styles.grid}
+                                    rowClassName={styles.virtualGridRow}
+                                    minItemWidth={192}
+                                    gap={16}
+                                    estimateRowSize={270}
+                                    getItemKey={(species) => species.speciesKey}
+                                    renderItem={(species: GbifSpecies) => (
+                                        <GBIFSpeciesCard
+                                            species={species}
+                                            mediaBounds={gbifMediaBounds}
+                                        isSpeciesNameLoading={gbif.namesLoading && (!species.commonName || !species.scientificName)}
+                                        />
+                                    )}
+                                />
+                            )
                     )}
                 </div>
             </MapDrawer>

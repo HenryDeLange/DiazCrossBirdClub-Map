@@ -1,0 +1,77 @@
+.indicator {
+    display: inline-flex;
+    align-items: center;
+    pointer-events: auto;
+}
+
+.trigger {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: #e59aa0;
+    cursor: pointer;
+    transition: color 140ms ease, transform 140ms ease;
+}
+
+.trigger:hover,
+.trigger:focus-visible,
+.trigger[aria-expanded='true'] {
+    background: transparent;
+    color: #ff7b88;
+    transform: scale(1.1);
+}
+
+.trigger:focus-visible {
+    outline: 2px solid var(--action-color);
+    outline-offset: 2px;
+}
+
+.icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: rgba(229, 154, 160, 0.42);
+    stroke: #ffe6e8;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9));
+}
+
+.trigger:hover .icon,
+.trigger:focus-visible .icon,
+.trigger[aria-expanded='true'] .icon {
+    fill: rgba(255, 123, 136, 0.72);
+    stroke: #fff;
+}
+
+.popup {
+    position: absolute;
+    top: 2.55rem;
+    left: 0;
+    z-index: 20;
+    box-sizing: border-box;
+    width: min(14rem, 100%);
+    max-width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--control-border);
+    border-radius: 0.4rem;
+    background: var(--drawer-card);
+    box-shadow: 0 4px 12px var(--button-shadow);
+    color: var(--drawer-muted);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.popup strong,
+.popup span {
+    display: block;
+}
+
+.popup strong {
+    color: var(--drawer-text);
+}

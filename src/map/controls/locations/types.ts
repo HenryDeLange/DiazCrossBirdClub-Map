@@ -16,6 +16,7 @@ export type LocationsControlProps = {
     initialSearchQuery?: string;
     initialTab?: LocationTabName;
     initialFocusQuery?: string;
+    expandedLocationName?: string;
     searchVersion?: number;
 }
 
@@ -42,6 +43,7 @@ export type FeatureDetailsProps = {
     onOpenInat: (locationName: string, tab: LocationTabName) => void;
     onLocationSelected: (locationName: string) => void;
     initialFocusQuery?: string;
+    expandedLocationName?: string;
     onOpenAstronomy: (location: AstronomyLocation, tab: LocationTabName) => void;
     onOpenTides: (location: AstronomyLocation, tab: LocationTabName) => void;
 }

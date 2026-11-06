@@ -1,0 +1,592 @@
+.gallery {
+    position: relative;
+    overflow: visible;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.thumbnailButton {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0.5rem;
+    background: transparent;
+    cursor: zoom-in;
+    overflow: hidden;
+}
+
+.thumbnailButton:focus-visible {
+    outline: 2px solid var(--action-color);
+    outline-offset: -2px;
+}
+
+.thumbnail {
+    display: block;
+    width: 100%;
+    min-height: 10rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.08);
+    object-fit: cover;
+}
+
+.placeholder {
+    display: grid;
+    min-height: 10rem;
+    aspect-ratio: 1 / 1;
+    place-items: center;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    color: var(--drawer-muted);
+    font-size: 0.8rem;
+}
+
+.failedThumbnail {
+    display: grid;
+    min-height: 10rem;
+    aspect-ratio: 1 / 1;
+    place-items: center;
+    padding: 0.5rem;
+    box-sizing: border-box;
+    color: var(--drawer-muted);
+    font-size: 0.8rem;
+}
+
+.conservationBadge {
+    position: absolute;
+    top: 0.35rem;
+    left: 0.35rem;
+    right: 0.35rem;
+    z-index: 3;
+    display: flex;
+    justify-content: flex-start;
+    pointer-events: none;
+}
+
+.imageLoading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(12, 14, 16, 0.28);
+    color: #fff;
+    pointer-events: none;
+}
+
+.loadingIcon {
+    width: 1.8rem;
+    height: 1.8rem;
+    filter: drop-shadow(0 1px 3px #000);
+    animation: imageLoadingPulse 1s ease-in-out infinite alternate;
+}
+
+@keyframes imageLoadingPulse {
+    from { opacity: 0.45; transform: translateY(0); }
+    to { opacity: 1; transform: translateY(-0.15rem); }
+}
+
+.label {
+    padding: 0.2rem 0.38rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.68);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px #000;
+}
+
+.carousel {
+    position: absolute;
+    right: 0.45rem;
+    bottom: 0.45rem;
+    left: 0.45rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.carouselButton {
+    display: inline-flex;
+    width: 2rem;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid var(--control-border);
+    border-radius: 50%;
+    background: var(--drawer-card);
+    box-shadow: 0 1px 4px var(--button-shadow);
+    color: var(--drawer-muted);
+    cursor: pointer;
+    line-height: 1;
+    pointer-events: auto;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.carouselButton:hover,
+.carouselButton:focus-visible {
+    background: var(--button-hover);
+    color: var(--action-color);
+}
+
+.carouselButton:focus-visible {
+    outline: 2px solid var(--action-color);
+    outline-offset: 2px;
+}
+
+.carouselButton:disabled,
+.viewerNavigation button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.carouselButton svg {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 auto;
+}
+
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    background: var(--page-bg);
+    color: var(--page-text);
+}
+
+.dialog {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    border-radius: 0;
+    background: var(--page-bg);
+    outline: none;
+}
+
+.viewerHeader {
+    display: flex;
+    min-width: 0;
+    min-height: 3rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0 0.75rem;
+}
+
+.viewerTitle {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: var(--page-text);
+    font-size: 1.25rem;
+    font-weight: 800;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.viewerHeaderActions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.headerButton {
+    display: inline-grid;
+    width: 2.5rem;
+    height: 2.5rem;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--drawer-muted);
+    cursor: pointer;
+}
+
+.headerButton svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.headerButton:hover,
+.headerButton:focus-visible {
+    border-color: transparent;
+    background: transparent;
+    color: var(--action-color);
+    outline: none;
+}
+
+.floatingZoomControls button:hover,
+.viewerNavigation button:hover,
+.floatingZoomControls button:focus-visible,
+.viewerNavigation button:focus-visible {
+    background: var(--button-hover);
+    color: var(--action-color);
+}
+
+.floatingZoomControls button:focus-visible,
+.viewerNavigation button:focus-visible {
+    outline: 2px solid var(--action-color);
+    outline-offset: 2px;
+}
+
+.viewport {
+    position: relative;
+    display: grid;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    min-height: 0;
+    flex: 1 1 auto;
+    place-items: center;
+    overflow: hidden;
+    touch-action: none;
+    cursor: grab;
+}
+
+.viewport:active {
+    cursor: grabbing;
+}
+
+.fullImageSlides {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.fullImageSlide {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--page-bg);
+}
+
+.fullImage {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transform-origin: center;
+    user-select: none;
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
+.fullImageLoading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 1;
+    color: var(--page-text);
+    pointer-events: none;
+}
+
+.fullImageLoading .loadingIcon {
+    width: 3rem;
+    height: 3rem;
+    color: inherit;
+    filter: none;
+}
+
+.imageMetadataOverlay {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    box-sizing: border-box;
+    max-width: calc(100% - 1.5rem);
+    color: #fff;
+    font-size: 0.7rem;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    text-shadow: 0 1px 2px #000, 0 0 4px #000;
+}
+
+.imageLabels {
+    position: absolute;
+    bottom: 4.2rem;
+    left: 1rem;
+    z-index: 2;
+    display: flex;
+    max-width: calc(100% - 5rem);
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.25rem;
+    pointer-events: none;
+}
+
+.label {
+    padding: 0.2rem 0.38rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.68);
+    color: #fff;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px #000;
+}
+
+.imageMetadataOverlay a {
+    pointer-events: auto;
+}
+
+.imageError {
+    color: var(--page-text);
+    font-size: 1rem;
+}
+
+.creditList {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+}
+
+.creditItem {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 0.3rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.creditItem svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+}
+
+.creditItem a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+}
+
+.gridViewport {
+    display: block;
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 0.5rem;
+}
+
+.gridCanvas {
+    position: relative;
+    width: 100%;
+    min-width: 0;
+}
+
+.gridLoading {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 50%;
+    z-index: 1;
+    display: grid;
+    width: 2.75rem;
+    height: 2.75rem;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--control-bg);
+    color: var(--control-text);
+    box-shadow: 0 2px 7px var(--button-shadow);
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.gridRow {
+    box-sizing: border-box;
+    align-items: start;
+    padding-bottom: 0.55rem;
+}
+
+.gridImageButton {
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    aspect-ratio: 1;
+    min-width: 0;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 0.35rem;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.gridImageButton:hover,
+.gridImageButton:focus-visible,
+.selectedGridImage {
+    border-color: var(--action-color);
+    outline: none;
+}
+
+.gridImageButton:focus-visible {
+    outline: 2px solid var(--action-color);
+    outline-offset: 2px;
+}
+
+.gridImageButton img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+.gridLabels {
+    position: absolute;
+    right: 0.2rem;
+    bottom: 0.2rem;
+    left: 0.2rem;
+    padding: 0.15rem 0.25rem;
+    border-radius: 0.2rem;
+    background: rgba(0, 0, 0, 0.72);
+    color: #fff;
+    font-size: 0.65rem;
+    line-height: 1.2;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.viewerNavigation {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.2rem;
+    border: 1px solid var(--control-border);
+    border-radius: 0.35rem;
+    background: var(--control-bg);
+    box-shadow: 0 2px 7px var(--button-shadow);
+    color: var(--control-text);
+}
+
+.viewerNavigation button,
+.floatingZoomControls button {
+    display: grid;
+    place-items: center;
+    background: transparent;
+    color: var(--control-text);
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.viewerNavigation button {
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+}
+
+.viewerNavigation .imageSizeToggle {
+    background: transparent;
+    color: var(--drawer-muted);
+    outline: none;
+    transition: color 150ms ease;
+}
+
+.viewerNavigation .imageSizeToggle:focus,
+.viewerNavigation .imageSizeToggle:focus-visible {
+    background: transparent;
+    color: var(--drawer-muted);
+    outline: none;
+}
+
+.viewerNavigation .imageSizeToggle[aria-pressed='true'] {
+    color: var(--action-color);
+}
+
+@media (hover: hover) {
+    .viewerNavigation .imageSizeToggle:hover {
+        background: transparent;
+        color: var(--action-color);
+    }
+}
+
+.viewerNavigation .imageSizeToggle svg {
+    width: 1.35rem;
+    height: 1.35rem;
+}
+
+.floatingZoomControls {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    border: 1px solid var(--control-border);
+    border-radius: 0.35rem;
+    background: var(--control-bg);
+    box-shadow: 0 2px 7px var(--button-shadow);
+}
+
+.floatingZoomControls button {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--control-border);
+}
+
+.floatingZoomControls button:last-child {
+    border-bottom: 0;
+}
+
+.viewerNavigation > span {
+    min-width: 2.5rem;
+    color: var(--control-text);
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+.viewerNavigation button svg {
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.floatingZoomControls button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+@media (max-width: 600px) {
+    .backdrop {
+        padding: 0;
+    }
+
+    .gridViewport { grid-template-columns: repeat(auto-fill, minmax(min(6rem, 100%), 1fr)); }
+}
