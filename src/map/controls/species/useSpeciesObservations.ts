@@ -2,6 +2,7 @@ import type { Map as LeafletMap } from 'leaflet';
 import { useEffect, useState } from 'react';
 import type { INatSpeciesCount } from '../../iNatTypes';
 import { getINatObservationRequest, type INatObservationRequest } from './iNatObservationUrl';
+import { fetchINatSpeciesCounts } from './iNatSpeciesCounts';
 import type { UseSpeciesObservationsResult } from './types';
 
 export function useSpeciesObservations(map: LeafletMap, isOpen: boolean): UseSpeciesObservationsResult {
@@ -32,15 +33,8 @@ export function useSpeciesObservations(map: LeafletMap, isOpen: boolean): UseSpe
             setData(null);
             setError(false);
 
-            fetch(nextRequest.apiUrl, { signal: controller.signal })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(`iNaturalist request failed with status ${response.status}`);
-                    }
-
-                    return response.json();
-                })
-                .then((responseData: INatSpeciesCount) => {
+            fetchINatSpeciesCounts(nextRequest.apiUrl, controller.signal)
+                .then((responseData) => {
                     setData(responseData);
                 })
                 .catch((error) => {
@@ -68,7 +62,7 @@ export function useSpeciesObservations(map: LeafletMap, isOpen: boolean): UseSpe
 
     return {
         data,
-        loading: !data,
+        loading: !data && !error,
         error,
         inatUrl: request?.webUrl ?? currentRequest.webUrl,
         reset: () => {

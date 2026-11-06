@@ -43,7 +43,7 @@ export function TidesControl({ drawerHeight, onDrawerHeightChange, isOpen, onTog
             <MapControlButton
                 groupClassName='tidesGroup'
                 onClick={onToggle}
-                title='Open tide guide'
+                title='Tide Times'
             >
                 <WavesHorizontal />
             </MapControlButton>

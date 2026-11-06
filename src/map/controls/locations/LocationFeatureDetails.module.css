@@ -14,7 +14,9 @@
 .categoryBadge:hover,
 .categoryBadge:focus-visible { border-color: var(--action-color); background: var(--button-hover); color: var(--action-color); outline: none; }
 .groupHeaderActions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
-.groupTitle { font-size: 1.4rem; font-weight: 600; line-height: 1.15; color: var(--page-text); }
+.groupTitle { padding: 0; border: 0; background: transparent; font-size: 1.4rem; font-weight: 600; line-height: 1.15; color: var(--page-text); text-align: left; cursor: pointer; transition: color 160ms ease; }
+.groupTitle:hover,
+.groupTitle:focus-visible { color: var(--action-color); text-decoration: underline; text-underline-offset: 0.15em; outline: none; }
 .groupDescription { line-height: 1.6; margin-bottom: 0.75rem; }
 .cardLinks { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.75rem; }
 .cardNav { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; border: 1px solid var(--control-border); border-radius: 50%; background: var(--drawer-card); color: var(--drawer-muted); cursor: pointer; transform: translateZ(0); will-change: transform; }

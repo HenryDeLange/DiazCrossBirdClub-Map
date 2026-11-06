@@ -54,11 +54,19 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
                                 aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${headingName}`}
                                 aria-expanded={isExpanded}
                                 aria-controls={itemsId}
-                                onClick={() => onToggle(groupKey, isExpanded)}
+                                onClick={() => onToggle(groupKey, !isExpanded)}
                             >
                                 <PrimaryCategoryIcon tabLabel={tab} />
                             </button>
-                            <div className={styles.groupTitle}>{headingName}</div>
+                            <button
+                                type='button'
+                                className={styles.groupTitle}
+                                aria-expanded={isExpanded}
+                                aria-controls={itemsId}
+                                onClick={() => onToggle(groupKey, !isExpanded)}
+                            >
+                                {headingName}
+                            </button>
                         </div>
                         <div className={styles.groupHeaderActions}>
                             <button

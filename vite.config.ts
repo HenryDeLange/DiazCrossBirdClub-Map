@@ -12,6 +12,8 @@ import packageJson from './package.json' with { type: 'json' };
 const { version } = packageJson;
 const compression = compressionPlugin as unknown as (options?: Record<string, unknown>) => PluginOption;
 const ONE_DAY_IN_SECONDS = 60 * 60 * 24;
+const THIRTY_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 30;
+const ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS = ONE_DAY_IN_SECONDS * 180;
 
 // GitHub Pages serves 404.html for unknown paths; copying the app shell there lets client-side deep links load.
 function githubPagesSpaFallback(): PluginOption {
@@ -66,7 +68,7 @@ export default defineConfig({
                             cacheName: 'tide-station-harmonics',
                             expiration: {
                                 maxEntries: 300,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 180 // ~6 months
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS // ~6 months
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -81,7 +83,7 @@ export default defineConfig({
                             cacheName: 'map-tiles',
                             expiration: {
                                 maxEntries: 6000,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 180 // ~6 months
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS // ~6 months
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -97,7 +99,60 @@ export default defineConfig({
                             networkTimeoutSeconds: 4,
                             expiration: {
                                 maxEntries: 300,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90 // ~3 months
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS, // ~6 months
+                                purgeOnQuotaError: true
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        // Taxon (photos) are fetched only when a species image is opened and can be reused offline.
+                        urlPattern: ({ url }) => url.origin === 'https://api.inaturalist.org' && /^\/v1\/taxa\/\d+$/.test(url.pathname),
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'inat-taxon',
+                            expiration: {
+                                maxEntries: 1000,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS, // ~6 months
+                                purgeOnQuotaError: true
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        // iNaturalist taxon photos (thumbnails shown in the species list), served either
+                        // from static.inaturalist.org or directly from the S3 bucket (region-specific subdomains included)
+                        // e.g. https://inaturalist-open-data.s3.amazonaws.com/photos/9818143/medium.jpeg
+                        urlPattern: /^https:\/\/(static\.inaturalist\.org|inaturalist-open-data\.s3(?:\.[a-z0-9-]+)?\.amazonaws\.com)\/photos\//i,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'inat-photos',
+                            expiration: {
+                                maxEntries: 2500,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS, // ~6 months
+                                purgeOnQuotaError: true
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        // Cache per-species media searches so scrolling back does not repeat GBIF queries.
+                        urlPattern: ({ url }) => url.origin === 'https://api.gbif.org'
+                            && url.pathname === '/v1/occurrence/search'
+                            && url.searchParams.get('mediaType') === 'StillImage',
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'gbif-occurrence-images',
+                            expiration: {
+                                maxEntries: 3000,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS, // ~6 months
+                                purgeOnQuotaError: true
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -111,8 +166,9 @@ export default defineConfig({
                             cacheName: 'gbif-occurrence-search',
                             networkTimeoutSeconds: 4,
                             expiration: {
-                                maxEntries: 300,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90 // ~3 months
+                                maxEntries: 1500,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS,
+                                purgeOnQuotaError: true
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -126,8 +182,9 @@ export default defineConfig({
                         options: {
                             cacheName: 'gbif-species-details',
                             expiration: {
-                                maxEntries: 10000,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 90
+                                maxEntries: 1000,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS,
+                                purgeOnQuotaError: true
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -136,16 +193,32 @@ export default defineConfig({
                         urlPattern: ({ url }) => url.origin === 'https://api.gbif.org' && /^\/v1\/species\/\d+$/.test(url.pathname)
                     },
                     {
-                        // iNaturalist taxon photos (thumbnails shown in the species list), served either
-                        // from static.inaturalist.org or directly from the S3 bucket (region-specific subdomains included)
-                        // e.g. https://inaturalist-open-data.s3.amazonaws.com/photos/9818143/medium.jpeg
-                        urlPattern: /^https:\/\/(static\.inaturalist\.org|inaturalist-open-data\.s3(?:\.[a-z0-9-]+)?\.amazonaws\.com)\/photos\//i,
+                        // Cache remote photo hosts used by GBIF occurrence media, including hosts not controlled by GBIF.
+                        urlPattern: ({ request }) => request.destination === 'image',
                         handler: 'CacheFirst',
                         options: {
-                            cacheName: 'inat-photos',
+                            cacheName: 'external-images',
                             expiration: {
-                                maxEntries: 1000,
-                                maxAgeSeconds: ONE_DAY_IN_SECONDS * 180 // ~6 months
+                                maxEntries: 2500,
+                                maxAgeSeconds: ONE_HUNDRED_EIGHTY_DAYS_IN_SECONDS,
+                                purgeOnQuotaError: true
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        // Last-resort offline cache for GET API requests not covered above.
+                        urlPattern: ({ request }) => request.method === 'GET' && request.destination === '',
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'external-api-data',
+                            networkTimeoutSeconds: 5,
+                            expiration: {
+                                maxEntries: 500,
+                                maxAgeSeconds: THIRTY_DAYS_IN_SECONDS,
+                                purgeOnQuotaError: true
                             },
                             cacheableResponse: {
                                 statuses: [0, 200]
@@ -209,7 +282,7 @@ export default defineConfig({
                         },
                         {
                             name: 'ui',
-                            test: /node_modules[\\/](lucide-react|usehooks-ts|geojson)/
+                            test: /node_modules[\\/](lucide-react|usehooks-ts|geojson|@tanstack[\\/](react-virtual|virtual-core))/
                         },
                         {
                             name: 'geojson',

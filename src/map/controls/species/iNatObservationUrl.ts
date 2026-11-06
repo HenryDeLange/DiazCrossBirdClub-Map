@@ -1,6 +1,8 @@
-import type { LatLngBounds, Map as LeafletMap } from 'leaflet';
+import type { Map as LeafletMap } from 'leaflet';
 
-const boundsPrecision = 2;
+const boundsBufferPixels = 64;
+const boundsBucketPixels = boundsBufferPixels * 2;
+const boundsPrecision = 6;
 const boundsMultiplier = 10 ** boundsPrecision;
 
 export type INatObservationRequest = {
@@ -8,7 +10,7 @@ export type INatObservationRequest = {
     webUrl: string;
 }
 
-export type SmoothedMapBounds = {
+export type BufferedMapBounds = {
     north: number;
     east: number;
     south: number;
@@ -16,8 +18,7 @@ export type SmoothedMapBounds = {
 }
 
 export function getINatObservationRequest(map: LeafletMap): INatObservationRequest {
-    const bounds = map.getBounds();
-    const boundsQuery = createBoundsQuery(bounds);
+    const boundsQuery = createBoundsQuery(getBufferedMapBounds(map));
     const apiQuery = new URLSearchParams({
         captive: 'false',
         iconic_taxa: 'Aves',
@@ -52,20 +53,27 @@ export function getINatTaxonObservationsUrl(webUrl: string, taxonId: number | un
     return url.toString();
 }
 
-export function getSmoothedMapBounds(bounds: LatLngBounds): SmoothedMapBounds {
-    const northEast = bounds.getNorthEast();
-    const southWest = bounds.getSouthWest();
+export function getBufferedMapBounds(map: LeafletMap): BufferedMapBounds {
+    const zoom = map.getZoom();
+    const center = map.project(map.getCenter(), zoom);
+    const size = map.getSize();
+    const snappedCenterX = Math.round(center.x / boundsBucketPixels) * boundsBucketPixels;
+    const snappedCenterY = Math.round(center.y / boundsBucketPixels) * boundsBucketPixels;
+    const halfWidth = size.x / 2 + boundsBufferPixels;
+    const halfHeight = size.y / 2 + boundsBufferPixels;
+    const northWest = map.unproject([snappedCenterX - halfWidth, snappedCenterY - halfHeight], zoom);
+    const southEast = map.unproject([snappedCenterX + halfWidth, snappedCenterY + halfHeight], zoom);
 
     return {
-        north: roundOutward(northEast.lat, 'max'),
-        east: roundOutward(northEast.lng, 'max'),
-        south: roundOutward(southWest.lat, 'min'),
-        west: roundOutward(southWest.lng, 'min')
+        north: roundOutward(northWest.lat, 'max'),
+        east: roundOutward(southEast.lng, 'max'),
+        south: roundOutward(southEast.lat, 'min'),
+        west: roundOutward(northWest.lng, 'min')
     };
 }
 
-function createBoundsQuery(bounds: LatLngBounds): URLSearchParams {
-    const { north, east, south, west } = getSmoothedMapBounds(bounds);
+function createBoundsQuery(bounds: BufferedMapBounds): URLSearchParams {
+    const { north, east, south, west } = bounds;
     return new URLSearchParams({
         nelat: String(north),
         nelng: String(east),
