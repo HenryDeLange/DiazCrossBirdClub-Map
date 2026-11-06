@@ -36,6 +36,7 @@ type RequestQueue = {
     timer: ReturnType<typeof setTimeout> | null;
 }
 
+<<<<<<< HEAD
 type CachedSpeciesResponse = {
     response: Response;
     cachedAt: number;
@@ -45,6 +46,8 @@ type WorkboxCacheEntry = {
     timestamp?: unknown;
 }
 
+=======
+>>>>>>> d35650d594134ecb5269c4496dfc38842f8ae32d
 const requestPolicies = new Map<string, RequestPolicy>([
     ['https://api.gbif.org', {
         intervalMs: 100,
@@ -66,11 +69,14 @@ const requestPolicies = new Map<string, RequestPolicy>([
 
 const queues = new Map<string, RequestQueue>();
 const maxRetries = 2;
+<<<<<<< HEAD
 const gbifSpeciesDetailsCacheName = 'gbif-species-details';
 // Keep this aligned with the species-details maxAgeSeconds in vite.config.ts.
 const gbifSpeciesDetailsMaxAgeMs = 180 * 24 * 60 * 60 * 1000;
 const gbifSpeciesDetailsCache = new Map<string, CachedSpeciesResponse>();
 let cacheLookupErrorLogged = false;
+=======
+>>>>>>> d35650d594134ecb5269c4496dfc38842f8ae32d
 
 export function throttledFetch(
     url: string,
@@ -147,6 +153,7 @@ export async function throttledFetchWithRetry(
     init: RequestInit = {},
     priority: RequestPriority = 'visible'
 ): Promise<Response> {
+<<<<<<< HEAD
     if (init.signal?.aborted) {
         throw init.signal.reason ?? new DOMException('The operation was aborted.', 'AbortError');
     }
@@ -164,6 +171,8 @@ export async function throttledFetchWithRetry(
         }
     }
 
+=======
+>>>>>>> d35650d594134ecb5269c4496dfc38842f8ae32d
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         let response: Response;
         try {
@@ -177,9 +186,12 @@ export async function throttledFetchWithRetry(
         }
 
         if (!isRetryableStatus(response.status) || attempt === maxRetries) {
+<<<<<<< HEAD
             if (response.ok && isGbifSpeciesDetailsUrl(url)) {
                 rememberSpeciesResponse(url, response);
             }
+=======
+>>>>>>> d35650d594134ecb5269c4496dfc38842f8ae32d
             return response;
         }
 
@@ -191,6 +203,7 @@ export async function throttledFetchWithRetry(
     throw new Error('Request failed after retrying.');
 }
 
+<<<<<<< HEAD
 function getMemoryCachedSpeciesResponse(url: string): Response | null {
     const cached = gbifSpeciesDetailsCache.get(url);
     if (!cached) {
@@ -300,6 +313,8 @@ function isGbifSpeciesDetailsUrl(url: string): boolean {
     return parsedUrl.origin === 'https://api.gbif.org' && /^\/v1\/species\/\d+$/.test(parsedUrl.pathname);
 }
 
+=======
+>>>>>>> d35650d594134ecb5269c4496dfc38842f8ae32d
 function pump(origin: string, queue: RequestQueue): void {
     if (
         queue.timer !== null
