@@ -1,4 +1,4 @@
-import { Bird, MapPinSearch, Share2, WavesHorizontal } from 'lucide-react';
+import { Bird, MapPinned, Share2, WavesHorizontal } from 'lucide-react';
 import { memo } from 'react';
 import { useMap } from 'react-leaflet';
 import { focusLocationGroup, type LocationTabName } from '../../locationUtils';
@@ -132,7 +132,7 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
                                 aria-label={`Navigate to ${headingName}`}
                                 title={`Navigate to ${headingName}`}
                             >
-                                <MapPinSearch className={styles.cardNavIcon} />
+                                <MapPinned className={styles.cardNavIcon} />
                             </button>
                         </div>
                     </div>

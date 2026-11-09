@@ -60,6 +60,9 @@ export type UseSpeciesObservationsResult = {
     data: INatSpeciesCount | null;
     loading: boolean;
     error: boolean;
+    localizedNamesLoading: boolean;
+    localizedNamesError: boolean;
     inatUrl: string;
     reset: () => void;
+    retryLocalizedNames: () => void;
 }

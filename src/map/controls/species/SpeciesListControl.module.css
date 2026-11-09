@@ -54,7 +54,7 @@
     will-change: transform;
 }
 
-.cardTitle { margin-top: 0.3rem; font-size: 1.1rem; font-weight: 800; line-height: 1.1; color: var(--page-text); }
+.cardTitle { min-width: 0; margin-top: 0.3rem; font-size: 1rem; font-weight: 800; line-height: 1.1; color: var(--page-text); overflow-wrap: anywhere; }
 .cardTitle a { color: inherit !important; font-style: normal; }
 .cardMeta { display: grid; gap: 0.1rem; margin-top: -0.15rem; color: var(--drawer-muted); font-size: 0.85rem; }
 .cardScientificRow { display: flex; position: relative; min-width: 0; align-items: center; justify-content: center; gap: 0.3rem; line-height: 1.2; }
@@ -73,7 +73,7 @@
 }
 
 .gbifCard:focus-within { border-color: var(--action-color); }
-.gbifCommonName { color: var(--page-text) !important; font-size: 1.1rem; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; text-decoration: none; }
+.gbifCommonName { color: var(--page-text) !important; font-size: 1rem; font-weight: 800; line-height: 1.1; overflow-wrap: anywhere; text-decoration: none; }
 .gbifCommonName:hover,
 .gbifCommonName:focus-visible { color: var(--action-color) !important; text-decoration: underline; }
 .gbifCommonNamePending,
@@ -112,8 +112,8 @@
     .desktopTitle { display: none; }
     .mobileTitle { display: inline; }
     .virtualGridRow { padding-bottom: 0.75rem; }
-    .cardTitle { font-size: 0.9rem; }
-    .gbifCommonName { font-size: 0.9rem; }
+    .cardTitle { font-size: 0.85rem; }
+    .gbifCommonName { font-size: 0.85rem; }
     .gbifCard { padding: 0.4rem; }
 }
 

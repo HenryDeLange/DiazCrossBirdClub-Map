@@ -29,7 +29,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearchInput] = useDebounceValue(searchInput, 300);
     const [isPrintViewOpen, setIsPrintViewOpen] = useState(false);
-    const inat = useSpeciesObservations(map, isOpen && source === 'inat');
+    const inat = useSpeciesObservations(map, isOpen && source === 'inat', commonNameLanguage);
     const gbif = useGbifSpeciesChecklist(map, isOpen && source === 'gbif');
     const isINat = source === 'inat';
     const inatData = inat.data;
@@ -100,21 +100,28 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
             commonName: species.commonName || `GBIF taxon ${species.speciesKey}`,
             scientificName: species.scientificName || `Taxon ${species.speciesKey}`
         }))).sort((first, second) => first.commonName.localeCompare(second.commonName)), [commonNameLanguage, gbifData, inatData, isINat]);
+    const checklistNamesPending = isINat ? inat.localizedNamesLoading : gbif.namesLoading;
+    const checklistNamesError = isINat
+        ? commonNameLanguage === 'af' && inat.localizedNamesError
+        : gbif.namesError;
     const hasChecklistData = !loading
         && !error
+        && !checklistNamesPending
         && printableSpecies.length > 0
         && (isINat || gbif.namesReady);
-    const checklistNamesPending = !isINat && gbif.namesLoading;
-    const checklistNamesError = !isINat && gbif.namesError;
     const copyLabel = checklistNamesPending
-        ? `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
+        ? isINat
+            ? 'Loading Afrikaans species names'
+            : `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
         : checklistNamesError
-            ? 'GBIF names could not all be loaded'
+            ? isINat ? 'Afrikaans names could not all be loaded' : 'GBIF names could not all be loaded'
             : 'Copy species checklist';
     const printLabel = checklistNamesPending
-        ? `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
+        ? isINat
+            ? 'Loading Afrikaans species names'
+            : `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()}/${gbif.namesProgress.total.toLocaleString()})`
         : checklistNamesError
-            ? 'GBIF names could not all be loaded'
+            ? isINat ? 'Afrikaans names could not all be loaded' : 'GBIF names could not all be loaded'
             : 'Print species checklist';
     const checklistText = useMemo(() => hasChecklistData
         ? [
@@ -277,17 +284,21 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 <div className={drawerStyles.content} ref={scrollContainerRef} data-species-scroll-root>
                     {checklistNamesPending && (
                         <div className={styles.nameLoadStatus} role='status'>
-                            Loading GBIF species names ({gbif.namesProgress.completed.toLocaleString()} of {gbif.namesProgress.total.toLocaleString()}). Copy and print will be available when complete.
+                            {isINat
+                                ? 'Loading Afrikaans species names. Copy and print will be available when complete.'
+                                : `Loading GBIF species names (${gbif.namesProgress.completed.toLocaleString()} of ${gbif.namesProgress.total.toLocaleString()}). Copy and print will be available when complete.`}
                         </div>
                     )}
                     {checklistNamesError && (
                         <div className={styles.nameLoadError} role='alert'>
-                            Some GBIF species names could not be loaded.
+                            {isINat
+                                ? 'Some Afrikaans names could not be loaded. Regional or English names are shown.'
+                                : 'Some GBIF species names could not be loaded.'}
                             <button
                                 type='button'
                                 className='drawer-header-action'
-                                onClick={gbif.retryMissingNames}
-                                disabled={gbif.namesLoading}
+                                onClick={isINat ? inat.retryLocalizedNames : gbif.retryMissingNames}
+                                disabled={checklistNamesPending}
                             >
                                 Retry names
                             </button>

@@ -1,4 +1,4 @@
-import { MapPinSearch } from 'lucide-react';
+import { MapPinned } from 'lucide-react';
 import { memo } from 'react';
 import { useMap } from 'react-leaflet';
 import { focusLocationGroup } from '../../locationUtils';
@@ -54,7 +54,7 @@ export const LocationFeatureItem = memo(function LocationFeatureItem({ item, onC
                     aria-label={`Navigate to ${name}`}
                     title={`Navigate to ${name}`}
                 >
-                    <MapPinSearch className={styles.cardNavIcon} />
+                    <MapPinned className={styles.cardNavIcon} />
                 </button>
             </div>
         </li>

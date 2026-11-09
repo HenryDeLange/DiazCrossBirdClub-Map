@@ -22,8 +22,8 @@ export function getINatObservationRequest(map: LeafletMap): INatObservationReque
     const apiQuery = new URLSearchParams({
         captive: 'false',
         iconic_taxa: 'Aves',
-        // The API also returns english_common_name when preferred_common_name is localized.
         locale: 'af',
+        // Keep the regional preference for taxon metadata; Afrikaans names are fetched separately.
         preferred_place_id: '6986',
         ...Object.fromEntries(boundsQuery),
         verifiable: 'true',
