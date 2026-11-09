@@ -13,6 +13,8 @@ export type GbifSpeciesDetails = {
     scientificName: string;
 }
 
+export type CommonNameLanguage = 'en' | 'af';
+
 export type SpeciesImage = {
     id: string;
     source: 'inat' | 'gbif';
@@ -50,6 +52,7 @@ export type SpeciesListControlProps = {
 
 export type INatSpeciesCardProps = {
     speciesCount: INatCount;
+    commonName: string;
     observationsUrl?: string;
 }
 

@@ -242,7 +242,12 @@ export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading }: 
         }
     }, [mediaRequestKey, mediaState.hasMore, mediaEast, mediaNorth, mediaSouth, mediaWest, shouldLoadMedia, species.speciesKey]);
 
-    const commonName = species.commonName || (isSpeciesNameLoading ? 'Loading species name...' : `GBIF species ${species.speciesKey}`);
+    const isProvisionalCommonName = !species.commonName && isSpeciesNameLoading && Boolean(species.scientificName);
+    const commonName = species.commonName
+        || (isSpeciesNameLoading ? species.scientificName || 'Loading name...' : `GBIF species ${species.speciesKey}`);
+    const commonNameClassName = isProvisionalCommonName
+        ? `${styles.gbifCommonName} ${styles.gbifCommonNamePending}`
+        : styles.gbifCommonName;
 
     return (
         <article ref={cardRef} className={styles.gbifCard}>
@@ -259,14 +264,17 @@ export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading }: 
                 onSelectedImageChange={handleSelectedImageChange}
             />
             <a
-                className={styles.gbifCommonName}
+                className={commonNameClassName}
                 href={`https://www.gbif.org/species/${species.speciesKey}`}
                 target='_blank'
                 rel='noreferrer'
             >
                 {commonName}
             </a>
-            <div className={styles.gbifScientificRow}>
+            <div
+                className={`${styles.gbifScientificRow} ${isProvisionalCommonName ? styles.gbifScientificRowHidden : ''}`}
+                aria-hidden={isProvisionalCommonName || undefined}
+            >
                 <i className={styles.gbifScientificName}>{species.scientificName || (isSpeciesNameLoading ? '' : `Taxon ${species.speciesKey}`)}</i>
             </div>
             <div className={styles.gbifCountRow}>

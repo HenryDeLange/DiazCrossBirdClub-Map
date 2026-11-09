@@ -235,7 +235,7 @@ async function fetchChecklist(
     }
 
     const facetData = await response.json() as GbifFacetResponse;
-    const occurrenceNames = new Map<number, { commonName: string; scientificName: string }>();
+    const occurrenceNames = new Map<number, { commonName?: string; scientificName: string }>();
     for (const result of facetData.results ?? []) {
         if (typeof result.speciesKey !== 'number' || !Number.isSafeInteger(result.speciesKey)) {
             continue;
@@ -251,9 +251,9 @@ async function fetchChecklist(
         const speciesKey = result.speciesKey;
         const currentName = occurrenceNames.get(speciesKey);
         const vernacularName = result.vernacularName?.trim();
-        if (!currentName || (vernacularName && currentName.commonName === currentName.scientificName)) {
+        if (!currentName || (vernacularName && !currentName.commonName)) {
             occurrenceNames.set(speciesKey, {
-                commonName: vernacularName || scientificName,
+                commonName: vernacularName,
                 scientificName
             });
         }

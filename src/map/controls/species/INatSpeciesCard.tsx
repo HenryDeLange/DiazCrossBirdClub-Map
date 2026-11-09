@@ -8,7 +8,7 @@ import { throttledFetchWithRetry } from './throttledFetch';
 import type { INatSpeciesCardProps, SpeciesImage } from './types';
 import type { INatPhoto } from '../../iNatTypes';
 
-export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INatSpeciesCardProps>) {
+export function INatSpeciesCard({ speciesCount, commonName, observationsUrl }: Readonly<INatSpeciesCardProps>) {
     const [selectedImage, setSelectedImage] = useState<SpeciesImage | null>(null);
     const [taxonPhotos, setTaxonPhotos] = useState<INatTaxonPhoto[] | null>(null);
     const [taxonPhotosLoading, setTaxonPhotosLoading] = useState(false);
@@ -71,7 +71,7 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
     return (
         <div className={styles.card}>
             <SpeciesImageGallery
-                imageAlt={speciesCount.taxon.preferred_common_name || speciesCount.taxon.name}
+                imageAlt={commonName}
                 images={images}
                 conservationStatus={speciesCount.taxon.conservation_status}
                 additionalImagesLoading={taxonPhotosLoading}
@@ -84,7 +84,7 @@ export function INatSpeciesCard({ speciesCount, observationsUrl }: Readonly<INat
                     target='_blank'
                     rel='noreferrer'
                 >
-                    {speciesCount.taxon.preferred_common_name || speciesCount.taxon.name}
+                    {commonName}
                 </a>
             </div>
             <div className={styles.cardMeta}>

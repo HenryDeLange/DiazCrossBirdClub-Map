@@ -129,8 +129,10 @@ export function SpeciesImageViewer({
             return { x: 0, y: 0 };
         }
 
-        const maxX = Math.max(0, (imageElement.offsetWidth * nextZoom - viewport.clientWidth) / 2);
-        const maxY = Math.max(0, (imageElement.offsetHeight * nextZoom - viewport.clientHeight) / 2);
+        const imageStyle = window.getComputedStyle(imageElement);
+        const viewportBounds = viewport.getBoundingClientRect();
+        const maxX = Math.max(0, (Number.parseFloat(imageStyle.width) * nextZoom - viewportBounds.width) / 2);
+        const maxY = Math.max(0, (Number.parseFloat(imageStyle.height) * nextZoom - viewportBounds.height) / 2);
         return {
             x: Math.max(-maxX, Math.min(maxX, nextPan.x)),
             y: Math.max(-maxY, Math.min(maxY, nextPan.y))

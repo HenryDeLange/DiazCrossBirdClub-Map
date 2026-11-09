@@ -1,4 +1,4 @@
-import { Bird, ExternalLink, Printer } from 'lucide-react';
+import { Bird, BookA, ExternalLink, Printer } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMap } from 'react-leaflet';
@@ -11,11 +11,12 @@ import { MapControlButton } from '../../components/MapControlButton';
 import { MapDrawer } from '../../components/MapDrawer';
 import drawerStyles from '../../components/MapDrawer.module.css';
 import { GBIFSpeciesCard } from './GBIFSpeciesCard';
+import { getINatCommonName } from './commonNames';
 import { getBufferedMapBounds, getINatTaxonObservationsUrl } from './iNatObservationUrl';
 import { INatSpeciesCard } from './INatSpeciesCard';
 import styles from './SpeciesListControl.module.css';
 import { VirtualizedGrid } from './VirtualizedGrid';
-import type { GbifSpecies, SpeciesListControlProps } from './types';
+import type { CommonNameLanguage, GbifSpecies, SpeciesListControlProps } from './types';
 import { useGbifSpeciesChecklist } from './useGbifSpeciesChecklist';
 import { useSpeciesObservations } from './useSpeciesObservations';
 
@@ -24,6 +25,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
     const gbifMediaBounds = getBufferedMapBounds(map);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const [source, setSource] = useState<'inat' | 'gbif'>('inat');
+    const [commonNameLanguage, setCommonNameLanguage] = useState<CommonNameLanguage>('en');
     const [searchInput, setSearchInput] = useState('');
     const [debouncedSearchInput] = useDebounceValue(searchInput, 300);
     const [isPrintViewOpen, setIsPrintViewOpen] = useState(false);
@@ -38,6 +40,9 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
     const title = isINat ? 'iNaturalist Species' : 'GBIF Species';
     const mobileTitle = isINat ? 'iNaturalist' : 'GBIF';
     const checklistTitle = isINat ? 'iNaturalist Species Checklist' : 'GBIF Checklist';
+    const currentCommonNameLanguage = commonNameLanguage === 'af' ? 'Afrikaans' : 'English';
+    const nextCommonNameLanguage = commonNameLanguage === 'af' ? 'English' : 'Afrikaans';
+    const commonNameLanguageLabel = `${currentCommonNameLanguage} common names. Switch to ${nextCommonNameLanguage}.`;
 
     const normalizedSearch = debouncedSearchInput.trim().toLowerCase();
 
@@ -55,11 +60,16 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
         }
 
         return inatData.results.filter((speciesCount) => {
-            const commonName = speciesCount.taxon.preferred_common_name?.toLowerCase() ?? '';
+            const commonNames = [
+                getINatCommonName(speciesCount.taxon, commonNameLanguage),
+                speciesCount.taxon.english_common_name,
+                speciesCount.taxon.preferred_common_name
+            ].filter((commonName): commonName is string => Boolean(commonName));
             const scientificName = speciesCount.taxon.name.toLowerCase();
-            return commonName.includes(normalizedSearch) || scientificName.includes(normalizedSearch);
+            return commonNames.some((commonName) => commonName.toLowerCase().includes(normalizedSearch))
+                || scientificName.includes(normalizedSearch);
         });
-    }, [inatData, normalizedSearch]);
+    }, [commonNameLanguage, inatData, normalizedSearch]);
 
     const filteredGbifResults = useMemo(() => {
         if (!gbifData) {
@@ -83,13 +93,13 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
 
     const printableSpecies = useMemo(() => (isINat
         ? (inatData?.results ?? []).map((species) => ({
-            commonName: species.taxon.preferred_common_name || species.taxon.name,
+            commonName: getINatCommonName(species.taxon, commonNameLanguage),
             scientificName: species.taxon.name
         }))
         : (gbifData ?? []).map((species) => ({
             commonName: species.commonName || `GBIF taxon ${species.speciesKey}`,
             scientificName: species.scientificName || `Taxon ${species.speciesKey}`
-        }))).sort((first, second) => first.commonName.localeCompare(second.commonName)), [gbifData, inatData, isINat]);
+        }))).sort((first, second) => first.commonName.localeCompare(second.commonName)), [commonNameLanguage, gbifData, inatData, isINat]);
     const hasChecklistData = !loading
         && !error
         && printableSpecies.length > 0
@@ -173,7 +183,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 )}
                 headerAction={(
                     <div className={styles.headerActions}>
-                        {isINat && (
+                        {isINat ? (
                             <a
                                 className={`drawer-header-action ${styles.viewButton}`}
                                 href={inat.inatUrl}
@@ -184,6 +194,27 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                             >
                                 <ExternalLink size={17} aria-hidden='true' />
                             </a>
+                        ) : (
+                            <span
+                                className={`drawer-header-action ${styles.viewButton} ${styles.headerActionPlaceholder}`}
+                                aria-hidden='true'
+                            />
+                        )}
+                        {isINat ? (
+                            <button
+                                type='button'
+                                className={`drawer-header-action ${styles.languageButton}`}
+                                onClick={() => setCommonNameLanguage((language) => language === 'en' ? 'af' : 'en')}
+                                aria-label={commonNameLanguageLabel}
+                                title={commonNameLanguageLabel}
+                            >
+                                <BookA size={17} aria-hidden='true' />
+                            </button>
+                        ) : (
+                            <span
+                                className={`drawer-header-action ${styles.headerActionPlaceholder}`}
+                                aria-hidden='true'
+                            />
                         )}
                         <CopyToClipboardButton
                             text={checklistText}
@@ -287,6 +318,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                                     renderItem={(speciesCount) => (
                                     <INatSpeciesCard
                                         speciesCount={speciesCount}
+                                        commonName={getINatCommonName(speciesCount.taxon, commonNameLanguage)}
                                         observationsUrl={getINatTaxonObservationsUrl(inat.inatUrl, speciesCount.taxon.id)}
                                     />
                                     )}

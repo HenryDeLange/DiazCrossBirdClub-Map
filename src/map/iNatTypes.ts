@@ -14,6 +14,7 @@ export type INatTaxon = {
     id?: number;
     name: string;
     preferred_common_name?: string;
+    english_common_name?: string;
     default_photo?: INatPhoto;
     taxon_photos?: INatTaxonPhoto[] | null;
     conservation_status?: INatConservationStatus;
