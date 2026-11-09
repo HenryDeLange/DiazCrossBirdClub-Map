@@ -107,6 +107,9 @@ export default function BirdingMap() {
             window.history.pushState({ ...window.history.state, drawer }, '', window.location.href);
             drawerHistoryEntryRef.current = true;
         }
+        else if (typeof window !== 'undefined') {
+            window.history.replaceState({ ...window.history.state, drawer }, '', window.location.href);
+        }
 
         setOpenDrawer(drawer);
     }, []);

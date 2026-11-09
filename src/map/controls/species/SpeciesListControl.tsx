@@ -1,4 +1,4 @@
-import { ExternalLink, Printer } from 'lucide-react';
+import { Bird, ExternalLink, Printer } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMap } from 'react-leaflet';
@@ -8,7 +8,6 @@ import inatLogo from '../../../assets/inat/inat-logo.png';
 import { CopyToClipboardButton } from '../../../calculations/components/CopyToClipboardButton';
 import { DrawerSearchField } from '../../components/DrawerSearchField';
 import { MapControlButton } from '../../components/MapControlButton';
-import mapControlStyles from '../../components/MapControlButton.module.css';
 import { MapDrawer } from '../../components/MapDrawer';
 import drawerStyles from '../../components/MapDrawer.module.css';
 import { GBIFSpeciesCard } from './GBIFSpeciesCard';
@@ -150,7 +149,7 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                 }}
                 title='Species List'
             >
-                <span className={mapControlStyles.inatLogo} aria-hidden='true' />
+                <Bird aria-hidden='true' />
             </MapControlButton>
             <MapDrawer
                 isOpen={isOpen}

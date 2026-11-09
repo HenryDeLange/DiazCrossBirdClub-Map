@@ -1,4 +1,4 @@
-import { MapPinSearch, Share2, WavesHorizontal } from 'lucide-react';
+import { Bird, MapPinSearch, Share2, WavesHorizontal } from 'lucide-react';
 import { memo } from 'react';
 import { useMap } from 'react-leaflet';
 import { focusLocationGroup, type LocationTabName } from '../../locationUtils';
@@ -83,7 +83,7 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
                             </button>
                             <button
                                 type='button'
-                                className={`${styles.cardNav} ${styles.cardNavInat}`}
+                                className={styles.cardNav}
                                 onClick={() => {
                                     onLocationSelected(headingName);
                                     map.once('moveend', () => {
@@ -94,7 +94,7 @@ export const LocationFeatureGroup = memo(function LocationFeatureGroup({
                                 aria-label={`Open iNaturalist observations near ${headingName}`}
                                 title='Open iNaturalist observations'
                             >
-                                <span className={styles.cardNavImage} aria-hidden='true' />
+                                <Bird className={styles.cardNavIcon} aria-hidden='true' />
                             </button>
                             {heading.geometry.type === 'Point' && (
                                 <LocationAstronomySummary

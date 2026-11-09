@@ -76,7 +76,18 @@ export function SpeciesImageGallery({
 
     return (
         <>
-            <div className={styles.gallery}>
+            <div
+                className={styles.gallery}
+                onClick={(event) => {
+                    if (event.detail === 0 || !(event.target instanceof Element)) {
+                        return;
+                    }
+                    const button = event.target.closest('button');
+                    if (button && event.currentTarget.contains(button)) {
+                        button.blur();
+                    }
+                }}
+            >
                 {selectedImage ? (
                     <>
                         <div className={styles.conservationBadge}>

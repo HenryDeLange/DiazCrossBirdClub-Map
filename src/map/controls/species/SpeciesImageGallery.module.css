@@ -83,8 +83,8 @@
 }
 
 @keyframes imageLoadingPulse {
-    from { opacity: 0.45; transform: translateY(0); }
-    to { opacity: 1; transform: translateY(-0.15rem); }
+    from { transform: translateY(0); }
+    to { transform: translateY(-0.15rem); }
 }
 
 .label {
@@ -130,7 +130,6 @@
     transition: background-color 150ms ease, color 150ms ease;
 }
 
-.carouselButton:hover,
 .carouselButton:focus-visible {
     background: var(--button-hover);
     color: var(--action-color);
@@ -139,12 +138,6 @@
 .carouselButton:focus-visible {
     outline: 2px solid var(--action-color);
     outline-offset: 2px;
-}
-
-.carouselButton:disabled,
-.viewerNavigation button:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
 }
 
 .carouselButton svg {
@@ -225,7 +218,6 @@
     height: 1.35rem;
 }
 
-.headerButton:hover,
 .headerButton:focus-visible {
     border-color: transparent;
     background: transparent;
@@ -233,8 +225,6 @@
     outline: none;
 }
 
-.floatingZoomControls button:hover,
-.viewerNavigation button:hover,
 .floatingZoomControls button:focus-visible,
 .viewerNavigation button:focus-visible {
     background: var(--button-hover);
@@ -245,6 +235,25 @@
 .viewerNavigation button:focus-visible {
     outline: 2px solid var(--action-color);
     outline-offset: 2px;
+}
+
+@media (hover: hover) {
+    .carouselButton:hover {
+        background: var(--button-hover);
+        color: var(--action-color);
+    }
+
+    .headerButton:hover {
+        border-color: transparent;
+        background: transparent;
+        color: var(--action-color);
+    }
+
+    .floatingZoomControls button:hover,
+    .viewerNavigation button:hover {
+        background: var(--button-hover);
+        color: var(--action-color);
+    }
 }
 
 .viewport {
@@ -441,7 +450,6 @@
     overflow: hidden;
 }
 
-.gridImageButton:hover,
 .gridImageButton:focus-visible,
 .selectedGridImage {
     border-color: var(--action-color);
@@ -451,6 +459,13 @@
 .gridImageButton:focus-visible {
     outline: 2px solid var(--action-color);
     outline-offset: 2px;
+}
+
+@media (hover: hover) {
+    .gridImageButton:hover {
+        border-color: var(--action-color);
+        outline: none;
+    }
 }
 
 .gridImageButton img {
@@ -517,13 +532,6 @@
     transition: color 150ms ease;
 }
 
-.viewerNavigation .imageSizeToggle:focus,
-.viewerNavigation .imageSizeToggle:focus-visible {
-    background: transparent;
-    color: var(--drawer-muted);
-    outline: none;
-}
-
 .viewerNavigation .imageSizeToggle[aria-pressed='true'] {
     color: var(--action-color);
 }
@@ -582,6 +590,15 @@
     width: 1.25rem;
     height: 1.25rem;
 }
+
+.carouselButton:disabled,
+.viewerNavigation button:disabled {
+    cursor: not-allowed;
+    color: var(--drawer-muted);
+}
+
+.carouselButton:disabled { background: var(--drawer-card); }
+.viewerNavigation button:disabled { background: transparent; }
 
 @media (max-width: 600px) {
     .backdrop {

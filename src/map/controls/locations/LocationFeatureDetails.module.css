@@ -21,39 +21,11 @@
 .cardLinks { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.75rem; }
 .cardNav { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 2rem; height: 2rem; border: 1px solid var(--control-border); border-radius: 50%; background: var(--drawer-card); color: var(--drawer-muted); cursor: pointer; transform: translateZ(0); will-change: transform; }
 .cardNavTitle { width: 2.4rem; height: 2.4rem; }
-.cardNav:hover { background: var(--button-hover); color: var(--action-color); }
-.cardNavIcon,
-.cardNavImage { width: 1rem; height: 1rem; }
-.cardNavImage {
-    position: relative;
-    display: block;
-}
-.cardNavImage::before,
-.cardNavImage::after {
-    position: absolute;
-    inset: 0;
-    content: '';
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    transition: opacity 160ms ease;
-}
-.cardNavImage::before {
-    background-color: currentColor;
-    -webkit-mask: url('../../../assets/inat/inat-logo.png') center / contain no-repeat;
-    mask: url('../../../assets/inat/inat-logo.png') center / contain no-repeat;
-}
-.cardNavImage::after {
-    background-image: url('../../../assets/inat/inat-logo.png');
-    opacity: 0;
-}
-.cardNavInat:hover .cardNavImage::before,
-.cardNavInat:focus-visible .cardNavImage::before {
-    opacity: 0;
-}
-.cardNavInat:hover .cardNavImage::after,
-.cardNavInat:focus-visible .cardNavImage::after {
-    opacity: 1;
+.cardNav:focus-visible { background: var(--button-hover); color: var(--action-color); outline: 2px solid var(--action-color); outline-offset: 2px; }
+.cardNavIcon { width: 1rem; height: 1rem; }
+
+@media (hover: hover) {
+    .cardNav:hover { background: var(--button-hover); color: var(--action-color); }
 }
 
 @media (max-width: 480px) {

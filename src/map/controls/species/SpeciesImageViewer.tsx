@@ -75,10 +75,12 @@ export function SpeciesImageViewer({
     }, [onClose]);
 
     useEffect(() => {
-        const currentState = window.history.state;
-        const state = typeof currentState === 'object' && currentState !== null ? currentState : {};
-        window.history.pushState({ ...state, speciesImageViewer: true }, '', window.location.href);
-        historyEntryRef.current = true;
+        if (!historyEntryRef.current) {
+            const currentState = window.history.state;
+            const state = typeof currentState === 'object' && currentState !== null ? currentState : {};
+            window.history.pushState({ ...state, speciesImageViewer: true }, '', window.location.href);
+            historyEntryRef.current = true;
+        }
         dialogRef.current?.focus();
 
         const previousOverflow = document.body.style.overflow;
@@ -393,6 +395,15 @@ export function SpeciesImageViewer({
             <section
                 ref={dialogRef}
                 className={styles.dialog}
+                onClick={(event) => {
+                    if (event.detail === 0 || !(event.target instanceof Element)) {
+                        return;
+                    }
+                    const button = event.target.closest('button');
+                    if (button && event.currentTarget.contains(button)) {
+                        button.blur();
+                    }
+                }}
                 role='dialog'
                 aria-modal='true'
                 aria-label={`Image of ${imageAlt}`}
@@ -576,6 +587,18 @@ export function SpeciesImageViewer({
                                 aria-label='Image navigation'
                                 onPointerDown={(event) => event.stopPropagation()}
                             >
+                                {canToggleImageSize && (
+                                    <button
+                                        type='button'
+                                        className={styles.imageSizeToggle}
+                                        aria-label='Original resolution'
+                                        aria-pressed={isOriginalImage}
+                                        title='Original resolution'
+                                        onClick={() => setIsOriginalImage((current) => !current)}
+                                    >
+                                        <Hd aria-hidden='true' />
+                                    </button>
+                                )}
                                 {hasImageNavigation && (
                                     <>
                                         <button type='button' onClick={showPrevious} disabled={!loopNavigation && imageIndex === 0} aria-label='Previous image'>
@@ -594,18 +617,6 @@ export function SpeciesImageViewer({
                                             <ChevronRight aria-hidden='true' />
                                         </button>
                                     </>
-                                )}
-                                {canToggleImageSize && (
-                                    <button
-                                        type='button'
-                                        className={styles.imageSizeToggle}
-                                        aria-label='Original resolution'
-                                        aria-pressed={isOriginalImage}
-                                        title='Original resolution'
-                                        onClick={() => setIsOriginalImage((current) => !current)}
-                                    >
-                                        <Hd aria-hidden='true' />
-                                    </button>
                                 )}
                             </div>
                         )}
