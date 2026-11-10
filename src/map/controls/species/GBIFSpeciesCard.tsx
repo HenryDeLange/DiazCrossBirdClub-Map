@@ -1,16 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SpeciesImageGallery } from './SpeciesImageGallery';
-import { SpeciesMetadataIndicators } from './SpeciesMetadataIndicators';
+import { SpeciesCardActions } from './SpeciesCardActions';
 import styles from './SpeciesListControl.module.css';
 import { getINatPhotoUrl } from './iNatPhotoUrl';
 import { throttledFetchWithRetry } from './throttledFetch';
-import type { GbifSpecies, SpeciesImage } from './types';
+import type { ActiveSpeciesLayer, GbifSpecies, SpeciesImage, SpeciesLayerSelection } from './types';
 import type { BufferedMapBounds } from './iNatObservationUrl';
 
 type GBIFSpeciesCardProps = {
     species: GbifSpecies;
     mediaBounds: BufferedMapBounds;
     isSpeciesNameLoading: boolean;
+    onShowSpeciesLayer: (selection: SpeciesLayerSelection) => void;
+    activeSpeciesLayer: ActiveSpeciesLayer | null;
+    onClearSpeciesLayer: () => void;
 }
 
 type GbifOccurrenceMedia = {
@@ -87,12 +90,12 @@ type MediaState = {
 
 const mediaOccurrencesPerRequest = 20;
 const maxImagesPerBatch = 10;
-const maxPagesPerLoad = 3;
+const maxPagesPerTierPerLoad = 3;
 const maxInitialPagesPerTier = 2;
 const minimumInitialImages = 5;
 const nearbyBoundsPaddings = [0.5, 2] as const;
 
-export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading }: Readonly<GBIFSpeciesCardProps>) {
+export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading, onShowSpeciesLayer, activeSpeciesLayer, onClearSpeciesLayer }: Readonly<GBIFSpeciesCardProps>) {
     const cardRef = useRef<HTMLElement | null>(null);
     const [shouldLoadMedia, setShouldLoadMedia] = useState(() => typeof IntersectionObserver === 'undefined');
     const [mediaStateRecord, setMediaStateRecord] = useState<MediaState & { key: string }>({
@@ -246,7 +249,7 @@ export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading }: 
     const commonName = species.commonName
         || (isSpeciesNameLoading ? species.scientificName || 'Loading name...' : `GBIF species ${species.speciesKey}`);
     const commonNameClassName = isProvisionalCommonName
-        ? `${styles.gbifCommonName} ${styles.gbifCommonNamePending}`
+        ? `${styles.gbifCommonName} ${styles.gbifCommonNamePending} ${styles.gbifCommonNameScientific}`
         : styles.gbifCommonName;
 
     return (
@@ -279,7 +282,17 @@ export function GBIFSpeciesCard({ species, mediaBounds, isSpeciesNameLoading }: 
             </div>
             <div className={styles.gbifCountRow}>
                 <span className={styles.gbifOccurrenceCount}>{species.occurrenceCount.toLocaleString()} occurrences</span>
-                <SpeciesMetadataIndicators attribution={selectedImage?.attribution} />
+                <SpeciesCardActions
+                    attribution={selectedImage?.attribution}
+                    species={{
+                        gbifTaxonKey: species.speciesKey,
+                        scientificName: species.scientificName || `GBIF taxon ${species.speciesKey}`,
+                        displayName: species.commonName || species.scientificName || `GBIF taxon ${species.speciesKey}`
+                    }}
+                    onShowSpeciesLayer={onShowSpeciesLayer}
+                    activeSpeciesLayer={activeSpeciesLayer}
+                    onClearSpeciesLayer={onClearSpeciesLayer}
+                />
             </div>
         </article>
     );
@@ -373,10 +386,18 @@ async function fetchMoreSpeciesImages(
             nextCursor.tierIndex += 1;
             nextCursor.offset = 0;
             nextCursor.endOfTier = false;
+            fetchedPages = 0;
         }
 
-        if (fetchedPages >= maxPagesPerLoad) {
-            break;
+        if (fetchedPages >= maxPagesPerTierPerLoad) {
+            if (images.length > 0 || nextCursor.tierIndex >= searchTiers.length - 1) {
+                break;
+            }
+            nextCursor.tierIndex += 1;
+            nextCursor.offset = 0;
+            nextCursor.endOfTier = false;
+            fetchedPages = 0;
+            continue;
         }
 
         const page = await fetchOccurrenceImages(

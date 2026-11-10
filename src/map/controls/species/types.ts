@@ -15,6 +15,17 @@ export type GbifSpeciesDetails = {
 
 export type CommonNameLanguage = 'en' | 'af';
 
+export type ActiveSpeciesLayer = {
+    taxonKey: number;
+    scientificName: string;
+}
+
+export type SpeciesLayerSelection = {
+    gbifTaxonKey?: number;
+    scientificName: string;
+    displayName: string;
+}
+
 export type SpeciesImage = {
     id: string;
     source: 'inat' | 'gbif';
@@ -48,12 +59,18 @@ export type SpeciesListControlProps = {
     onClose: () => void;
     onBack?: () => void;
     locationName?: string;
+    onShowSpeciesLayer: (selection: SpeciesLayerSelection) => void;
+    activeSpeciesLayer: ActiveSpeciesLayer | null;
+    onClearSpeciesLayer: () => void;
 }
 
 export type INatSpeciesCardProps = {
     speciesCount: INatCount;
     commonName: string;
     observationsUrl?: string;
+    onShowSpeciesLayer: (selection: SpeciesLayerSelection) => void;
+    activeSpeciesLayer: ActiveSpeciesLayer | null;
+    onClearSpeciesLayer: () => void;
 }
 
 export type UseSpeciesObservationsResult = {

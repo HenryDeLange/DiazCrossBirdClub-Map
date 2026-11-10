@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { INatTaxon, INatTaxonPhoto } from '../../iNatTypes';
 import { SpeciesImageGallery } from './SpeciesImageGallery';
-import { SpeciesMetadataIndicators } from './SpeciesMetadataIndicators';
+import { SpeciesCardActions } from './SpeciesCardActions';
 import styles from './SpeciesListControl.module.css';
 import { getINatPhotoUrl } from './iNatPhotoUrl';
 import { throttledFetchWithRetry } from './throttledFetch';
 import type { INatSpeciesCardProps, SpeciesImage } from './types';
 import type { INatPhoto } from '../../iNatTypes';
 
-export function INatSpeciesCard({ speciesCount, commonName, observationsUrl }: Readonly<INatSpeciesCardProps>) {
+export function INatSpeciesCard({ speciesCount, commonName, observationsUrl, onShowSpeciesLayer, activeSpeciesLayer, onClearSpeciesLayer }: Readonly<INatSpeciesCardProps>) {
     const [selectedImage, setSelectedImage] = useState<SpeciesImage | null>(null);
     const [taxonPhotos, setTaxonPhotos] = useState<INatTaxonPhoto[] | null>(null);
     const [taxonPhotosLoading, setTaxonPhotosLoading] = useState(false);
@@ -101,7 +101,16 @@ export function INatSpeciesCard({ speciesCount, commonName, observationsUrl }: R
                             <span className={styles.cardCount}>{speciesCount.count.toLocaleString()} observations</span>
                         )
                     )}
-                    <SpeciesMetadataIndicators attribution={selectedImage?.attribution} />
+                    <SpeciesCardActions
+                        attribution={selectedImage?.attribution}
+                        species={{
+                            scientificName: speciesCount.taxon.name,
+                            displayName: commonName || speciesCount.taxon.name
+                        }}
+                        onShowSpeciesLayer={onShowSpeciesLayer}
+                        activeSpeciesLayer={activeSpeciesLayer}
+                        onClearSpeciesLayer={onClearSpeciesLayer}
+                    />
                 </div>
             </div>
         </div>

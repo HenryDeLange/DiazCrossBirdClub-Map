@@ -1,4 +1,5 @@
 
+import { MapPinX, X } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapContainer, useMap, ZoomControl } from 'react-leaflet';
 import { defaultMapCenter } from '../common/defaultLocation';
@@ -6,6 +7,7 @@ import { InstallAppButton } from '../pwa/InstallAppButton';
 import { PwaCacheDrawer } from '../pwa/PwaCacheDrawer';
 import { useTheme } from '../theme/useTheme';
 import styles from './BirdingMap.module.css';
+import { MapControlButton } from './components/MapControlButton';
 import { MapLegendFooter } from './components/MapLegendFooter';
 import { AstraControl } from './controls/AstraControl';
 import { LocateControl } from './controls/LocateControl';
@@ -13,8 +15,11 @@ import { LocationsControl } from './controls/locations/LocationsControl';
 import type { AstronomyLocation } from './controls/locations/types';
 import { Logo } from './controls/logo/Logo';
 import { SpeciesListControl } from './controls/species/SpeciesListControl';
+import { throttledFetchWithRetry } from './controls/species/throttledFetch';
+import type { ActiveSpeciesLayer, SpeciesLayerSelection } from './controls/species/types';
 import { TidesControl } from './controls/TidesControl';
 import { getInitialLayerState, type LayerState } from './layers/layerState';
+import { SpeciesOccurrenceLayer } from './layers/SpeciesOccurrenceLayer';
 import { locationSources } from './locationSources';
 import type { LocationTabName } from './locationUtils';
 import { clearLocationPath, getInitialLocationKeys, resolveLocationSelection, setLocationPath } from './locationUtils';
@@ -23,6 +28,10 @@ import { MapEvents } from './MapEvents';
 import { MapLayers } from './MapLayers';
 
 type OpenDrawer = 'inat' | 'locations' | 'tides' | 'astra' | 'cache' | null;
+type ActiveSpeciesLayerState = ActiveSpeciesLayer & {
+    displayName: string;
+    generation: number;
+}
 
 export default function BirdingMap() {
     const [initialLocation] = useState(() => {
@@ -40,6 +49,8 @@ export default function BirdingMap() {
     const [astronomyLocation, setAstronomyLocation] = useState<AstronomyLocation | null>(null);
     const [tidesLocation, setTidesLocation] = useState<AstronomyLocation | null>(null);
     const [inatLocationName, setInatLocationName] = useState<string | null>(null);
+    const [activeSpeciesLayer, setActiveSpeciesLayer] = useState<ActiveSpeciesLayerState | null>(null);
+    const [speciesLayerNotice, setSpeciesLayerNotice] = useState<{ message: string; type: 'loading' | 'error' } | null>(null);
     const [locationSearchQuery, setLocationSearchQuery] = useState(initialLocationSelection?.name ?? '');
     const [locationSearchVersion, setLocationSearchVersion] = useState(0);
     const [initialFocusQuery, setInitialFocusQuery] = useState(initialLocationSelection?.name ?? '');
@@ -51,6 +62,9 @@ export default function BirdingMap() {
     const [drawerBackTarget, setDrawerBackTarget] = useState<OpenDrawer>(null);
     const openDrawerRef = useRef<OpenDrawer>(openDrawer);
     const drawerHistoryEntryRef = useRef(false);
+    const speciesLayerMatchControllerRef = useRef<AbortController | null>(null);
+    const speciesLayerGenerationRef = useRef(0);
+    const checkedSpeciesTileErrorsRef = useRef<Set<string>>(new Set());
     const { isDarkMode } = useTheme();
 
     useEffect(() => {
@@ -147,6 +161,100 @@ export default function BirdingMap() {
         }
     }, [closeOpenDrawerState]);
 
+    const handleShowSpeciesLayer = useCallback((selection: SpeciesLayerSelection) => {
+        const generation = speciesLayerGenerationRef.current + 1;
+        speciesLayerGenerationRef.current = generation;
+        checkedSpeciesTileErrorsRef.current.clear();
+        speciesLayerMatchControllerRef.current?.abort();
+        speciesLayerMatchControllerRef.current = null;
+        setActiveSpeciesLayer(null);
+        setSpeciesLayerNotice(null);
+        closeDrawer();
+
+        if (typeof selection.gbifTaxonKey === 'number') {
+            setActiveSpeciesLayer({
+                taxonKey: selection.gbifTaxonKey,
+                scientificName: selection.scientificName,
+                displayName: selection.displayName,
+                generation
+            });
+            return;
+        }
+
+        const controller = new AbortController();
+        speciesLayerMatchControllerRef.current = controller;
+        setSpeciesLayerNotice({
+            type: 'loading',
+            message: `Finding GBIF occurrences for ${selection.displayName}...`
+        });
+
+        void resolveGbifSpeciesKey(selection.scientificName, controller.signal)
+            .then((taxonKey) => {
+                if (controller.signal.aborted || speciesLayerGenerationRef.current !== generation) {
+                    return;
+                }
+                setActiveSpeciesLayer({
+                    taxonKey,
+                    scientificName: selection.scientificName,
+                    displayName: selection.displayName,
+                    generation
+                });
+                setSpeciesLayerNotice(null);
+            })
+            .catch((error: unknown) => {
+                if (controller.signal.aborted) {
+                    return;
+                }
+                console.error(`Error finding a GBIF taxon for "${selection.scientificName}":`, error);
+                setSpeciesLayerNotice({
+                    type: 'error',
+                    message: `Could not load a GBIF occurrence layer for ${selection.displayName}.`
+                });
+            })
+            .finally(() => {
+                if (speciesLayerMatchControllerRef.current === controller) {
+                    speciesLayerMatchControllerRef.current = null;
+                }
+            });
+    }, [closeDrawer]);
+
+    const handleClearSpeciesLayer = useCallback(() => {
+        speciesLayerGenerationRef.current += 1;
+        checkedSpeciesTileErrorsRef.current.clear();
+        speciesLayerMatchControllerRef.current?.abort();
+        speciesLayerMatchControllerRef.current = null;
+        setActiveSpeciesLayer(null);
+        setSpeciesLayerNotice(null);
+    }, []);
+
+    const handleSpeciesLayerTileError = useCallback((generation: number, tileUrl: string) => {
+        if (speciesLayerGenerationRef.current !== generation || checkedSpeciesTileErrorsRef.current.has(tileUrl)) {
+            return;
+        }
+        checkedSpeciesTileErrorsRef.current.add(tileUrl);
+        void fetch(tileUrl)
+            .then((response) => {
+                if (speciesLayerGenerationRef.current !== generation || response.status === 204 || response.ok) {
+                    return;
+                }
+                console.error(`GBIF occurrence tile request failed with status ${response.status}:`, tileUrl);
+                setSpeciesLayerNotice({
+                    type: 'error',
+                    message: 'GBIF occurrence tiles could not be loaded. Check your connection and try again.'
+                });
+            })
+            .catch((error: unknown) => {
+                if (speciesLayerGenerationRef.current !== generation) {
+                    return;
+                }
+                console.error(`Error checking GBIF occurrence tile ${tileUrl}:`, error);
+                setSpeciesLayerNotice({
+                    type: 'error',
+                    message: 'GBIF occurrence tiles could not be loaded. Check your connection and try again.'
+                });
+            });
+    }, []);
+
     const handleDrawerBack = useCallback(() => {
         if (drawerBackTarget === null) {
             closeDrawer();
@@ -241,6 +349,11 @@ export default function BirdingMap() {
         openDrawerRef.current = openDrawer;
     }, [openDrawer]);
 
+    useEffect(() => () => {
+        speciesLayerGenerationRef.current += 1;
+        speciesLayerMatchControllerRef.current?.abort();
+    }, []);
+
     useEffect(() => {
         if (typeof window === 'undefined' || openDrawer === null) {
             return;
@@ -324,7 +437,37 @@ export default function BirdingMap() {
                 onBack={openDrawer === 'inat' && drawerBackTarget !== null ? handleDrawerBack : undefined}
                 locationName={inatLocationName ?? undefined}
                 onToggle={handleToggleInat}
+                onShowSpeciesLayer={handleShowSpeciesLayer}
+                activeSpeciesLayer={activeSpeciesLayer}
+                onClearSpeciesLayer={handleClearSpeciesLayer}
             />
+            {activeSpeciesLayer && (
+                <MapControlButton
+                    groupClassName='speciesLayerGroup'
+                    size='small'
+                    label={activeSpeciesLayer.displayName}
+                    onClick={handleClearSpeciesLayer}
+                    title={`Clear ${activeSpeciesLayer.displayName} map layer`}
+                >
+                    <MapPinX aria-hidden='true' />
+                </MapControlButton>
+            )}
+            {speciesLayerNotice && (
+                <div
+                    className={`${styles.speciesLayerNotice} ${speciesLayerNotice.type === 'error' ? styles.speciesLayerNoticeError : ''}`}
+                    role={speciesLayerNotice.type === 'error' ? 'alert' : 'status'}
+                >
+                    <span>{speciesLayerNotice.message}</span>
+                    <button
+                        type='button'
+                        className={styles.speciesLayerNoticeClose}
+                        onClick={() => setSpeciesLayerNotice(null)}
+                        aria-label='Dismiss map layer message'
+                    >
+                        <X aria-hidden='true' />
+                    </button>
+                </div>
+            )}
             <LocationsControl
                 drawerHeight={clampedDrawerHeight}
                 onDrawerHeightChange={setDrawerHeight}
@@ -378,6 +521,13 @@ export default function BirdingMap() {
                 onLayerStateChange={setLayerState}
                 onTextMarkerClick={handleTextMarkerClick}
             />
+            {activeSpeciesLayer && (
+                <SpeciesOccurrenceLayer
+                    taxonKey={activeSpeciesLayer.taxonKey}
+                    generation={activeSpeciesLayer.generation}
+                    onTileError={handleSpeciesLayerTileError}
+                />
+            )}
             <MapEvents />
         </MapContainer>
     );
@@ -386,6 +536,25 @@ export default function BirdingMap() {
 const drawerMinHeight = 180;
 const defaultMapZoom = 11;
 const maxMapZoom = 20;
+
+type GbifSpeciesMatchResponse = {
+    matchType?: string;
+    speciesKey?: number;
+}
+
+async function resolveGbifSpeciesKey(scientificName: string, signal: AbortSignal): Promise<number> {
+    const params = new URLSearchParams({ name: scientificName, strict: 'true' });
+    const response = await throttledFetchWithRetry(`https://api.gbif.org/v1/species/match?${params.toString()}`, { signal });
+    if (!response.ok) {
+        throw new Error(`GBIF species matching failed with status ${response.status}`);
+    }
+
+    const match = await response.json() as GbifSpeciesMatchResponse;
+    if (match.matchType !== 'EXACT' || typeof match.speciesKey !== 'number') {
+        throw new Error(`No exact GBIF species match was found for "${scientificName}"`);
+    }
+    return match.speciesKey;
+}
 
 type MapView = {
     center: typeof defaultMapCenter;

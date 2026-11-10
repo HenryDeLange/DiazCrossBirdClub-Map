@@ -539,6 +539,10 @@
     color: var(--action-color);
 }
 
+.viewerNavigation .imageSizeToggle:disabled {
+    opacity: 0.45;
+}
+
 @media (hover: hover) {
     .viewerNavigation .imageSizeToggle:hover {
         background: transparent;

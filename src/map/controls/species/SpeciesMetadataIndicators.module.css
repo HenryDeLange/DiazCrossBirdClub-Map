@@ -8,13 +8,17 @@
 
 .trigger {
     display: inline-flex;
+    width: 1.15rem;
+    height: 1.15rem;
     align-items: center;
+    justify-content: center;
     padding: 0;
     border: 0;
     background: transparent;
     color: var(--drawer-muted);
     cursor: pointer;
     line-height: 1;
+    transform: translateY(0.45rem);
 }
 
 .trigger:hover .icon,
@@ -35,7 +39,8 @@
 
 .popup {
     position: absolute;
-    right: 0;
+    left: 0;
+    right: auto;
     bottom: calc(100% + 0.35rem);
     z-index: 20;
     display: block;

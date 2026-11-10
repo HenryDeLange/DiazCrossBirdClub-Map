@@ -3,3 +3,44 @@
     width: 100%;
     height: 100%;
 }
+
+.speciesLayerNotice {
+    position: absolute;
+    top: 0.75rem;
+    left: 50%;
+    z-index: 1000;
+    display: flex;
+    width: max-content;
+    max-width: calc(100% - 7rem);
+    align-items: center;
+    gap: 0.45rem;
+    transform: translateX(-50%);
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--control-border);
+    border-radius: 0.5rem;
+    background: var(--control-bg);
+    box-shadow: 0 4px 12px var(--button-shadow);
+    color: var(--control-text);
+    font-size: 0.8rem;
+}
+
+.speciesLayerNoticeError { border-color: var(--action-color); }
+
+.speciesLayerNoticeClose {
+    display: grid;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 0.25rem;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.speciesLayerNoticeClose svg { width: 0.9rem; height: 0.9rem; }
+.speciesLayerNoticeClose:hover,
+.speciesLayerNoticeClose:focus-visible { color: var(--action-color); }
+.speciesLayerNoticeClose:focus-visible { outline: 2px solid var(--action-color); }

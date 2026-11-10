@@ -213,6 +213,7 @@ function getGbifRequest(map: LeafletMap): GbifRequest {
     const geometry = `POLYGON((${west} ${south},${east} ${south},${east} ${north},${west} ${north},${west} ${south}))`;
     const apiQuery = new URLSearchParams({
         taxonKey: '212',
+        taxonomicStatus: 'ACCEPTED',
         hasCoordinate: 'true',
         occurrenceStatus: 'PRESENT',
         geometry,

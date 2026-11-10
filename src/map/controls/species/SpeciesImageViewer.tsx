@@ -186,7 +186,6 @@ export function SpeciesImageViewer({
         return null;
     }
 
-    const isINatImage = image.source === 'inat';
     const largeImageUrl = image.largeUrl ?? image.fullUrl;
     const currentImageUrl = isOriginalImage ? image.fullUrl : largeImageUrl;
     const canToggleImageSize = largeImageUrl !== image.fullUrl;
@@ -196,7 +195,7 @@ export function SpeciesImageViewer({
         || image.credits?.license
     );
     const isImageLoading = !failedImages.has(currentImageUrl)
-        && (!loadedImages.has(currentImageUrl) || (isINatImage && additionalImagesLoading));
+        && !loadedImages.has(currentImageUrl);
     const canNavigatePrevious = loopNavigation ? images.length > 1 : imageIndex > 0;
     const canNavigateNext = loopNavigation ? images.length > 1 : imageIndex < images.length - 1;
     const hasImageNavigation = images.length > 1 || hasMoreImages;
@@ -486,7 +485,7 @@ export function SpeciesImageViewer({
                                 </button>
                             )}
                         />
-                        {loadingMoreImages && (
+                        {(loadingMoreImages || additionalImagesLoading) && (
                             <div className={styles.gridLoading} role='status' aria-label='Loading more photos'>
                                 <ImageDown className={styles.loadingIcon} aria-hidden='true' />
                             </div>
@@ -582,46 +581,43 @@ export function SpeciesImageViewer({
                                 {image.labels.map((label) => <span className={styles.label} key={label}>{label}</span>)}
                             </div>
                         )}
-                        {(hasImageNavigation || canToggleImageSize) && (
-                            <div
-                                className={styles.viewerNavigation}
-                                role='group'
-                                aria-label='Image navigation'
-                                onPointerDown={(event) => event.stopPropagation()}
+                        <div
+                            className={styles.viewerNavigation}
+                            role='group'
+                            aria-label='Image navigation'
+                            onPointerDown={(event) => event.stopPropagation()}
+                        >
+                            <button
+                                type='button'
+                                className={styles.imageSizeToggle}
+                                aria-label='Original resolution'
+                                aria-pressed={isOriginalImage}
+                                title='Original resolution'
+                                disabled={!canToggleImageSize}
+                                onClick={() => setIsOriginalImage((current) => !current)}
                             >
-                                {canToggleImageSize && (
+                                <Hd aria-hidden='true' />
+                            </button>
+                            {hasImageNavigation && (
+                                <>
+                                    <button type='button' onClick={showPrevious} disabled={!loopNavigation && imageIndex === 0} aria-label='Previous image'>
+                                        <ChevronLeft aria-hidden='true' />
+                                    </button>
+                                    <span>{loopNavigation ? `${imageIndex + 1} / ${images.length}` : imageIndex + 1}</span>
                                     <button
                                         type='button'
-                                        className={styles.imageSizeToggle}
-                                        aria-label='Original resolution'
-                                        aria-pressed={isOriginalImage}
-                                        title='Original resolution'
-                                        onClick={() => setIsOriginalImage((current) => !current)}
+                                        onClick={() => void showNext()}
+                                        disabled={
+                                            (!loopNavigation && imageIndex === images.length - 1 && !hasMoreImages)
+                                            || (loadingMoreImages && imageIndex === images.length - 1 && !loopNavigation)
+                                        }
+                                        aria-label='Next image'
                                     >
-                                        <Hd aria-hidden='true' />
+                                        <ChevronRight aria-hidden='true' />
                                     </button>
-                                )}
-                                {hasImageNavigation && (
-                                    <>
-                                        <button type='button' onClick={showPrevious} disabled={!loopNavigation && imageIndex === 0} aria-label='Previous image'>
-                                            <ChevronLeft aria-hidden='true' />
-                                        </button>
-                                        <span>{loopNavigation ? `${imageIndex + 1} / ${images.length}` : imageIndex + 1}</span>
-                                        <button
-                                            type='button'
-                                            onClick={() => void showNext()}
-                                            disabled={
-                                                (!loopNavigation && imageIndex === images.length - 1 && !hasMoreImages)
-                                                || (loadingMoreImages && imageIndex === images.length - 1 && !loopNavigation)
-                                            }
-                                            aria-label='Next image'
-                                        >
-                                            <ChevronRight aria-hidden='true' />
-                                        </button>
-                                    </>
-                                )}
-                            </div>
-                        )}
+                                </>
+                            )}
+                        </div>
                         <div
                             className={styles.floatingZoomControls}
                             role='group'

@@ -1,4 +1,4 @@
-import { Bird, BookA, ExternalLink, Printer } from 'lucide-react';
+import { Bird, Book, BookA, ExternalLink, Printer } from 'lucide-react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useMap } from 'react-leaflet';
@@ -20,7 +20,7 @@ import type { CommonNameLanguage, GbifSpecies, SpeciesListControlProps } from '.
 import { useGbifSpeciesChecklist } from './useGbifSpeciesChecklist';
 import { useSpeciesObservations } from './useSpeciesObservations';
 
-export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, locationName }: Readonly<SpeciesListControlProps>) {
+export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen, onToggle, onClose, onBack, locationName, onShowSpeciesLayer, activeSpeciesLayer, onClearSpeciesLayer }: Readonly<SpeciesListControlProps>) {
     const map = useMap();
     const gbifMediaBounds = getBufferedMapBounds(map);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
@@ -80,15 +80,15 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
             return gbifData;
         }
 
-        const matchingSpecies = gbifData.filter((species) => (species.commonName ?? '').toLowerCase().includes(normalizedSearch)
-            || (species.scientificName ?? '').toLowerCase().includes(normalizedSearch)
-            || String(species.speciesKey).includes(normalizedSearch));
-        if (matchingSpecies.length > 0) {
-            const unresolvedSpecies = gbifData.filter((species) => !species.commonName || !species.scientificName).slice(0, 8);
-            return [...matchingSpecies, ...unresolvedSpecies.filter((species) => !matchingSpecies.includes(species))];
-        }
+        return gbifData.filter((species) => {
+            if (!species.commonName || !species.scientificName) {
+                return false;
+            }
 
-        return gbifData.filter((species) => !species.commonName || !species.scientificName).slice(0, 8);
+            return species.commonName.toLowerCase().includes(normalizedSearch)
+                || species.scientificName.toLowerCase().includes(normalizedSearch)
+                || String(species.speciesKey).includes(normalizedSearch);
+        });
     }, [gbifData, normalizedSearch]);
 
     const printableSpecies = useMemo(() => (isINat
@@ -215,7 +215,9 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                                 aria-label={commonNameLanguageLabel}
                                 title={commonNameLanguageLabel}
                             >
-                                <BookA size={17} aria-hidden='true' />
+                                {commonNameLanguage === 'af'
+                                    ? <BookA size={17} aria-hidden='true' />
+                                    : <Book size={17} aria-hidden='true' />}
                             </button>
                         ) : (
                             <span
@@ -331,6 +333,9 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                                         speciesCount={speciesCount}
                                         commonName={getINatCommonName(speciesCount.taxon, commonNameLanguage)}
                                         observationsUrl={getINatTaxonObservationsUrl(inat.inatUrl, speciesCount.taxon.id)}
+                                        onShowSpeciesLayer={onShowSpeciesLayer}
+                                        activeSpeciesLayer={activeSpeciesLayer}
+                                        onClearSpeciesLayer={onClearSpeciesLayer}
                                     />
                                     )}
                                 />
@@ -350,7 +355,10 @@ export function SpeciesListControl({ drawerHeight, onDrawerHeightChange, isOpen,
                                         <GBIFSpeciesCard
                                             species={species}
                                             mediaBounds={gbifMediaBounds}
-                                        isSpeciesNameLoading={gbif.namesLoading && (!species.commonName || !species.scientificName)}
+                                            isSpeciesNameLoading={gbif.namesLoading && (!species.commonName || !species.scientificName)}
+                                            onShowSpeciesLayer={onShowSpeciesLayer}
+                                            activeSpeciesLayer={activeSpeciesLayer}
+                                            onClearSpeciesLayer={onClearSpeciesLayer}
                                         />
                                     )}
                                 />

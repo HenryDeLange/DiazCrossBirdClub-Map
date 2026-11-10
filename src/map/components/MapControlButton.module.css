@@ -8,6 +8,7 @@
 
 .locationsGroup { top: 7.5rem; }
 .inatGroup { top: 12rem; }
+.speciesLayerGroup { top: 16rem; }
 .astraGroup { bottom: 7.8rem; }
 .installGroup { bottom: 12.3rem; }
 .tidesGroup { bottom: 3.3rem; }
@@ -35,6 +36,27 @@
     display: block;
 }
 
+.smallControlButton { padding: 0.5rem; }
+.smallControlButton > :global(svg) { width: 1.3rem; height: 1.3rem; }
+
+.labelControlButton {
+    width: fit-content;
+    height: auto;
+    min-height: 2.5rem;
+    max-width: min(14rem, calc(100vw - 2rem));
+    justify-content: flex-start;
+    gap: 0.45rem;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.7rem;
+    line-height: 1.15;
+    text-align: left;
+    text-transform: none;
+    white-space: normal;
+}
+
+.labelControlButton > :global(svg) { flex: 0 0 1.3rem; }
+.controlLabel { overflow-wrap: anywhere; }
+
 @media (hover: hover) {
     .controlButton:hover {
         color: var(--action-color);
@@ -57,6 +79,7 @@
 
     .locationsGroup { top: 6.4rem; }
     .inatGroup { top: 10.3rem; }
+    .speciesLayerGroup { top: 13.8rem; }
 
     .controlButton {
         align-self: flex-start;
@@ -64,5 +87,20 @@
         min-width: 3rem;
         height: 3rem;
         padding: 0.75rem;
+    }
+
+    .smallControlButton {
+        width: 2.5rem;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        padding: 0.5rem;
+    }
+
+    .controlButton.labelControlButton {
+        width: fit-content;
+        min-width: 2.5rem;
+        max-width: min(14rem, calc(100vw - 1.5rem));
+        height: auto;
+        min-height: 2.5rem;
     }
 }
